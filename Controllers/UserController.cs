@@ -1362,7 +1362,6 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetUserGroupUser()
         {
-
             string uId = Request.Params.Get("uId");
 
             int i_uId = 0;
@@ -1490,7 +1489,6 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
-
         /// <summary>
         /// 4.创建群
         /// </summary>
@@ -1509,6 +1507,7 @@ namespace fengmiapp.Controllers
                 i_createUId = int.Parse(createUId);
             }
             catch { }
+
             int i_gType = 0;
             try
             {
@@ -1516,7 +1515,7 @@ namespace fengmiapp.Controllers
             }
             catch { }
 
-            int userStatus = 0;
+            int userStatus = 1;
             try
             {
                 userStatus = int.Parse(userStatusStr);
@@ -1655,8 +1654,6 @@ namespace fengmiapp.Controllers
             }
             catch { }
 
-
-
             int userStatus = 0;
 
             UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
@@ -1685,8 +1682,6 @@ namespace fengmiapp.Controllers
 
             return Json(obj, contentType);
         }
-
-
 
         #endregion
 

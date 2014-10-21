@@ -11,7 +11,7 @@ namespace fengmiapp.Models
     {
         #region 参数
 
-        private int _id = 0;
+        private int _Id = 0;
         private int _uId = 0;
         //群Id
         private int _uGId = 0;
@@ -32,8 +32,8 @@ namespace fengmiapp.Models
         ///</summary>
         public int Id
         {
-            get { return _id; }
-            set { _id = value; }
+            get { return _Id; }
+            set { _Id = value; }
         }
         ///<summary>
         /// UId
@@ -98,14 +98,14 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
-				new SqlParameter("uId", uId),
-				new SqlParameter("uGId", uGId),
+				new SqlParameter("@uId", uId),
+				new SqlParameter("@uGId", uGId),
 			};
             dt = base.GetDataList(strSql,para);
 
             if (dt.Rows.Count > 0)
             {
-                this._id = int.Parse(dt.Rows[0]["Id"].ToString());
+                this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
                 this._uId = uId;
                 this._uGId = uGId;
 
@@ -150,11 +150,11 @@ namespace fengmiapp.Models
 
         public int ModifyStatus()
         {
-            string set = "status=@status";
+            string set = " status=@status ";
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@status", _status),
-                new SqlParameter("@Id", _id),
+                new SqlParameter("@Id", _Id),
 			};
             return base.Modify(set, para);
         }
@@ -165,7 +165,7 @@ namespace fengmiapp.Models
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@uRole", _uRole),
-                new SqlParameter("@Id", _id),
+                new SqlParameter("@Id", _Id),
 			};
             return base.Modify(set, para);
         }
@@ -175,15 +175,23 @@ namespace fengmiapp.Models
             int uId = this._uId;
             string strSql = string.Empty;
             int status = 0;
-            strSql += " Select table1.*,table1.name,table1.gType,table1.createUId  from " + this._table + " as table1 ";
+            strSql += " Select table1.*,table2.name,table2.gType,table2.createUId  from " + this._table + " as table1 ";
             strSql += " left join [userGroup] as table2 on table1.uGId = table2.Id ";
 
-            strSql += " where 1=1 and table1.uId = '" + uId + "' and table2.status > " + status;
+            //strSql += " where 1=1 and table1.uId = '" + uId + "' and table2.status > " + status;
+            strSql += " where 1=1 and table1.uId =@uId and table2.status > @status ";
+
             strSql += " order by table1.Id desc ";
 
             DataTable dt = new DataTable();
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@status", status),
+                new SqlParameter("@uId", uId),
+			};
 
-            dt = this.GetDataList(strSql);
+            //dt = this.GetDataList(strSql);
+            dt = this.GetDataList(strSql, para);
 
             return dt;
 
