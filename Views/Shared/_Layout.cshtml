@@ -1,0 +1,16 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @System.Web.Optimization.Styles.Render("~/Content/site.css")
+    @System.Web.Optimization.Scripts.Render("~/Scripts/jquery-1.7.1.min.js")
+</head>
+<body>
+    @RenderBody()
+
+    @System.Web.Optimization.Scripts.Render("~/Scripts/modernizr-2.5.3.js")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
