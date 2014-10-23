@@ -206,12 +206,19 @@ namespace fengmiapp.Models
             strSql += " Select table1.*,table2.phone,table2.email,table2.realName,table2.nickName,table2.userFace,table2.identityCard,table2.birthDay,table2.address,table2.registerTime,table2.userExp,table2.status,table2.interests from " + this._table + " as table1 ";
             strSql += " left join [user] as table2 on table1.uId = table2.Id ";
 
-            strSql += " where 1=1 and table1.uGId = '" + uGId + "' and table1.status > " + status;
+            strSql += " where 1=1 and table1.uGId = @uGId and table1.status > @status ";
             strSql += " order by table1.Id desc ";
 
             DataTable dt = new DataTable();
 
-            dt = this.GetDataList(strSql);
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@status", status),
+                new SqlParameter("@uGId", uGId),
+			};
+
+            //dt = this.GetDataList(strSql);
+            dt = this.GetDataList(strSql, para);
 
             return dt;
 

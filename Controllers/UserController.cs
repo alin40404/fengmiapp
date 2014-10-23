@@ -767,7 +767,6 @@ namespace fengmiapp.Controllers
             string addType = Request.Params.Get("addType");
             string uFGroupId = Request.Params.Get("uFGroupId");
 
-
             int i_uId = 0;
             try
             {
@@ -1394,16 +1393,11 @@ namespace fengmiapp.Controllers
                 for (int i = 0; i < count; i++)
                 {
                     string uGId = dt.Rows[i]["uGId"].ToString();
-                    string uRole = dt.Rows[i]["uRole"].ToString();
                     string modifyTime = dt.Rows[i]["modifyTime"].ToString();
-                    //status
-                    string ugStatus = dt.Rows[i]["status"].ToString();
 
                     string gType = dt.Rows[i]["gType"].ToString();
                     string name = dt.Rows[i]["name"].ToString();
                     string createUId = dt.Rows[i]["createUId"].ToString();
-
-
 
                     int i_uGId = 0;
                     try
@@ -1415,29 +1409,40 @@ namespace fengmiapp.Controllers
                         i_uGId = 0;
                     }
 
-
                     DataTable ug_dt = new DataTable();
+
+                    userGroupUser.UGId = i_uGId;
                     ug_dt = userGroupUser.GetUserGroupWithUGid();
+
                     int ug_count = ug_dt.Rows.Count;
 
                     List<object> userGroupUserObjList = new List<object>();
 
-                    for (int j = 0; j < count; j++)
+                    for (int j = 0; j < ug_count; j++)
                     {
-                        string phone = dt.Rows[j]["phone"].ToString();
-                        string realName = dt.Rows[j]["realName"].ToString();
-                        string nickName = dt.Rows[j]["nickName"].ToString();
-                        string identityCard = dt.Rows[j]["identityCard"].ToString();
-                        string birthDay = DateTime.Parse(dt.Rows[j]["birthDay"].ToString()).ToString("yyyy-MM-dd HH:mm:ss");
-                        string userFace = dt.Rows[j]["userFace"].ToString();
-                        string email = dt.Rows[j]["email"].ToString();
-                        string address = dt.Rows[j]["address"].ToString();
+                        //status
+                        string ugStatus = ug_dt.Rows[j]["status"].ToString();
+                        string uRole = ug_dt.Rows[j]["uRole"].ToString();
+
+                        string ug_uId = ug_dt.Rows[j]["uId"].ToString();
+                        string phone = ug_dt.Rows[j]["phone"].ToString();
+                        string realName = ug_dt.Rows[j]["realName"].ToString();
+                        string nickName = ug_dt.Rows[j]["nickName"].ToString();
+                        string identityCard = ug_dt.Rows[j]["identityCard"].ToString();
+                        string birthDay = DateTime.Parse(ug_dt.Rows[j]["birthDay"].ToString()).ToString("yyyy-MM-dd HH:mm:ss");
+                        string userFace = ug_dt.Rows[j]["userFace"].ToString();
+                        string email = ug_dt.Rows[j]["email"].ToString();
+                        string address = ug_dt.Rows[j]["address"].ToString();
+
 
                         object userObj = new object();
 
                         userObj = new
                         {
-                            uId = uId,
+                            uRole = uRole,
+                            status = ugStatus,
+                            uId = ug_uId,
+
                             phone = phone,
                             realName = realName,
                             nickName = nickName,
@@ -1458,17 +1463,14 @@ namespace fengmiapp.Controllers
 
                     userGroupObj = new
                     {
-                        uId = uId,
+
                         uGId = uGId,
-                        uRole = uRole,
                         modifyTime = modifyTime,
-                        status = ugStatus,
+
                         name = name,
                         createUId = createUId,
                         userGroupUser = userGroupUserObjList,
                     };
-
-
 
                     userGroupObjList.Add(userGroupObj);
 
@@ -1599,7 +1601,11 @@ namespace fengmiapp.Controllers
 
             int userStatus = 1;
 
-            UserGroupUser userGroupUser = new UserGroupUser();
+            UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
+
+            int Id = userGroupUser.Id;
+
+
 
             userGroupUser.UGId = i_uGId;
             userGroupUser.UId = i_uId;
@@ -1609,17 +1615,29 @@ namespace fengmiapp.Controllers
 
             string status = "error";
             string msg = "";
-            int result = userGroupUser.Add();
 
-            if (result > 0)
+            int result=0;
+            if (Id > 0)
             {
-                status = "succeed";
-                msg = "创建成功";
+                status = "error";
+                msg = "添加失败，用户已加入该群";
             }
             else
             {
-                status = "error";
-                msg = "创建失败";
+                result = userGroupUser.Add();
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "添加成功";
+                }
+                else
+                {
+                    status = "error";
+                    msg = "添加失败";
+                }
+
+
             }
 
             object obj = new { status = status, msg = msg };
@@ -1664,17 +1682,29 @@ namespace fengmiapp.Controllers
 
             string status = "error";
             string msg = "";
-            int result = userGroupUser.ModifyStatus();
 
-            if (result > 0)
+            int result=0;
+            if (Id > 0)
             {
-                status = "succeed";
-                msg = "删除成功";
+                result = userGroupUser.ModifyStatus();
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "删除成功";
+                }
+                else
+                {
+                    status = "error";
+                    msg = "删除失败";
+                }
+
             }
             else
             {
                 status = "error";
-                msg = "删除失败";
+                msg = "信息不存在，无法删除";
+
             }
 
             object obj = new { status = status, msg = msg };
