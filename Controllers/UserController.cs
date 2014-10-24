@@ -130,7 +130,7 @@ namespace fengmiapp.Controllers
             else
             {
                 status = "error";
-                msg = "注册失败，用户名已存在";
+                msg = "注册失败，帐号已存在";
             }
 
             object obj = new { status = status, msg = msg };
@@ -255,7 +255,7 @@ namespace fengmiapp.Controllers
                 string realName = adminUser.RealName;
                 string nickName = adminUser.NickName;
                 string identityCard = adminUser.IdentityCard;
-                string birthDay = adminUser.BirthDay.ToString("yyyy-MM-dd HH:mm:ss");
+                string birthDay = adminUser.BirthDay.ToString("yyyy-MM-dd");//HH:mm:ss
                 string userFace = adminUser.UserFace;
                 string email = adminUser.Email;
                 string address = adminUser.Address;
@@ -1262,8 +1262,6 @@ namespace fengmiapp.Controllers
         }
 
 
-
-
         #endregion
 
         #region 群组操作
@@ -1429,7 +1427,15 @@ namespace fengmiapp.Controllers
                         string realName = ug_dt.Rows[j]["realName"].ToString();
                         string nickName = ug_dt.Rows[j]["nickName"].ToString();
                         string identityCard = ug_dt.Rows[j]["identityCard"].ToString();
-                        string birthDay = DateTime.Parse(ug_dt.Rows[j]["birthDay"].ToString()).ToString("yyyy-MM-dd HH:mm:ss");
+                        string birthDay = ug_dt.Rows[j]["birthDay"].ToString();
+                        try
+                        {
+                            birthDay = DateTime.Parse(birthDay).ToString("yyyy-MM-dd");
+                        }
+                        catch { birthDay = ""; }
+
+                        //string birthDay = DateTime.Parse().ToString("yyyy-MM-dd");
+
                         string userFace = ug_dt.Rows[j]["userFace"].ToString();
                         string email = ug_dt.Rows[j]["email"].ToString();
                         string address = ug_dt.Rows[j]["address"].ToString();
