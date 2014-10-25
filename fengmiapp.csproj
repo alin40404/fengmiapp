@@ -148,6 +148,7 @@
     <Compile Include="Models\UserGroupUserStatus.cs" />
     <Compile Include="Models\UserPosition.cs" />
     <Compile Include="Models\UserFriendGroup.cs" />
+    <Compile Include="Models\UserAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemCookies.cs" />
     <Compile Include="Upload.cs" />

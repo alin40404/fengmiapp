@@ -150,22 +150,24 @@ namespace fengmiapp.Models
 
         public int ModifyStatus()
         {
-            string set = " status=@status ";
+            string set = " status=@status,modifyTime=@modifyTime ";
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@status", _status),
                 new SqlParameter("@Id", _Id),
+                new SqlParameter("@modifyTime", _modifyTime),
 			};
             return base.Modify(set, para);
         }
 
         public int Modify_uRole()
         {
-            string set = "uRole=@uRole";
+            string set = "uRole=@uRole,modifyTime=@modifyTime ";
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@uRole", _uRole),
                 new SqlParameter("@Id", _Id),
+                new SqlParameter("@modifyTime", _modifyTime),
 			};
             return base.Modify(set, para);
         }

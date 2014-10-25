@@ -30,7 +30,8 @@ namespace fengmiapp.Models
         
         public int Add(string value, SqlParameter[] para)
         {
-            value=value.Trim(',');
+            value = value.Trim();
+            value = value.Trim(',');
             string tempValue = "," + value;
             string AtValue = tempValue.Replace(",", ",@");
             AtValue = AtValue.Trim(',');
@@ -38,7 +39,24 @@ namespace fengmiapp.Models
             " INSERT INTO " + this._table + " ("+value+") " +
             " VALUES (" + AtValue + ") ";
 
+
+
             return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+        }
+
+        public int AddBackId(string value, SqlParameter[] para)
+        {
+            value = value.Trim(',');
+            string tempValue = "," + value;
+            string AtValue = tempValue.Replace(",", ",@");
+            AtValue = AtValue.Trim(',');
+            string sql = "";
+            sql += " INSERT INTO " + this._table + " (" + value + ") ";
+            sql += " output inserted.Id ";
+            sql += " VALUES (" + AtValue + "); ";
+            sql += " select @@identity ";
+
+            return SQLHelper.ExecuteScalar(CommandType.Text, sql, para);
         }
 
         public int Modify(string set,  SqlParameter[] para)

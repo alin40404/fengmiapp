@@ -28,7 +28,6 @@ namespace fengmiapp.Controllers
 
             string placeName = request.Params.Get("placeName");
             string uploadTime = request.Params.Get("uploadTime");
-            string modifyTime = "";
 
             UserPosition position = new UserPosition();
 
@@ -36,11 +35,40 @@ namespace fengmiapp.Controllers
             string status = "error";
             string msg = "";
 
-            position.UId =int.Parse( uId);
-            position.Longitude = double.Parse(longitude);
-            position.Latitude =double.Parse( latitude);
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch
+            {
+                i_uId = 0;
+            }
+            double d_longitude =0;
+            try
+            {
+                d_longitude = double.Parse(longitude);
+            }
+            catch { }
+            double d_latitude = 0;
+            try
+            {
+                d_latitude = double.Parse(latitude);
+            }
+            catch { }
+          
+            DateTime dt_uploadTime= DateTime.Now;
+            try
+            {
+                dt_uploadTime = DateTime.Parse(uploadTime);
+            }
+            catch { }
+
+            position.UId = i_uId;
+            position.Longitude = d_longitude;
+            position.Latitude = d_latitude;
             position.PlaceName = placeName;
-            position.UploadTime =DateTime.Parse(uploadTime);
+            position.UploadTime = dt_uploadTime;
             position.ModifyTime = DateTime.Now;
 
             int result = position.Add();
@@ -180,15 +208,265 @@ namespace fengmiapp.Controllers
         }
 
         /// <summary>
+        ///  获取用户最新定位信息
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult GetUserNewestPosition()
+        {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
+            string uId = Request.Params.Get("uId");
+            string[] uIdList = uId.Split(',');
+
+
+            List<object> listObj = new List<object>();
+
+
+            int uIdCount = uIdList.Length;
+            if (uIdCount < 1)
+            {
+                status = "error";
+                msg = "参数有误";
+
+            }
+            else
+            {
+
+                string userStatus = string.Empty;
+
+                for (int i_U = 0; i_U < uIdCount; i_U++)
+                {
+                    uId = uIdList[i_U];
+                    int i_uId = 0;
+                    try
+                    {
+                        i_uId = int.Parse(uId);
+                    }
+                    catch
+                    {
+                        i_uId = 0;
+                    }
+
+                    UserPosition position = new UserPosition();
+                    position.UId = i_uId;
+
+                    int number = 1;
+                    DataTable dt = new DataTable();
+                    dt = position.GetPositionList(number);
+                    int count = dt.Rows.Count;
+                    object obj_t = new object();
+                    if (count < 1)
+                    {
+                        obj_t = new
+                        {
+                            uId = uId,
+                            position = new { },
+                        };
+
+                    }
+                    else
+                    {
+                        int i = 0;
+                        DataRow dr = dt.Rows[i];
+                        string Id = dr["Id"].ToString();
+
+                        string longitude = dr["longitude"].ToString();
+                        string latitude = dr["latitude"].ToString();
+                        string placeName = dr["placeName"].ToString();
+                        string uploadTime = dr["uploadTime"].ToString();
+                        string modifyTime = dr["modifyTime"].ToString();
+
+                        obj_t = new
+                        {
+                            uId = uId,
+                            position = new
+                            {
+                                longitude = longitude,
+                                latitude = latitude,
+                                placeName = placeName,
+                                uploadTime = uploadTime,
+                                modifyTime = modifyTime,
+                            },
+
+                        };
+                    }
+
+                    listObj.Add(obj_t);
+                }
+                if (listObj != null)
+                {
+                    status = "succeed";
+                    msg = "获取成功";
+
+                }
+                else
+                {
+                    status = "error";
+                    msg = "获取失败";
+                }
+
+            }
+
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+            //int adminId = int.Parse(Session["adminId"].ToString());
+
+            Common.addLog(logType, title + msg);
+
+
+            object obj = new
+            {
+                status = status,
+                msg = msg,
+                data = listObj,
+            };
+
+            string contentType = "text/json; charset=utf-8";
+
+            return Json(obj, contentType);
+        }
+
+        /// <summary>
+        ///  获取用户最新定位信息
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult GetUserNewestPositionByUGid()
+        {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
+            string uGId = Request.Params.Get("uGId");
+            int i_uGId = 0;
+            try
+            {
+                i_uGId = int.Parse(uGId);
+            }
+            catch
+            {
+                i_uGId = 0;
+            }
+
+            List<object> listObj = new List<object>();
+            DataTable ug_dt = new DataTable();
+            UserGroupUser userGroupUser = new UserGroupUser();
+            userGroupUser.UGId = i_uGId;
+            ug_dt = userGroupUser.GetUserGroupWithUGid();
+
+            int ug_count = ug_dt.Rows.Count;
+
+            if (ug_count < 1)
+            {
+                status = "error";
+                msg = "参数有误";
+
+            }
+            else
+            {
+                for (int j = 0; j < ug_count; j++)
+                {
+                    string ug_uId = ug_dt.Rows[j]["uId"].ToString();
+                    string uId = ug_uId;
+
+                    int i_uId = 0;
+                    try
+                    {
+                        i_uId = int.Parse(uId);
+                    }
+                    catch
+                    {
+                        i_uId = 0;
+                    }
+
+                    UserPosition position = new UserPosition();
+                    position.UId = i_uId;
+
+                    int number = 1;
+                    DataTable dt = new DataTable();
+                    dt = position.GetPositionList(number);
+                    int count = dt.Rows.Count;
+                    object obj_t = new object();
+                    if (count < 1)
+                    {
+                        obj_t = new
+                        {
+                            uId = uId,
+                            position = new { },
+                        };
+
+                    }
+                    else
+                    {
+                        int i = 0;
+                        DataRow dr = dt.Rows[i];
+                        string Id = dr["Id"].ToString();
+
+                        string longitude = dr["longitude"].ToString();
+                        string latitude = dr["latitude"].ToString();
+                        string placeName = dr["placeName"].ToString();
+                        string uploadTime = dr["uploadTime"].ToString();
+                        string modifyTime = dr["modifyTime"].ToString();
+
+                        obj_t = new
+                        {
+                            uId = uId,
+                            position = new
+                            {
+                                longitude = longitude,
+                                latitude = latitude,
+                                placeName = placeName,
+                                uploadTime = uploadTime,
+                                modifyTime = modifyTime,
+                            },
+
+                        };
+                    }
+                    listObj.Add(obj_t);
+                }
+
+                if (listObj != null)
+                {
+                    status = "succeed";
+                    msg = "获取成功";
+                }
+                else
+                {
+                    status = "error";
+                    msg = "获取失败";
+                }
+            }
+
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+            //int adminId = int.Parse(Session["adminId"].ToString());
+
+            Common.addLog(logType, title + msg);
+
+
+            object obj = new
+            {
+                status = status,
+                msg = msg,
+                data = listObj,
+            };
+
+            string contentType = "text/json; charset=utf-8";
+            return Json(obj, contentType);
+        }
+
+        /// <summary>
         /// 获取所有好友的最新定位信息
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         public ActionResult GetNewestPosition()
         {
-            //HttpRequestBase request = Request;
-
-            //string uId = request.Params.Get("uId");
             string uId = Request.Params.Get("uId");
             int i_uId = 0;
             try

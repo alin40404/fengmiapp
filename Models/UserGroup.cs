@@ -135,24 +135,41 @@ namespace fengmiapp.Models
             return base.Add(value,para);
         }
 
+        public int AddBackId()
+        {
+            string value = "name,gType,createUId,status,modifyTime";
+            SqlParameter[] para = new SqlParameter[]
+            {
+                new SqlParameter("@createUId", _createUId),
+                new SqlParameter("@name", _name),
+                new SqlParameter("@gType", _gType),
+                new SqlParameter("@status", _status),
+                new SqlParameter("@modifyTime", _modifyTime),
+             
+            };
+            return base.AddBackId(value, para);
+        }
+
         public int ModifyStatus()
         {
-            string set = "status=@status";
+            string set = " status=@status,modifyTime=@modifyTime ";
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@status", _status),
                 new SqlParameter("@Id", _Id),
+                new SqlParameter("@modifyTime", _modifyTime),
 			};
             return base.Modify(set, para);
         }
 
         public int ModifyName()
         {
-            string set = "name=@name";
+            string set = " name=@name,modifyTime=@modifyTime ";
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@name", _name),
                 new SqlParameter("@Id", _Id),
+                new SqlParameter("@modifyTime", _modifyTime),
 			};
             return base.Modify(set, para);
         }

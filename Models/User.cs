@@ -28,6 +28,7 @@ namespace fengmiapp.Models
         private DateTime _registerTime = DateTime.Now;
         private float _userExp = 0;
         private int _status = 0;
+        private int _isPermitAddFriend = 1;//默认允许被添加好友
 
         private string _interests = String.Empty;
 
@@ -152,6 +153,14 @@ namespace fengmiapp.Models
             set { this._interests = value; }
         }
 
+        /// <summary>
+        /// IsPermitAddFriend
+        /// </summary>
+        public int IsPermitAddFriend
+        {
+            get { return _isPermitAddFriend; }
+            set { _isPermitAddFriend = value; }
+        }
 
         #endregion
 
@@ -218,7 +227,7 @@ namespace fengmiapp.Models
 
                     //status
                     this._status = int.Parse(dt.Rows[0]["status"].ToString());
-
+                    this._isPermitAddFriend = int.Parse(dt.Rows[0]["isPermitAddFriend"].ToString());
 
                 }
             }
@@ -282,6 +291,7 @@ namespace fengmiapp.Models
 
                     //status
                     this._status = int.Parse(dt.Rows[0]["status"].ToString());
+                    this._isPermitAddFriend = int.Parse(dt.Rows[0]["isPermitAddFriend"].ToString());
 
                 }
             }
@@ -290,8 +300,8 @@ namespace fengmiapp.Models
         public int Add()
         {
             string sql =
-            "INSERT INTO " + this._table + "(password,phone,email,realName,nickName,userFace,identityCard,birthDay,address,registerTime,userExp,status,interests) " +
-            "VALUES (@password,@phone,@email,@realName,@nickName,@userFace,@identityCard,@birthDay,@address,@registerTime,@userExp,@status,@interests)";
+            "INSERT INTO " + this._table + "(password,phone,email,realName,nickName,userFace,identityCard,birthDay,address,registerTime,userExp,status,interests,isPermitAddFriend) " +
+            "VALUES (@password,@phone,@email,@realName,@nickName,@userFace,@identityCard,@birthDay,@address,@registerTime,@userExp,@status,@interests,@isPermitAddFriend)";
 
             //byte[] userFace = Encoding.UTF8.GetBytes(_userFace);
            
@@ -306,13 +316,13 @@ namespace fengmiapp.Models
                 new SqlParameter("@nickName", _nickName),
                 new SqlParameter("@userFace", _userFace),
                 new SqlParameter("@identityCard", _identityCard),
-                new SqlParameter("@userExp", _userExp),
-                new SqlParameter("@address", _address),
                 new SqlParameter("@birthDay", _birthDay),
+                new SqlParameter("@address", _address),
+                new SqlParameter("@registerTime", _registerTime),
+                new SqlParameter("@userExp", _userExp),
                 new SqlParameter("@status", _status),
                 new SqlParameter("@interests",_interests),
-                
-                new SqlParameter("@registerTime", _registerTime),
+                new SqlParameter("@isPermitAddFriend", _isPermitAddFriend),
              
             };
             return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
@@ -347,6 +357,21 @@ namespace fengmiapp.Models
 			{
                 new SqlParameter("@Id", _id),
                 new SqlParameter("@status", _status),
+			};
+            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+
+        }
+
+        public int ModifyPermit()
+        {
+            string sql = "UPDATE " + "" + this._table + "" + " set " +
+                    " isPermitAddFriend=@isPermitAddFriend " +
+                    " Where Id=@Id  ";
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@Id", _id),
+                new SqlParameter("@isPermitAddFriend", _isPermitAddFriend),
 			};
             return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
 
@@ -452,6 +477,7 @@ namespace fengmiapp.Models
             return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
+
 
         public int Delete(int Id)
         {

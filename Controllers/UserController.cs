@@ -20,33 +20,51 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult PostValidUser()
         {
-            string phone = Request.Params.Get("phone");
-            string password = Request.Params.Get("password");
-            DataTable dt = new DataTable();
-            User user = new User();
-            user.Phone = phone;
-
-            password = Common.MD5(password);
-            user.PassWord = password;
-
-            dt = user.login();
-            string uId = "0";
             string status = "error";
             string msg = "";
-            if (dt != null && dt.Rows.Count > 0)
+
+            string phone = Request.Params.Get("phone");
+            string password = Request.Params.Get("password");
+
+            string uId = "0";
+
+            if (string.IsNullOrEmpty(phone))
             {
-                DataRow dr = dt.Rows[0];
-                uId = dr["Id"].ToString();
-                status = "succeed";
-                msg = "成功";
+                status = "error";
+                msg = "失败，帐号";
+
+            }
+            else if (string.IsNullOrEmpty(password))
+            {
+                status = "error";
+                msg = "失败，密码不能为空";
             }
             else
             {
-                uId = "0";
-                status = "error";
-                msg = "帐号或密码错误";
-            }
 
+
+                DataTable dt = new DataTable();
+                User user = new User();
+                user.Phone = phone;
+
+                password = Common.MD5(password);
+                user.PassWord = password;
+
+                dt = user.login();
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    DataRow dr = dt.Rows[0];
+                    uId = dr["Id"].ToString();
+                    status = "succeed";
+                    msg = "成功";
+                }
+                else
+                {
+                    uId = "0";
+                    status = "error";
+                    msg = "帐号或密码错误";
+                }
+            }
 
             object obj = new { status = status, uId = uId, msg = msg };
             string contentType = "text/json; charset=utf-8";
@@ -98,39 +116,54 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult Register()
         {
-            //帐号 手机号 密码
-            string phone = Request.Params.Get("phone");
-            string password = Request.Params.Get("password");
-            DataTable dt = new DataTable();
-            User user = new User();
-            user.Phone = phone;
-
-            password = Common.MD5(password);
-            user.PassWord = password;
-
-            int validUserCount = user.SelectByCount(phone);
             string status = "error";
             string msg = "";
 
-            if (validUserCount < 1)
-            {//用户可用
-                int result = user.Add();
+            //帐号 手机号 密码
+            string phone = Request.Params.Get("phone");
+            string password = Request.Params.Get("password");
+            if (string.IsNullOrEmpty(phone))
+            {
+                status = "error";
+                msg = "注册失败，手机号码不能为空";
 
-                if (result > 0)
-                {
-                    status = "succeed";
-                    msg = "注册成功";
+            }
+            else if (string.IsNullOrEmpty(password))
+            {
+                status = "error";
+                msg = "注册失败，密码不能为空";
+            }
+            else
+            {
+                DataTable dt = new DataTable();
+                User user = new User();
+                user.Phone = phone;
+
+                password = Common.MD5(password);
+                user.PassWord = password;
+
+                int validUserCount = user.SelectByCount(phone);
+
+                if (validUserCount < 1)
+                {//用户可用
+                    int result = user.Add();
+
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "注册成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "注册失败";
+                    }
                 }
                 else
                 {
                     status = "error";
-                    msg = "注册失败";
+                    msg = "注册失败，帐号已存在";
                 }
-            }
-            else
-            {
-                status = "error";
-                msg = "注册失败，帐号已存在";
             }
 
             object obj = new { status = status, msg = msg };
@@ -259,6 +292,11 @@ namespace fengmiapp.Controllers
                 string userFace = adminUser.UserFace;
                 string email = adminUser.Email;
                 string address = adminUser.Address;
+                int userStatus = adminUser.Status;
+                string interests = adminUser.Interests;
+                int isPermitAddFriend = adminUser.IsPermitAddFriend;
+
+
 
                 userOjb = new
                 {
@@ -269,7 +307,11 @@ namespace fengmiapp.Controllers
                     birthDay = birthDay,
                     userFace = userFace,
                     email = email,
-                    address = address
+                    address = address,
+                    userStatus = userStatus,
+                    interests = interests,
+                    isPermitAddFriend = isPermitAddFriend,
+
                 };
 
 
@@ -291,17 +333,10 @@ namespace fengmiapp.Controllers
 
             Common.addLog(logType, title + msg);
 
-
-
             object obj = new { status = status, msg = msg, user = userOjb };
 
-
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
-
-
         }
 
         /// <summary>
@@ -499,7 +534,11 @@ namespace fengmiapp.Controllers
             int i_status = 1;
             try
             {
-                i_status = int.Parse(userStatus);
+                try
+                {
+                    i_status = int.Parse(userStatus);
+                }
+                catch { }
                 adminUser.Status = i_status;
 
 
@@ -544,6 +583,74 @@ namespace fengmiapp.Controllers
 
             string contentType = "text/json; charset=utf-8";
 
+            return Json(obj, contentType);
+        }
+
+        /// <summary>
+        /// 5．修改用户设置
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult dealUserPermit()
+        {
+            string uId = Request.Params.Get("uId");
+            string isPermitAddFriend = Request.Params.Get("isPermitAddFriend");
+
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch
+            {
+                i_uId = 0;
+            }
+
+
+            User adminUser = new User(i_uId);
+            int Id = adminUser.Id;
+            string title = "";
+            string status = "error";
+            string msg = "";
+
+            //1 允许 ，0 不允许
+            int i_isPermitAddFriend = 1;
+            try
+            {
+                i_isPermitAddFriend = int.Parse(isPermitAddFriend);
+            }
+            catch { }
+            adminUser.IsPermitAddFriend = i_isPermitAddFriend;
+
+            if (Id > 0)
+            {//update
+                int result = adminUser.ModifyPermit();
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "修改成功";
+                }
+                else
+                {
+                    status = "error";
+                    msg = "修改失败";
+                }
+            }
+            else
+            {
+                status = "error";
+                msg = "修改失败,用户帐号不存在";
+
+            }
+
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+
+            Common.addLog(logType, title + msg);
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
             return Json(obj, contentType);
         }
 
@@ -750,6 +857,171 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
+
+        #endregion
+
+        #region 用户动作，例如摇一摇
+        
+        /// <summary>
+        /// 摇一摇
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult Shake()
+        {
+            string title = "";
+            string status = "error";
+            string msg = "";
+
+            HttpRequestBase request = Request;
+            string uId = request.Params.Get("uId");
+            string uploadTime = request.Params.Get("uploadTime");
+
+            int action = 1;
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch
+            {
+                i_uId = 0;
+            }
+            DateTime dt_uploadTime = DateTime.Now;
+            try
+            {
+                dt_uploadTime = DateTime.Parse(uploadTime);
+            }
+            catch { }
+
+            int result = 0;
+
+            UserAction userAction = new UserAction(i_uId,action);
+            int Id = userAction.Id;
+            userAction.UploadTime = dt_uploadTime;
+
+            if (Id > 0)
+            {//update
+                result = userAction.ModifyInfo();
+            }
+            else
+            {
+                userAction.UId = i_uId;
+                userAction.Action = action;
+
+                result = userAction.Add();
+                if (result > 0)
+                {
+                    userAction = new UserAction(i_uId, action);
+                }
+            }
+
+            List<object> userObjList = new List<object>();
+
+
+            if (result > 0)
+            {
+                status = "succeed";
+                msg = "获取成功";
+
+                DataTable dt = new DataTable();
+
+                //重置用户Id
+                userAction.UId = 0;
+                userAction.Action = action;
+                userAction.Id = Id;
+                
+                int number = 20;
+                double hours = -1;//取一小时之前到现在的数据
+                //dt = userAction.GetActionUserList(number);
+                dt = userAction.GetActionUserList(number, hours);
+                int count = dt.Rows.Count;
+
+                for (int i = 0; i < count; i++)
+                {
+
+                    string t_uId = dt.Rows[i]["uId"].ToString();
+                    string t_action = dt.Rows[i]["action"].ToString();
+                    string t_uploadTime = dt.Rows[i]["uploadTime"].ToString();
+                    string t_modifyTime = dt.Rows[i]["modifyTime"].ToString();
+                    try
+                    {
+                        t_uploadTime = DateTime.Parse(t_uploadTime).ToString("yyyy-MM-dd HH:mm:ss");
+                    }
+                    catch { }
+                    try
+                    {
+                        t_modifyTime = DateTime.Parse(t_modifyTime).ToString("yyyy-MM-dd HH:mm:ss");
+                    }
+                    catch { }
+
+
+                    string phone = dt.Rows[i]["phone"].ToString();
+                    string realName = dt.Rows[i]["realName"].ToString();
+                    string nickName = dt.Rows[i]["nickName"].ToString();
+                    string identityCard = dt.Rows[i]["identityCard"].ToString();
+                    string t_birthDay = dt.Rows[i]["birthDay"].ToString();
+
+                    string birthDay = "";
+                    try
+                    {
+                        birthDay = DateTime.Parse(t_birthDay).ToString("yyyy-MM-dd");
+                    }
+                    catch { }
+
+                    string userFace = dt.Rows[i]["userFace"].ToString();
+                    //string userFace = Encoding.UTF8.GetString((byte[])dt.Rows[i]["userFace"]);
+
+                    string email = dt.Rows[i]["email"].ToString();
+                    string address = dt.Rows[i]["address"].ToString();
+
+
+                    object userObj = new object();
+
+                    userObj = new
+                    {
+                        uId = t_uId,
+                        action = t_action,
+                        uploadTime = t_uploadTime,
+                        modifyTime = t_modifyTime,
+
+                        phone = phone,
+                        realName = realName,
+                        nickName = nickName,
+                        identityCard = identityCard,
+                        birthDay = birthDay,
+                        userFace = userFace,
+                        email = email,
+                        address = address
+                    };
+
+                    userObjList.Add(userObj);
+                }
+
+
+            }
+            else
+            {
+                status = "error";
+                msg = "获取失败";
+            }
+
+
+
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+            //int adminId = int.Parse(Session["adminId"].ToString());
+
+            Common.addLog(logType, title + msg);
+
+
+            object obj = new { status = status, msg = msg, data = userObjList };
+
+            string contentType = "text/json; charset=utf-8";
+
+            return Json(obj, contentType);
+        }
 
         #endregion
 
@@ -1009,7 +1281,14 @@ namespace fengmiapp.Controllers
                     string realName = dt.Rows[i]["realName"].ToString();
                     string nickName = dt.Rows[i]["nickName"].ToString();
                     string identityCard = dt.Rows[i]["identityCard"].ToString();
-                    string birthDay = DateTime.Parse(dt.Rows[i]["birthDay"].ToString()).ToString("yyyy-MM-dd HH:mm:ss");
+                    string t_birthDay = dt.Rows[i]["birthDay"].ToString();
+
+                    string birthDay = "";
+                    try
+                    {
+                        birthDay = DateTime.Parse(t_birthDay).ToString("yyyy-MM-dd");
+                    }
+                    catch { }
 
                     string userFace = dt.Rows[i]["userFace"].ToString();
                     //string userFace = Encoding.UTF8.GetString((byte[])dt.Rows[i]["userFace"]);
@@ -1539,8 +1818,9 @@ namespace fengmiapp.Controllers
 
             string status = "error";
             string msg = "";
-            int result = userGroup.Add();
-            
+            //int result = userGroup.Add();
+            int result = userGroup.AddBackId();
+
             int uGId = 0;
             
             if (result > 0)
@@ -1548,7 +1828,8 @@ namespace fengmiapp.Controllers
                 status = "succeed";
                 msg = "创建成功";
 
-                uGId = userGroup.GetUserGroupId();
+                //uGId = userGroup.GetUserGroupId();
+                uGId = result;
 
                 UserGroupUser userGroupUser = new UserGroupUser();
 
@@ -1573,7 +1854,95 @@ namespace fengmiapp.Controllers
 
             return Json(obj, contentType);
         }
-       
+
+        /// <summary>
+        /// 修改群名称
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult ModifyUserGroupName()
+        {
+            string uGId = Request.Params.Get("uGId");
+            string name = Request.Params.Get("name");
+
+            int i_uGId = 0;
+            try
+            {
+                i_uGId = int.Parse(uGId);
+            }
+            catch { }
+
+            UserGroup userGroup = new UserGroup();
+            userGroup.Name = name;
+            userGroup.Id = i_uGId;
+
+            string status = "error";
+            string msg = "";
+
+            int result = userGroup.ModifyName();
+
+            if (result > 0)
+            {
+                status = "succeed";
+                msg = "修改成功";
+
+            }
+            else
+            {
+                status = "error";
+                msg = "修改失败";
+            }
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+
+            return Json(obj, contentType);
+        }
+
+        /// <summary>
+        /// 修改群组
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult DeleteUserGroup()
+        {
+            string uGId = Request.Params.Get("uGId");
+
+            int i_uGId = 0;
+            try
+            {
+                i_uGId = int.Parse(uGId);
+            }
+            catch { }
+
+            UserGroup userGroup = new UserGroup();
+            userGroup.Id = i_uGId;
+            int ug_status = 0;
+            userGroup.Status = ug_status;
+
+            string status = "error";
+            string msg = "";
+
+            int result = userGroup.ModifyStatus();
+
+            if (result > 0)
+            {
+                status = "succeed";
+                msg = "删除成功";
+
+            }
+            else
+            {
+                status = "error";
+                msg = "删除失败";
+            }
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+
+            return Json(obj, contentType);
+        }
+
         /// <summary>
         /// 5.添加群用户
         /// </summary>
@@ -1611,13 +1980,10 @@ namespace fengmiapp.Controllers
 
             int Id = userGroupUser.Id;
 
-
-
             userGroupUser.UGId = i_uGId;
             userGroupUser.UId = i_uId;
             userGroupUser.URole = i_uRole;
 
-            userGroupUser.Status = userStatus;
 
             string status = "error";
             string msg = "";
@@ -1625,11 +1991,23 @@ namespace fengmiapp.Controllers
             int result=0;
             if (Id > 0)
             {
-                status = "error";
-                msg = "添加失败，用户已加入该群";
+                userStatus = userGroupUser.Status;
+
+                if (userStatus < 1)
+                {
+                    userGroupUser.ModifyStatus();
+                }
+                else
+                {
+                    status = "error";
+                    msg = "添加失败，用户已加入该群";
+                }
             }
             else
             {
+                userStatus = 1;
+                userGroupUser.Status = userStatus;
+
                 result = userGroupUser.Add();
 
                 if (result > 0)
@@ -1643,7 +2021,6 @@ namespace fengmiapp.Controllers
                     msg = "添加失败";
                 }
 
-
             }
 
             object obj = new { status = status, msg = msg };
@@ -1651,7 +2028,121 @@ namespace fengmiapp.Controllers
 
             return Json(obj, contentType);
         }
-       
+
+        /// <summary>
+        /// 添加多个群用户
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult AddUserGroupUserList()
+        {
+            string uGId = Request.Params.Get("uGId");
+            string uId = Request.Params.Get("uId");// ","号隔开
+            string uRole = Request.Params.Get("uRole");//角色统一
+
+            int i_uGId = 0;
+            try
+            {
+                i_uGId = int.Parse(uGId);
+            }
+            catch { }
+
+            string[] uIdList = uId.Split(',');
+
+            int i_uId = 0;
+
+            int i_uRole = 0;
+            try
+            {
+                i_uRole = int.Parse(uRole);
+            }
+            catch { }
+
+            string status = "error";
+            string msg = "";
+            int count=uIdList.Length;
+
+            int addResult = 0;
+
+            for (int i = 0; i < count; i++)
+            {
+                uId = uIdList[i];
+                try
+                {
+                    i_uId = int.Parse(uId);
+                }
+                catch { }
+
+                int userStatus = 1;
+
+                UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
+
+                int Id = userGroupUser.Id;
+
+                userGroupUser.UGId = i_uGId;
+                userGroupUser.UId = i_uId;
+                userGroupUser.URole = i_uRole;
+
+                int result = 0;
+                if (Id > 0)
+                {
+                    userStatus = userGroupUser.Status;
+
+                    if (userStatus < 1)
+                    {
+                        userGroupUser.ModifyStatus();
+                        addResult++;//添加成功
+                    }
+                    else
+                    {
+                        //status = "error";
+                        //msg = "添加失败，用户已加入该群";
+                    }
+                }
+                else
+                {
+                    userStatus = 1;
+                    userGroupUser.Status = userStatus;
+
+                    result = userGroupUser.Add();
+
+                    if (result > 0)
+                    {
+                        //status = "succeed";
+                       // msg = "添加成功";
+                        addResult++;//添加成功
+
+                    }
+                    else
+                    {
+                        //status = "error";
+                       // msg = "添加失败";
+                    }
+                    
+                }
+            }
+
+
+
+            if (addResult > 0)
+            {
+                status = "succeed";
+                msg = "添加成功："+addResult+"条数据添加成功；"+(count-addResult)+"条数据添加失败";
+
+            }
+            else
+            {
+                status = "error";
+                msg = "添加失败";
+            }
+
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+
+            return Json(obj, contentType);
+        }
+
         /// <summary>
         /// 6.删除群用户
         /// </summary>
@@ -1719,7 +2210,92 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
+        /// <summary>
+        /// 修改群用户角色
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult ModifyUserGroupUserRole()
+        {
+            string uGId = Request.Params.Get("uGId");
+            string uId = Request.Params.Get("uId");
+            string uRole = Request.Params.Get("uRole");
+
+            int i_uGId = 0;
+            try
+            {
+                i_uGId = int.Parse(uGId);
+            }
+            catch { }
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch { }
+
+            int i_uRole = 0;
+            try
+            {
+                i_uRole = int.Parse(uRole);
+            }
+            catch { }
+
+            int userStatus = 1;
+
+            UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
+
+            int Id = userGroupUser.Id;
+
+            userGroupUser.UGId = i_uGId;
+            userGroupUser.UId = i_uId;
+            userGroupUser.URole = i_uRole;
+
+
+            string status = "error";
+            string msg = "";
+
+            int result = 0;
+            if (Id > 0)
+            {
+                userStatus = userGroupUser.Status;
+                if (userStatus < 1)
+                {
+                    status = "error";
+                    msg = "修改失败，用户已退群";
+                }
+                else
+                {
+                    result = userGroupUser.Modify_uRole();
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "修改成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "修改失败";
+                    }
+                }
+            }
+            else
+            {
+                    status = "error";
+                    msg = "修改失败，用户未加入该群";
+            }
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+
+            return Json(obj, contentType);
+
+        }
+
+
         #endregion
+
+
 
     }
 }

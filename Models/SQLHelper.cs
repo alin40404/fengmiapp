@@ -177,6 +177,27 @@ namespace fengmiapp.Models
             return ds;
         }
         //public static DataSet ExecuteToDataSet(string cmdText, int startRecord, int maxRecord, string TableName);
+       
+        
+        public static int ExecuteScalar(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
+        {
+            open();
+            int result = 0;
+            try
+            {
+                SqlCommand cmd = new SqlCommand(cmdText, ConnectionString);
+                cmd.CommandType = cmdType;
+                cmd.Parameters.AddRange(commandParameters);
+                //result = cmd.ExecuteNonQuery();
+                result = (int)cmd.ExecuteScalar();
+            }
+            catch
+            {
+                result = -1;
+            }
+            close();
+            return result;
+        }
 
     }
 }
