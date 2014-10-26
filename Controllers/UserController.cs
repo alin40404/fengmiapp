@@ -1347,10 +1347,17 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult CreateUserFriendGroup()
         {
-            string name = Request.Params.Get("name");
-            string uId = Request.Params.Get("uId");
-            string userStatusStr = Request.Params.Get("status");
+            string status = "error";
+            string msg = "";
+            int uFGroupId = 0;
 
+
+            string uId = Request.Params.Get("uId");
+            string name = Request.Params.Get("name");
+
+            //string userStatusStr = Request.Params.Get("status");
+
+            string userStatusStr = "1";
             int i_uId = 0;
             try
             {
@@ -1365,31 +1372,76 @@ namespace fengmiapp.Controllers
             }
             catch { }
 
-            //UserGroup userGroup = new UserGroup();
-            UserFriendGroup userFriendGroup = new UserFriendGroup();
 
-            userFriendGroup.GName = name;
-            userFriendGroup.UId = i_uId;
-            userFriendGroup.Status = userStatus;
-
-            string status = "error";
-            string msg = "";
-            int result = userFriendGroup.Add();
-
-            if (result > 0)
+            if (string.IsNullOrEmpty(uId))
             {
-                status = "succeed";
-                msg = "创建成功";
+                status = "error";
+                msg = "创建失败，用户Id不能为空";
+            }
+            else if (string.IsNullOrEmpty(name))
+            {
+                status = "error";
+                msg = "创建失败，组名不能为空";
+
             }
             else
             {
-                status = "error";
-                msg = "创建失败";
+                UserFriendGroup userFriendGroup = new UserFriendGroup(i_uId, name);
+                int Id = userFriendGroup.Id;
+
+                int result = 0;
+                if (Id > 0)
+                {
+                    int ufg_status = 1;
+                    ufg_status = userFriendGroup.Status;
+                    if (ufg_status < 1)
+                    {
+                        ufg_status = 1;
+                        userFriendGroup.Status = ufg_status;
+                        result = userFriendGroup.ModifyStatus();
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "创建成功";
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "创建失败";
+                        }
+
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "创建失败，组名已经存在";
+                    }
+                    uFGroupId = Id;
+                }
+                else
+                {
+                    userFriendGroup.GName = name;
+                    userFriendGroup.UId = i_uId;
+                    userFriendGroup.Status = userStatus;
+                    result = userFriendGroup.AddBackId();
+
+                    uFGroupId = result;
+
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "创建成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "创建失败";
+                    }
+                }
             }
 
-            object obj = new { status = status, msg = msg };
+            object obj = new { status = status, msg = msg,uFGroupId = uFGroupId };
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 
@@ -1400,6 +1452,9 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DeleteUserFriendGroup()
         {
+            string status = "error";
+            string msg = "";
+
             string uFGroupId = Request.Params.Get("uFGroupId");
             int i_uFGroupId = 0;
             try
@@ -1413,23 +1468,27 @@ namespace fengmiapp.Controllers
             UserFriendGroup userFriendGroup = new UserFriendGroup(i_uFGroupId);
             int Id = userFriendGroup.Id;
 
-            int userStatus = 0;
-            userFriendGroup.Status = userStatus;
-
-            string status = "error";
-            string msg = "";
-
-            int result = userFriendGroup.ModifyStatus();
-
-            if (result > 0)
+            if (Id > 0)
             {
-                status = "succeed";
-                msg = "删除成功";
+                int userStatus = 0;
+                userFriendGroup.Status = userStatus;
+                int result = userFriendGroup.ModifyStatus();
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "删除成功";
+                }
+                else
+                {
+                    status = "error";
+                    msg = "删除失败";
+                }
             }
             else
             {
                 status = "error";
-                msg = "删除失败";
+                msg = "删除失败，好友分组不存在";
             }
 
             object obj = new { status = status, msg = msg };
@@ -1445,6 +1504,9 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult ModifyUserFriendGroupName()
         {
+            string status = "error";
+            string msg = "";
+
             string uFGroupId = Request.Params.Get("uFGroupId");
             string name = Request.Params.Get("name");
 
@@ -1459,24 +1521,43 @@ namespace fengmiapp.Controllers
             }
 
             UserFriendGroup userFriendGroup = new UserFriendGroup(i_uFGroupId);
-
             int Id = userFriendGroup.Id;
 
-            userFriendGroup.GName = name;
-
-            string status = "error";
-            string msg = "";
-            int result = userFriendGroup.ModifyName();
-
-            if (result > 0)
+            if (Id > 0)
             {
-                status = "succeed";
-                msg = "修改成功";
+                if (string.IsNullOrEmpty(name))
+                {
+                    status = "error";
+                    msg = "修改组名不能为空";
+                }
+                else
+                {
+
+                    if (string.IsNullOrEmpty(name))
+                    {
+
+                    }
+                    else
+                    {
+                        userFriendGroup.GName = name;
+                        int result = userFriendGroup.ModifyName();
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "修改成功";
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "修改失败";
+                        }
+                    }
+                }
             }
             else
             {
                 status = "error";
-                msg = "修改失败";
+                msg = "修改失败，好友分组不存在";
             }
 
             object obj = new { status = status, msg = msg };
@@ -1485,7 +1566,6 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
-
         /// <summary>
         /// 3.修改好友分组状态
         /// </summary>
@@ -1493,6 +1573,9 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult ModifyUserFriendGroupStatus()
         {
+            string status = "error";
+            string msg = "";
+
             string uFGroupId = Request.Params.Get("uFGroupId");
             string userStatusStr = Request.Params.Get("status");
 
@@ -1514,24 +1597,29 @@ namespace fengmiapp.Controllers
             }
 
             UserFriendGroup userFriendGroup = new UserFriendGroup(i_uFGroupId);
-
             int Id = userFriendGroup.Id;
 
-            userFriendGroup.Status = userStatus;
-
-            string status = "error";
-            string msg = "";
-            int result = userFriendGroup.ModifyStatus();
-
-            if (result > 0)
+            if (Id > 0)
             {
-                status = "succeed";
-                msg = "修改成功";
+
+                userFriendGroup.Status = userStatus;
+                int result = userFriendGroup.ModifyStatus();
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "修改成功";
+                }
+                else
+                {
+                    status = "error";
+                    msg = "修改失败";
+                }
             }
             else
             {
                 status = "error";
-                msg = "修改失败";
+                msg = "修改失败，好友分组不存在";
             }
 
             object obj = new { status = status, msg = msg };
@@ -1540,6 +1628,75 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
+        /// <summary>
+        /// 添加好友到好友分组
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult AddUserFriToUserFriendGroup()
+        {
+            string status = "error";
+            string msg = "";
+
+            string uId = Request.Params.Get("uId");
+            string fuId = Request.Params.Get("fuId");
+            string uFGroupId = Request.Params.Get("uFGroupId");
+            //string userStatusStr = Request.Params.Get("status");
+
+            int i_uFGroupId = 0;
+            try
+            {
+                i_uFGroupId = int.Parse(uFGroupId);
+            }
+            catch
+            {
+            }
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch { }
+            int i_fuId = 0;
+            try
+            {
+                i_fuId = int.Parse(fuId);
+            }
+            catch
+            {
+                i_fuId = 0;
+            }
+
+            UserFriend userFriend = new UserFriend(i_uId, i_fuId);
+            int Id = userFriend.Id;
+
+            if (Id > 0)
+            {
+                userFriend.UFGroupId = i_uFGroupId;
+                int result = userFriend.Modify_uFGroupId();
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "添加成功";
+                }
+                else
+                {
+                    status = "error";
+                    msg = "添加失败";
+                }
+            }
+            else
+            {
+                status = "error";
+                msg = "修改失败，用户好友不存在";
+            }
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+
+            return Json(obj, contentType);
+        }
 
         #endregion
 

@@ -16,7 +16,7 @@ namespace fengmiapp.Models
 
         private string _gName = string.Empty;
 
-        private int _status = 0;
+        private int _status = 1;
 
 
         #endregion
@@ -70,11 +70,11 @@ namespace fengmiapp.Models
 
             string strSql = " Select table1.* from " + this._table + " as table1  where 1=1 and table1.Id = @Id  ";
 
-            DataTable dt = null;
+            DataTable dt = new DataTable();
 
             SqlParameter[] para = new SqlParameter[]
 			{
-				new SqlParameter("Id", Id),
+				new SqlParameter("@Id", Id),
 			};
             dt = base.GetDataList(strSql,para);
 
@@ -92,6 +92,37 @@ namespace fengmiapp.Models
 
 
         }
+
+        public UserFriendGroup(int uId, string gName)
+        {
+            init();
+
+            string strSql = " Select table1.* from " + this._table + " as table1  where 1=1 and table1.uId = @uId and table1.gName = @gName ";
+
+            DataTable dt = new DataTable();
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+				new SqlParameter("@uId", uId),
+				new SqlParameter("@gName", gName),
+			};
+            dt = base.GetDataList(strSql, para);
+
+            if (dt.Rows.Count > 0)
+            {
+                this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
+                this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
+                this._gName = dt.Rows[0]["gName"].ToString();
+
+                //status
+                this._status = int.Parse(dt.Rows[0]["status"].ToString());
+
+
+            }
+
+
+        }
+
 
         /// <summary>
         /// 初始化参数
@@ -114,6 +145,19 @@ namespace fengmiapp.Models
              
             };
             return base.Add(value,para);
+        }
+
+        public int AddBackId()
+        {
+            string value = "uId,gName,status";
+            SqlParameter[] para = new SqlParameter[]
+            {
+                new SqlParameter("@uId", _uId),
+                new SqlParameter("@gName", _gName),
+                new SqlParameter("@status", _status),
+             
+            };
+            return base.AddBackId(value, para);
         }
 
         public int ModifyStatus()

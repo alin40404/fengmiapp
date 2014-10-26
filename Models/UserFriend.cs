@@ -21,7 +21,7 @@ namespace fengmiapp.Models
         private int _uFGroupId = 0;
 
         private DateTime _modifyTime = DateTime.Now;
-        private int _status = 0;
+        private int _status = 1;
 
         #endregion
 
@@ -197,7 +197,6 @@ namespace fengmiapp.Models
             return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
-
 
         public int Modify_uFGroupId()
         {

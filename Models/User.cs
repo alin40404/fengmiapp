@@ -27,7 +27,7 @@ namespace fengmiapp.Models
         private string _address = String.Empty;
         private DateTime _registerTime = DateTime.Now;
         private float _userExp = 0;
-        private int _status = 0;
+        private int _status = 1;
         private int _isPermitAddFriend = 1;//默认允许被添加好友
 
         private string _interests = String.Empty;
