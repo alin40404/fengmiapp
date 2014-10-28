@@ -62,7 +62,7 @@ namespace fengmiapp.Models
         }
 
         ///<summary>
-        /// UFGroupId ,所属好友组
+        /// UFGroupId ,所属好友分组
         ///</summary>
         public int UFGroupId
         {
@@ -179,6 +179,7 @@ namespace fengmiapp.Models
             return base.Modify(set, para);
         }
 
+        //互改好友状态
         public int ModifyStatus(string fuIdList)
         {
             string set = "status=@status";
@@ -193,9 +194,21 @@ namespace fengmiapp.Models
             string sql = "UPDATE " + this._table + " set " + set +
         "  Where uId=@uId and fuId in ( " + fuIdList + " ) ";
 
+            string sql_deleted = "UPDATE " + this._table + " set " + set +
+        "  Where fuId=@uId and uId in ( " + fuIdList + " ) ";
+            int result = 0;
 
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            sql += " ; " + sql_deleted + " ; ";
+            result = SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
 
+            /*
+            if (result > 0)
+            {
+                SQLHelper.ExecuteNonQuery(CommandType.Text, sql_deleted, para);
+            }
+             */
+
+            return result;
         }
 
         public int Modify_uFGroupId()

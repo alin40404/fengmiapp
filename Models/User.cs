@@ -179,13 +179,17 @@ namespace fengmiapp.Models
                 DataTable dt = null;
 
                 SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@Id", _id),
-			};
+			    {
+				    new SqlParameter("@Id", _id),
+			    };
                 dt = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para).Tables[0];
 
                 if (dt.Rows.Count > 0)
                 {
+                    this.SetField(dt);
+
+                    #region
+                    /*
                     this._id = int.Parse(dt.Rows[0]["Id"].ToString());
                     this._email = dt.Rows[0]["email"].ToString();
                     this._phone = dt.Rows[0]["phone"].ToString();
@@ -228,7 +232,8 @@ namespace fengmiapp.Models
                     //status
                     this._status = int.Parse(dt.Rows[0]["status"].ToString());
                     this._isPermitAddFriend = int.Parse(dt.Rows[0]["isPermitAddFriend"].ToString());
-
+                    */
+                    #endregion
                 }
             }
         }
@@ -247,10 +252,14 @@ namespace fengmiapp.Models
 			    {
 				    new SqlParameter("@phone", phone),
 			    };
+
                 dt = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para).Tables[0];
 
                 if (dt.Rows.Count > 0)
                 {
+                    this.SetField(dt);
+                    #region
+                    /*
                     this._id = int.Parse(dt.Rows[0]["Id"].ToString());
                     this._email = dt.Rows[0]["email"].ToString();
                     this._phone = dt.Rows[0]["phone"].ToString();
@@ -262,7 +271,6 @@ namespace fengmiapp.Models
                     this._identityCard = dt.Rows[0]["identityCard"].ToString();
 
                     this._userFace = dt.Rows[0]["userFace"].ToString();
-                    //this._userFace = Encoding.UTF8.GetString((byte[])dt.Rows[0]["userFace"]);
 
                     this._address = dt.Rows[0]["address"].ToString();
                     this._interests = dt.Rows[0]["interests"].ToString();
@@ -292,9 +300,65 @@ namespace fengmiapp.Models
                     //status
                     this._status = int.Parse(dt.Rows[0]["status"].ToString());
                     this._isPermitAddFriend = int.Parse(dt.Rows[0]["isPermitAddFriend"].ToString());
+                    */
+                    #endregion
+                }
+            }
+        }
+
+        protected void SetField(DataTable dt)
+        {
+            try
+            {
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    this._id = int.Parse(dt.Rows[0]["Id"].ToString());
+                    this._email = dt.Rows[0]["email"].ToString();
+                    this._phone = dt.Rows[0]["phone"].ToString();
+                    this._password = dt.Rows[0]["password"].ToString();
+
+                    this._realName = dt.Rows[0]["realName"].ToString();
+                    this._nickName = dt.Rows[0]["nickName"].ToString();
+
+                    this._identityCard = dt.Rows[0]["identityCard"].ToString();
+
+                    this._userFace = dt.Rows[0]["userFace"].ToString();
+                    //this._userFace = Encoding.UTF8.GetString((byte[])dt.Rows[0]["userFace"]);
+
+                    this._address = dt.Rows[0]["address"].ToString();
+                    this._interests = dt.Rows[0]["interests"].ToString();
+
+                    float userExp = 0;
+                    try
+                    {
+                        userExp = float.Parse(dt.Rows[0]["userExp"].ToString());
+                    }
+                    catch
+                    {
+                        userExp = 0;
+                    }
+                    this._userExp = userExp;
+                    string birthDay = dt.Rows[0]["birthDay"].ToString();
+                    if (string.IsNullOrEmpty(birthDay))
+                    {
+                        this._birthDay = DateTime.Now;
+                    }
+                    else
+                    {
+                        this._birthDay = DateTime.Parse(birthDay);
+                    }
+
+                    string registerTime = dt.Rows[0]["registerTime"].ToString();
+                    this._registerTime = DateTime.Parse(registerTime);
+
+                    //status
+                    this._status = int.Parse(dt.Rows[0]["status"].ToString());
+                    this._isPermitAddFriend = int.Parse(dt.Rows[0]["isPermitAddFriend"].ToString());
 
                 }
             }
+            catch { }
+
         }
 
         public int Add()
@@ -663,27 +727,38 @@ namespace fengmiapp.Models
 
         }
         
-        public DataTable login()
+        public void login()
         {
-            string strSql = "select top 1 * from " + this._table + " where (phone=@phone and password=@password ) order by Id asc";
+            string strSql = "select top 1 * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc";
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _id),
+               // new SqlParameter("@Id", _id),
 				new SqlParameter("@phone", _phone),
 				new SqlParameter("@password", _password),
-                new SqlParameter("@email", _email),
+               // new SqlParameter("@email", _email),
             };
             DataSet dts = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
+
             DataTable dt = new DataTable();
+            //dt = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para).Tables[0];
+
             if (dts != null && dts.Tables.Count > 0)
             {
                 dt = dts.Tables[0];
+                if (dt.Rows.Count > 0)
+                {
+                    this.SetField(dt);
+                }
+                else
+                {
+                    this._id = 0;
+                }
             }
             else
             {
-                dt = null;
+                this._id = 0;
             }
-            return dt;
+            //return dt;
         }
     }
 }

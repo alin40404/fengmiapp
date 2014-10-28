@@ -26,12 +26,12 @@ namespace fengmiapp.Controllers
             string phone = Request.Params.Get("phone");
             string password = Request.Params.Get("password");
 
-            string uId = "0";
+            int uId = 0;
 
             if (string.IsNullOrEmpty(phone))
             {
                 status = "error";
-                msg = "失败，帐号";
+                msg = "失败，帐号不能为空";
 
             }
             else if (string.IsNullOrEmpty(password))
@@ -41,32 +41,28 @@ namespace fengmiapp.Controllers
             }
             else
             {
-
-
-                DataTable dt = new DataTable();
+                //DataTable dt = new DataTable();
                 User user = new User();
                 user.Phone = phone;
-
                 password = Common.MD5(password);
                 user.PassWord = password;
+                user.login();
+                uId=user.Id;
 
-                dt = user.login();
-                if (dt != null && dt.Rows.Count > 0)
+                if (uId>0)
                 {
-                    DataRow dr = dt.Rows[0];
-                    uId = dr["Id"].ToString();
                     status = "succeed";
-                    msg = "成功";
+                    msg = "验证成功";
                 }
                 else
                 {
-                    uId = "0";
+                    uId = 0;
                     status = "error";
                     msg = "帐号或密码错误";
                 }
             }
 
-            object obj = new { status = status, uId = uId, msg = msg };
+            object obj = new { status = status, msg = msg, uId = uId };
             string contentType = "text/json; charset=utf-8";
 
             return Json(obj, contentType);
@@ -83,7 +79,6 @@ namespace fengmiapp.Controllers
             //string password = Request.Params.Get("password");
             DataTable dt = new DataTable();
             User user = new User(phone);
-
 
             string uId = "0";
             string status = "error";
@@ -1038,7 +1033,8 @@ namespace fengmiapp.Controllers
             string fuId = Request.Params.Get("fuId");
             string addType = Request.Params.Get("addType");
             string uFGroupId = Request.Params.Get("uFGroupId");
-
+            
+            #region 字段验证
             int i_uId = 0;
             try
             {
@@ -1058,16 +1054,43 @@ namespace fengmiapp.Controllers
             {
                 i_fuId = 0;
             }
+            int i_addType = 2;
+            try
+            {
+                i_addType = int.Parse(addType);
+            }
+            catch
+            {
+                i_addType = 2;
+            }
+
+            int i_uFGroupId = 0;
+            try
+            {
+                i_uFGroupId = int.Parse(uFGroupId);
+            }
+            catch
+            {
+                i_uFGroupId = 0;
+            }
+            #endregion
 
             UserFriend userFriend = new UserFriend(i_uId, i_fuId);
 
+            UserFriend userFriend_added = new UserFriend(i_fuId, i_uId);
+
             int Id = userFriend.Id;
+            int Id_added = userFriend_added.Id;
+
             string status = "error";
             string msg = "";
 
+            int userStatus =1 ;
+            int result = 0;
+
             if (Id > 0)
             {
-                int userStatus = userFriend.Status; //添加好友 修改状态
+                userStatus = userFriend.Status; //添加好友 修改状态
 
                 if (userStatus > 0)
                 {
@@ -1078,11 +1101,31 @@ namespace fengmiapp.Controllers
                 {
                     userStatus = 1;
                     userFriend.Status = userStatus;
-                    int result = userFriend.ModifyStatus();
+
+                    //通知对方
+
+
+                    result = userFriend.ModifyStatus();
+
                     if (result > 0)
                     {
                         status = "succeed";
                         msg = "已经恢复为好友";
+
+                        if (Id_added > 0)
+                        {
+                            userFriend_added.Status = userStatus;
+                            userFriend_added.ModifyStatus();
+                        }
+                        else
+                        {
+                            userFriend_added.UId =i_fuId ;
+                            userFriend_added.FuId = i_uId;
+                            userFriend_added.AddType = i_addType;
+                            userFriend_added.UFGroupId = i_uFGroupId;
+                            userFriend_added.Status = userStatus;
+                            userFriend_added.Add();
+                        }
                     }
                     else
                     {
@@ -1103,41 +1146,40 @@ namespace fengmiapp.Controllers
                 }
                 else
                 {
-                    int i_addType = 2;
-                    try
-                    {
-                        i_addType = int.Parse(addType);
-                    }
-                    catch
-                    {
-                        i_addType = 2;
-                    }
-
-                    int i_uFGroupId = 0;
-                    try
-                    {
-                        i_uFGroupId = int.Parse(uFGroupId);
-                    }
-                    catch
-                    {
-                        i_uFGroupId = 0;
-                    }
-
                     userFriend.UId = i_uId;
                     userFriend.FuId = i_fuId;
                     userFriend.AddType = i_addType;
                     userFriend.UFGroupId = i_uFGroupId;
 
-                    int userStatus = 1;//默认在线
+                    userStatus = 1;//默认在线
 
                     userFriend.Status = userStatus;
+                    //通知对方
 
-                    int result = userFriend.Add();
+                    result = userFriend.Add();
 
                     if (result > 0)
                     {
                         status = "succeed";
                         msg = "添加成功";
+
+                        if (Id_added > 0)
+                        {
+                            userFriend_added.Status = userStatus;
+                            userFriend_added.ModifyStatus();
+                        }
+                        else
+                        {
+                            userFriend_added.UId = i_fuId;
+                            userFriend_added.FuId = i_uId;
+                            userFriend_added.AddType = i_addType;
+                            userFriend_added.UFGroupId = i_uFGroupId;
+                            userFriend_added.Status = userStatus;
+
+                            userFriend_added.Add();
+
+                        }
+
                     }
                     else
                     {
@@ -1171,16 +1213,16 @@ namespace fengmiapp.Controllers
             {
                 i_uId = 0;
             }
-            //int i_uId = int.Parse(uId);
-
+           
             //int i_fuId = int.Parse(fuId);
-
             //UserFriend userFriend = new UserFriend(i_uId, i_fuId);
-            //int Id = userFriend.Id;
+            //UserFriend userFriend_added = new UserFriend(i_fuId, i_uId);
 
             UserFriend userFriend = new UserFriend();
 
             int userStatus = 0; //删除好友
+            int result = 0;
+
             string status = "error";
             string msg = "";
 
@@ -1192,15 +1234,16 @@ namespace fengmiapp.Controllers
             else
             {
                 userFriend.UId = i_uId;
-                userFriend.Status = userStatus;
+                userFriend.Status = userStatus; 
 
-                //
-                int result = userFriend.ModifyStatus(fuId);
+                result = userFriend.ModifyStatus(fuId);
 
                 if (result > 0)
                 {
                     status = "succeed";
                     msg = "删除成功";
+
+
                 }
                 else
                 {
@@ -2451,8 +2494,6 @@ namespace fengmiapp.Controllers
 
 
         #endregion
-
-
 
     }
 }
