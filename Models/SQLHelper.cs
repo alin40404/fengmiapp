@@ -177,7 +177,6 @@ namespace fengmiapp.Models
             return ds;
         }
         //public static DataSet ExecuteToDataSet(string cmdText, int startRecord, int maxRecord, string TableName);
-       
         
         public static int ExecuteScalar(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
         {

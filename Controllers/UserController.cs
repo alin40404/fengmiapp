@@ -32,7 +32,6 @@ namespace fengmiapp.Controllers
             {
                 status = "error";
                 msg = "失败，帐号不能为空";
-
             }
             else if (string.IsNullOrEmpty(password))
             {
@@ -41,12 +40,12 @@ namespace fengmiapp.Controllers
             }
             else
             {
-                //DataTable dt = new DataTable();
                 User user = new User();
                 user.Phone = phone;
                 password = Common.MD5(password);
                 user.PassWord = password;
                 user.login();
+
                 uId=user.Id;
 
                 if (uId>0)
@@ -103,7 +102,6 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
-
         /// <summary>
         /// 2．用户注册
         /// </summary>
@@ -120,7 +118,7 @@ namespace fengmiapp.Controllers
             if (string.IsNullOrEmpty(phone))
             {
                 status = "error";
-                msg = "注册失败，手机号码不能为空";
+                msg = "注册失败，帐号不能为空";
 
             }
             else if (string.IsNullOrEmpty(password))
@@ -131,16 +129,15 @@ namespace fengmiapp.Controllers
             else
             {
                 DataTable dt = new DataTable();
-                User user = new User();
-                user.Phone = phone;
+                User user = new User(phone);
+                int Id = user.Id;
 
-                password = Common.MD5(password);
-                user.PassWord = password;
-
-                int validUserCount = user.SelectByCount(phone);
-
-                if (validUserCount < 1)
+                if (Id < 1)
                 {//用户可用
+                    user.Phone = phone;
+                    password = Common.MD5(password);
+                    user.PassWord = password;
+
                     int result = user.Add();
 
                     if (result > 0)
@@ -167,7 +164,6 @@ namespace fengmiapp.Controllers
 
             return Json(obj, contentType);
         }
-
 
         #endregion
 
@@ -1077,10 +1073,10 @@ namespace fengmiapp.Controllers
 
             UserFriend userFriend = new UserFriend(i_uId, i_fuId);
 
-            UserFriend userFriend_added = new UserFriend(i_fuId, i_uId);
+            UserFriend userFriend_added = new UserFriend();
 
             int Id = userFriend.Id;
-            int Id_added = userFriend_added.Id;
+            int Id_added = 0;
 
             string status = "error";
             string msg = "";
@@ -1112,10 +1108,17 @@ namespace fengmiapp.Controllers
                         status = "succeed";
                         msg = "已经恢复为好友";
 
+                       userFriend_added = new UserFriend(i_fuId, i_uId);
+                       Id_added = userFriend_added.Id;
+
                         if (Id_added > 0)
                         {
-                            userFriend_added.Status = userStatus;
-                            userFriend_added.ModifyStatus();
+                            int tempStatus = userFriend_added.Status;
+                            if (tempStatus < 1)
+                            {
+                                userFriend_added.Status = userStatus;
+                                userFriend_added.ModifyStatus();
+                            }
                         }
                         else
                         {
@@ -1163,10 +1166,17 @@ namespace fengmiapp.Controllers
                         status = "succeed";
                         msg = "添加成功";
 
+                        userFriend_added = new UserFriend(i_fuId, i_uId);
+                        Id_added = userFriend_added.Id;
+
                         if (Id_added > 0)
                         {
-                            userFriend_added.Status = userStatus;
-                            userFriend_added.ModifyStatus();
+                            int tempStatus=userFriend_added.Status;
+                            if (tempStatus < 1)
+                            {
+                                userFriend_added.Status = userStatus;
+                                userFriend_added.ModifyStatus();
+                            }
                         }
                         else
                         {

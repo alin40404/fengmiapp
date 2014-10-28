@@ -168,15 +168,15 @@ namespace fengmiapp.Models
         {
         }
         
-        public User(int? Id)
+        public User(int tempId)
         {
-            if (Id != null)
+            if (tempId >0)
             {
-                this._id = (int)Id;
+                this._id = tempId;
 
                 string strSql = " Select admin.* from " + this._table + " as admin  where 1=1 and admin.Id = @Id order by admin.Id asc ";
 
-                DataTable dt = null;
+                DataTable dt = new DataTable();
 
                 SqlParameter[] para = new SqlParameter[]
 			    {
@@ -187,66 +187,18 @@ namespace fengmiapp.Models
                 if (dt.Rows.Count > 0)
                 {
                     this.SetField(dt);
-
-                    #region
-                    /*
-                    this._id = int.Parse(dt.Rows[0]["Id"].ToString());
-                    this._email = dt.Rows[0]["email"].ToString();
-                    this._phone = dt.Rows[0]["phone"].ToString();
-                    this._password = dt.Rows[0]["password"].ToString();
-
-                    this._realName = dt.Rows[0]["realName"].ToString();
-                    this._nickName = dt.Rows[0]["nickName"].ToString();
-
-                    this._identityCard = dt.Rows[0]["identityCard"].ToString();
-
-                    this._userFace = dt.Rows[0]["userFace"].ToString();
-                    //this._userFace = Encoding.UTF8.GetString((byte[])dt.Rows[0]["userFace"]);
-
-                    this._address = dt.Rows[0]["address"].ToString();
-                    this._interests = dt.Rows[0]["interests"].ToString();
-
-                    float userExp = 0;
-                    try
-                    {
-                        userExp = float.Parse(dt.Rows[0]["userExp"].ToString());
-                    }
-                    catch
-                    {
-                        userExp = 0;
-                    }
-                    this._userExp = userExp;
-                    string birthDay = dt.Rows[0]["birthDay"].ToString();
-                    if (string.IsNullOrEmpty(birthDay))
-                    {
-                        this._birthDay = DateTime.Now;
-                    }
-                    else
-                    {
-                        this._birthDay = DateTime.Parse(birthDay);
-                    }
-
-                    string registerTime = dt.Rows[0]["registerTime"].ToString();
-                    this._registerTime = DateTime.Parse(registerTime);
-
-                    //status
-                    this._status = int.Parse(dt.Rows[0]["status"].ToString());
-                    this._isPermitAddFriend = int.Parse(dt.Rows[0]["isPermitAddFriend"].ToString());
-                    */
-                    #endregion
                 }
             }
         }
 
         public User(string phone)
         {
-            if (phone != null)
+            if ( !string.IsNullOrEmpty(phone))
             {
-                //this._phone = phone;
 
                 string strSql = " Select admin.* from " + this._table + " as admin  where 1=1 and admin.phone = @phone ";
 
-                DataTable dt = null;
+                DataTable dt = new DataTable();
 
                 SqlParameter[] para = new SqlParameter[]
 			    {
@@ -258,50 +210,6 @@ namespace fengmiapp.Models
                 if (dt.Rows.Count > 0)
                 {
                     this.SetField(dt);
-                    #region
-                    /*
-                    this._id = int.Parse(dt.Rows[0]["Id"].ToString());
-                    this._email = dt.Rows[0]["email"].ToString();
-                    this._phone = dt.Rows[0]["phone"].ToString();
-                    this._password = dt.Rows[0]["password"].ToString();
-
-                    this._realName = dt.Rows[0]["realName"].ToString();
-                    this._nickName = dt.Rows[0]["nickName"].ToString();
-
-                    this._identityCard = dt.Rows[0]["identityCard"].ToString();
-
-                    this._userFace = dt.Rows[0]["userFace"].ToString();
-
-                    this._address = dt.Rows[0]["address"].ToString();
-                    this._interests = dt.Rows[0]["interests"].ToString();
-                    float userExp = 0;
-                    try
-                    {
-                        userExp = float.Parse(dt.Rows[0]["userExp"].ToString());
-                    }
-                    catch
-                    {
-                        userExp = 0;
-                    }
-                    this._userExp = userExp;
-                    string birthDay = dt.Rows[0]["birthDay"].ToString();
-                    if (string.IsNullOrEmpty(birthDay))
-                    {
-                        this._birthDay = DateTime.Now;
-                    }
-                    else
-                    {
-                        this._birthDay = DateTime.Parse(birthDay);
-                    }
-
-                    string registerTime = dt.Rows[0]["registerTime"].ToString();
-                    this._registerTime = DateTime.Parse(registerTime);
-
-                    //status
-                    this._status = int.Parse(dt.Rows[0]["status"].ToString());
-                    this._isPermitAddFriend = int.Parse(dt.Rows[0]["isPermitAddFriend"].ToString());
-                    */
-                    #endregion
                 }
             }
         }
@@ -391,7 +299,24 @@ namespace fengmiapp.Models
             };
             return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
         }
-        
+
+        #region 修改操作
+        public int ModifyPWD()
+        {
+            string sql = "UPDATE " + "" + this._table + "" + " set " +
+                    "password=@password " +
+                    "Where Id=@Id";
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+				new SqlParameter("@Id", _id),
+				new SqlParameter("@password", _password)
+             
+			};
+            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+
+        }
+
         public int Modify()
         {
             string sql = "UPDATE " + "" + this._table + "" + " set " +
@@ -541,8 +466,9 @@ namespace fengmiapp.Models
             return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
+        #endregion
 
-
+        #region 删除操作
         public int Delete(int Id)
         {
             string sql = "delete " + this._table + " Where Id=@Id ";
@@ -562,7 +488,9 @@ namespace fengmiapp.Models
 			};
             return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
         }
+        #endregion
 
+        #region 获取数据操作
         public DataTable SelectByCount()
         {
             string sql = "select * from " + this._table + " Where adminName=@adminName ";
@@ -572,89 +500,6 @@ namespace fengmiapp.Models
              
 			};
             return SQLHelper.ExecuteToDataSet(CommandType.Text, sql, para).Tables[0];
-        }
-
-        public int SelectByCount(string phone)
-        {
-            string sql = "select * from " + this._table + " Where phone=@phone ";
-            SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@phone", phone),
-             
-			};
-            int count =0;
-            DataTable dt = null;
-            try
-            {
-                dt = SQLHelper.ExecuteToDataSet(CommandType.Text, sql, para).Tables[0];
-                count = dt.Rows.Count;
-            }
-            catch
-            {
-                count = 0;
-            }
-
-            if (count > 0)
-            {
-
-                this._id = int.Parse(dt.Rows[0]["Id"].ToString());
-                this._email = dt.Rows[0]["email"].ToString();
-                this._phone = dt.Rows[0]["phone"].ToString();
-                this._password = dt.Rows[0]["password"].ToString();
-
-                this._realName = dt.Rows[0]["realName"].ToString();
-                this._nickName = dt.Rows[0]["nickName"].ToString();
-
-                this._identityCard = dt.Rows[0]["identityCard"].ToString();
-
-                this._userFace = dt.Rows[0]["userFace"].ToString();
-
-                
-                this._address = dt.Rows[0]["address"].ToString();
-                float userExp = 0;
-                try
-                {
-                    userExp = float.Parse(dt.Rows[0]["userExp"].ToString());
-                }
-                catch
-                {
-                    userExp = 0;
-                }
-                this._userExp = userExp;
-                string birthDay = dt.Rows[0]["birthDay"].ToString();
-                if (string.IsNullOrEmpty(birthDay))
-                {
-                    this._birthDay = DateTime.Now;
-                }
-                else
-                {
-                    this._birthDay = DateTime.Parse(birthDay);
-                }
-
-                string registerTime = dt.Rows[0]["registerTime"].ToString();
-                this._registerTime = DateTime.Parse(registerTime);
-
-                //status
-                this._status = int.Parse(dt.Rows[0]["status"].ToString());
-
-            }
-            return count;
-        }
-
-        public int ModifyPWD()
-        {
-            string sql = "UPDATE " + "" + this._table + "" + " set " +
-                    "password=@password " +
-                    "Where Id=@Id";
-
-            SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@Id", _id),
-				new SqlParameter("@password", _password)
-             
-			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
-
         }
         
         public DataTable GetDataList()
@@ -726,7 +571,8 @@ namespace fengmiapp.Models
             return dt;
 
         }
-        
+        #endregion 
+       
         public void login()
         {
             string strSql = "select top 1 * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc";
@@ -738,7 +584,6 @@ namespace fengmiapp.Models
                // new SqlParameter("@email", _email),
             };
             DataSet dts = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
-
             DataTable dt = new DataTable();
             //dt = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para).Tables[0];
 
