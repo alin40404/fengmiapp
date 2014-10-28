@@ -22,6 +22,7 @@ namespace fengmiapp.Controllers
         {
             string status = "error";
             string msg = "";
+            string title = "";
 
             string phone = Request.Params.Get("phone");
             string password = Request.Params.Get("password");
@@ -42,8 +43,7 @@ namespace fengmiapp.Controllers
             {
                 User user = new User();
                 user.Phone = phone;
-                password = Common.MD5(password);
-                user.PassWord = password;
+                user.PassWord = Common.MD5(password);
                 user.login();
 
                 uId=user.Id;
@@ -61,6 +61,13 @@ namespace fengmiapp.Controllers
                 }
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：PostValidUser； ";
+            title += "用户名："+phone+"，密码："+password+";  ";
+            title += "用户Id：" + uId + "，验证用户登录：";
+            Common.addLog(logType, title + msg);
+
             object obj = new { status = status, msg = msg, uId = uId };
             string contentType = "text/json; charset=utf-8";
 
@@ -74,14 +81,17 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult isUserExist()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string phone = Request.Params.Get("phone");
             //string password = Request.Params.Get("password");
             DataTable dt = new DataTable();
             User user = new User(phone);
 
             string uId = "0";
-            string status = "error";
-            string msg = "";
+
             if (user.Phone == phone)
             {
                 uId = user.Id.ToString();
@@ -95,8 +105,16 @@ namespace fengmiapp.Controllers
                 msg = "帐号不存在";
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
 
-            object obj = new { status = status, uId = uId, msg = msg };
+            title += "API：isUserExist； ";
+            title += "用户名：" + phone + ";  ";
+            title += "用户Id：" + uId + "，判断用户是否存在：";
+            Common.addLog(logType, title + msg);
+
+
+            object obj = new { status = status, msg = msg, uId = uId };
             string contentType = "text/json; charset=utf-8";
 
             return Json(obj, contentType);
@@ -111,10 +129,14 @@ namespace fengmiapp.Controllers
         {
             string status = "error";
             string msg = "";
+            string title = "";
 
             //帐号 手机号 密码
             string phone = Request.Params.Get("phone");
             string password = Request.Params.Get("password");
+
+            int uId = 0;
+
             if (string.IsNullOrEmpty(phone))
             {
                 status = "error";
@@ -130,9 +152,9 @@ namespace fengmiapp.Controllers
             {
                 DataTable dt = new DataTable();
                 User user = new User(phone);
-                int Id = user.Id;
+                uId = user.Id;
 
-                if (Id < 1)
+                if (uId < 1)
                 {//用户可用
                     user.Phone = phone;
                     password = Common.MD5(password);
@@ -157,6 +179,15 @@ namespace fengmiapp.Controllers
                     msg = "注册失败，帐号已存在";
                 }
             }
+
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+
+            title += "API：Register； ";
+            title += "用户名：" + phone + "，密码：" + password + ";  ";
+            title += "用户Id：" + uId + "，用户注册：";
+            Common.addLog(logType, title + msg);
+
 
             object obj = new { status = status, msg = msg };
 
@@ -1025,6 +1056,10 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult AddFriend()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uId = Request.Params.Get("uId");
             string fuId = Request.Params.Get("fuId");
             string addType = Request.Params.Get("addType");
@@ -1078,8 +1113,6 @@ namespace fengmiapp.Controllers
             int Id = userFriend.Id;
             int Id_added = 0;
 
-            string status = "error";
-            string msg = "";
 
             int userStatus =1 ;
             int result = 0;
@@ -1198,6 +1231,15 @@ namespace fengmiapp.Controllers
                     }
                 }
             }
+
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+
+            title += "API：AddFriend； ";
+            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，添加好友：";
+            Common.addLog(logType, title + msg);
+
+
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
 
@@ -1211,6 +1253,10 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DeleteFriend()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uId = Request.Params.Get("uId");
             string fuId = Request.Params.Get("fuId");//多个好友用 "，" 隔开
 
@@ -1233,8 +1279,6 @@ namespace fengmiapp.Controllers
             int userStatus = 0; //删除好友
             int result = 0;
 
-            string status = "error";
-            string msg = "";
 
             if (i_uId <= 0)
             {
@@ -1263,6 +1307,13 @@ namespace fengmiapp.Controllers
 
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+
+            title += "API：DeleteFriend； ";
+            title += "用户Id：" + i_uId + "，好友Id：" + fuId + "，删除好友：";
+            Common.addLog(logType, title + msg);
+
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
 
@@ -1274,8 +1325,12 @@ namespace fengmiapp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult getFriend()
+        public ActionResult GetFriend()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uId = Request.Params.Get("uId");
             //string fuId = Request.Params.Get("fuId");
             //string addType = Request.Params.Get("addType");
@@ -1301,8 +1356,6 @@ namespace fengmiapp.Controllers
 
             //userFriend.Status = userStatus;
 
-            string status = "error";
-            string msg = "";
 
             DataTable dt = new DataTable();
 
@@ -1382,10 +1435,15 @@ namespace fengmiapp.Controllers
                 userFriendObjList = new List<object>();
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：GetFriend； ";
+            title += "用户Id：" + i_uId + "，获取好友：";
+            Common.addLog(logType, title + msg);
+
+
             object obj = new { status = status, msg = msg, userFriend = userFriendObjList };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
        

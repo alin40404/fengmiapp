@@ -8,7 +8,7 @@ using System.Configuration;
 
 namespace fengmiapp.Models
 {
-    public  class SQLHelper
+    public class SQLHelper
     {
         protected SQLHelper()
         {

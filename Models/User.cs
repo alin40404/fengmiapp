@@ -29,7 +29,6 @@ namespace fengmiapp.Models
         private float _userExp = 0;
         private int _status = 1;
         private int _isPermitAddFriend = 1;//默认允许被添加好友
-
         private string _interests = String.Empty;
 
         #endregion
@@ -576,16 +575,14 @@ namespace fengmiapp.Models
         public void login()
         {
             string strSql = "select top 1 * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc";
+            //string strSql = "select * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc ";
             SqlParameter[] para = new SqlParameter[]
 			{
-               // new SqlParameter("@Id", _id),
 				new SqlParameter("@phone", _phone),
 				new SqlParameter("@password", _password),
-               // new SqlParameter("@email", _email),
             };
             DataSet dts = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
             DataTable dt = new DataTable();
-            //dt = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para).Tables[0];
 
             if (dts != null && dts.Tables.Count > 0)
             {

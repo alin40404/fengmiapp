@@ -14,7 +14,7 @@ namespace fengmiapp.Controllers
         //
         // GET: /Position/
         /// <summary>
-        /// 设置用户定位信息
+        /// 上传用户定位信息
         /// </summary>
         /// <returns></returns>
         [HttpPost]
@@ -88,8 +88,8 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：SetPosition； ";
+            title += "用户Id：" + i_uId + "，上传用户定位信息：";
             Common.addLog(logType, title + msg);
 
 
@@ -187,9 +187,11 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：GetPosition； ";
+            title += "用户Id：" + i_uId + "，获取用户定位信息：";
             Common.addLog(logType, title + msg);
+
+
             double d_pageTotal = 1.0 * total / i_perPage;
             int pageTotal = (int)Math.Ceiling(d_pageTotal);
 
