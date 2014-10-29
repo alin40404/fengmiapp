@@ -205,7 +205,6 @@ namespace fengmiapp.Controllers
             };
 
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 
@@ -220,8 +219,8 @@ namespace fengmiapp.Controllers
             string msg = "";
             string title = "";
 
-            string uId = Request.Params.Get("uId");
-            string[] uIdList = uId.Split(',');
+            string uIdStr = Request.Params.Get("uId");
+            string[] uIdList = uIdStr.Split(',');
 
 
             List<object> listObj = new List<object>();
@@ -238,6 +237,7 @@ namespace fengmiapp.Controllers
             {
 
                 string userStatus = string.Empty;
+                string uId = string.Empty;
 
                 for (int i_U = 0; i_U < uIdCount; i_U++)
                 {
@@ -315,10 +315,9 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：GetUserNewestPosition； ";
+            title += "用户Id：" + uIdStr + "，获取用户最新定位信息：";
             Common.addLog(logType, title + msg);
-
 
             object obj = new
             {
@@ -328,12 +327,11 @@ namespace fengmiapp.Controllers
             };
 
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 
         /// <summary>
-        ///  获取用户最新定位信息
+        ///  获取群用户最新定位信息
         /// </summary>
         /// <returns></returns>
         [HttpPost]
@@ -345,6 +343,7 @@ namespace fengmiapp.Controllers
 
             string uGId = Request.Params.Get("uGId");
             int i_uGId = 0;
+
             try
             {
                 i_uGId = int.Parse(uGId);
@@ -446,10 +445,9 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：GetUserNewestPositionByUGid； ";
+            title += "群Id：" + i_uGId + "，获取群用户最新定位信息：";
             Common.addLog(logType, title + msg);
-
 
             object obj = new
             {
@@ -469,6 +467,10 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetNewestPosition()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uId = Request.Params.Get("uId");
             int i_uId = 0;
             try
@@ -483,14 +485,8 @@ namespace fengmiapp.Controllers
             UserFriend userFriend = new UserFriend();
 
             DataTable dt_uf = new DataTable();
-
             userFriend.UId = i_uId;
             dt_uf = userFriend.GetUserFriends();
-
-
-            string status = "error";
-            string msg = "";
-            string title = "";
 
             List<object> listObj = new List<object>();
 
@@ -574,10 +570,9 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：GetNewestPosition； ";
+            title += "用户Id：" + i_uId + "，获取所有好友的最新定位信息：";
             Common.addLog(logType, title + msg);
-
 
             object obj = new
             {
@@ -585,9 +580,8 @@ namespace fengmiapp.Controllers
                 msg = msg,
                 data = listObj,
             };
-
+            
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 

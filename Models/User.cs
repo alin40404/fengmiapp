@@ -7,10 +7,9 @@ using System.Data.SqlClient;
 
 namespace fengmiapp.Models
 {
-    public class User
+    public class User:CommonModel
     {
         #region 参数
-        private string _table = "[user]";
 
         private int _id = 0;
         private string _phone = String.Empty;
@@ -165,10 +164,13 @@ namespace fengmiapp.Models
 
         public User()
         {
+            this.init();
         }
         
         public User(int tempId)
         {
+            this.init();
+
             if (tempId >0)
             {
                 this._id = tempId;
@@ -181,7 +183,8 @@ namespace fengmiapp.Models
 			    {
 				    new SqlParameter("@Id", _id),
 			    };
-                dt = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para).Tables[0];
+
+                dt = base.GetDataList(strSql, para);
 
                 if (dt.Rows.Count > 0)
                 {
@@ -192,6 +195,8 @@ namespace fengmiapp.Models
 
         public User(string phone)
         {
+            this.init();
+
             if ( !string.IsNullOrEmpty(phone))
             {
 
@@ -203,14 +208,23 @@ namespace fengmiapp.Models
 			    {
 				    new SqlParameter("@phone", phone),
 			    };
-
-                dt = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para).Tables[0];
+                dt = base.GetDataList(strSql, para);
 
                 if (dt.Rows.Count > 0)
                 {
                     this.SetField(dt);
                 }
             }
+        }
+
+        /// <summary>
+        /// 初始化参数
+        /// </summary>
+        private void init()
+        {
+            string table = "[user]";
+            this._table = table;
+            this.Table = table;
         }
 
         protected void SetField(DataTable dt)
@@ -268,14 +282,36 @@ namespace fengmiapp.Models
 
         }
 
+        public void login()
+        {
+            string strSql = "select top 1 * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc";
+            //string strSql = "select * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc ";
+            SqlParameter[] para = new SqlParameter[]
+			{
+				new SqlParameter("@phone", _phone),
+				new SqlParameter("@password", _password),
+            };
+
+            DataTable dt = new DataTable();
+            dt = base.GetDataList(strSql, para);
+
+            if (dt.Rows.Count > 0)
+            {
+                this.SetField(dt);
+            }
+            else
+            {
+                this._id = 0;
+            }
+        }
+
+        #region 添加操作
         public int Add()
         {
-            string sql =
-            "INSERT INTO " + this._table + "(password,phone,email,realName,nickName,userFace,identityCard,birthDay,address,registerTime,userExp,status,interests,isPermitAddFriend) " +
-            "VALUES (@password,@phone,@email,@realName,@nickName,@userFace,@identityCard,@birthDay,@address,@registerTime,@userExp,@status,@interests,@isPermitAddFriend)";
+           // string sql ="INSERT INTO " + this._table + "(password,phone,email,realName,nickName,userFace,identityCard,birthDay,address,registerTime,userExp,status,interests,isPermitAddFriend) " + "VALUES (@password,@phone,@email,@realName,@nickName,@userFace,@identityCard,@birthDay,@address,@registerTime,@userExp,@status,@interests,@isPermitAddFriend)";
 
             //byte[] userFace = Encoding.UTF8.GetBytes(_userFace);
-           
+            string value = "password,phone,email,realName,nickName,userFace,identityCard,birthDay,address,registerTime,userExp,status,interests,isPermitAddFriend";
 
             SqlParameter[] para = new SqlParameter[]
             {
@@ -296,15 +332,20 @@ namespace fengmiapp.Models
                 new SqlParameter("@isPermitAddFriend", _isPermitAddFriend),
              
             };
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return base.Add(value, para);
         }
+        #endregion
 
         #region 修改操作
+        
         public int ModifyPWD()
         {
+            /*
             string sql = "UPDATE " + "" + this._table + "" + " set " +
                     "password=@password " +
                     "Where Id=@Id";
+             * */
+            string set = "password=@password";
 
             SqlParameter[] para = new SqlParameter[]
 			{
@@ -312,11 +353,11 @@ namespace fengmiapp.Models
 				new SqlParameter("@password", _password)
              
 			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return base.Modify(set, para);
 
         }
 
-        public int Modify()
+        public int ModifyEmail()
         {
             string sql = "UPDATE " + "" + this._table + "" + " set " +
                     "email=@email, " +
@@ -331,7 +372,7 @@ namespace fengmiapp.Models
                 new SqlParameter("@realName", _realName),
                 new SqlParameter("@nickName", _nickName),
 			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
 
@@ -346,7 +387,7 @@ namespace fengmiapp.Models
                 new SqlParameter("@Id", _id),
                 new SqlParameter("@status", _status),
 			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
 
@@ -361,7 +402,7 @@ namespace fengmiapp.Models
                 new SqlParameter("@Id", _id),
                 new SqlParameter("@isPermitAddFriend", _isPermitAddFriend),
 			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
 
@@ -443,7 +484,7 @@ namespace fengmiapp.Models
 			};
 
 
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
        
@@ -462,145 +503,30 @@ namespace fengmiapp.Models
                 new SqlParameter("@lastLoginIP", _address),
                 new SqlParameter("@lastLoginTime", _birthDay),
 			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
+        
         #endregion
 
         #region 删除操作
-        public int Delete(int Id)
-        {
-            string sql = "delete " + this._table + " Where Id=@Id ";
-            SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@Id", Id),
-			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
-        }
-
-        public int Delete(string Id)
-        {
-            string sql = "delete " + this._table + " Where Id in (@Id) ";
-            SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@Id", Id),
-			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
-        }
         #endregion
 
-        #region 获取数据操作
-        public DataTable SelectByCount()
-        {
-            string sql = "select * from " + this._table + " Where adminName=@adminName ";
-            SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@adminName", this._nickName),
-             
-			};
-            return SQLHelper.ExecuteToDataSet(CommandType.Text, sql, para).Tables[0];
-        }
-        
-        public DataTable GetDataList()
-        {
-            //string strSql = " Select admin.* from " + this._table + " as admin where 1=1  ";
-            string table = "[category]";
-            string strSql = " Select admin.*,c.cateName as department from " + this._table + "as admin left join " + table + " as c on admin.gId=c.Id where 1=1  ";
-
-            if (_id != 0)
-            {
-                strSql += " and admin.Id != @Id  ";
-            }
-
-            if (_realName != String.Empty)
-            {
-                strSql += " and admin.realName like '%'+ @realName+'%'  ";
-            }
-            if (_nickName != String.Empty)
-            {
-                strSql += " and admin.adminName like '%'+  @adminName+'%' ";
-            }
-            if (_email != String.Empty)
-            {
-                strSql += " and admin.email like '%'+  @email+'%' ";
-            }
-
-
-            strSql += " order by admin.Id desc ";
-
-            SqlParameter[] para = new SqlParameter[]
-			{
-							new SqlParameter("@Id", _id),
-							new SqlParameter("@realName", _realName),
-							new SqlParameter("@adminName", _nickName),
-							new SqlParameter("@email", _email),
-			};
-
-            DataTable dt = new DataTable();
-            DataSet ds = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
-            if (ds == null || ds.Tables[0] == null)
-            {
-                return null;
-            }
-            else
-            {
-                dt = ds.Tables[0];
-            }
-            return dt;
-
-        }
-
-        public DataTable GetDataList(string Id)
+        #region 获取数据操作        
+        public DataTable GetUserDataList(string Id)
         {
             string strSql = " Select * from " + this._table + " where 1=1 and Id in (" + Id + ") ";
             strSql += " order by Id desc ";
 
+            SqlParameter[] para = new SqlParameter[] { };
 
             DataTable dt = new DataTable();
-            DataSet ds = SQLHelper.ExecuteToDataSet(strSql);
+            dt = base.GetDataList(strSql, para);
 
-            if (ds == null || ds.Tables[0] == null)
-            {
-                return null;
-            }
-            else
-            {
-                dt = ds.Tables[0];
-            }
             return dt;
 
         }
         #endregion 
        
-        public void login()
-        {
-            string strSql = "select top 1 * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc";
-            //string strSql = "select * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc ";
-            SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@phone", _phone),
-				new SqlParameter("@password", _password),
-            };
-            DataSet dts = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
-            DataTable dt = new DataTable();
-
-            if (dts != null && dts.Tables.Count > 0)
-            {
-                dt = dts.Tables[0];
-                if (dt.Rows.Count > 0)
-                {
-                    this.SetField(dt);
-                }
-                else
-                {
-                    this._id = 0;
-                }
-            }
-            else
-            {
-                this._id = 0;
-            }
-            //return dt;
-        }
     }
 }

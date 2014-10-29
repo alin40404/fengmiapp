@@ -7,8 +7,12 @@ using System.Web;
 
 namespace fengmiapp.Models
 {
-    public class CommonModel
+    public class CommonModel:_SQLHelper
     {
+        #region 属性
+        /// <summary>
+        /// 表名
+        /// </summary>
         protected string _table="";
 
         /// <summary>
@@ -16,18 +20,20 @@ namespace fengmiapp.Models
         /// </summary>
         public string Table
         {
-            get { return _table; }
-            set { 
-                _table=value;
-                _table = _table.Trim(new char[]{ '[',']'});
-                _table = "[" + _table + "]";
+            get { return this._table; }
+            set {
+                this._table = value;
+                this._table = _table.Trim(new char[] { '[', ']' });
+                this._table = "[" + _table + "]";
             }
         }
+        #endregion
 
-        public CommonModel()
+        public CommonModel():base()
         {
         }
-        
+
+        #region 添加
         public int Add(string value, SqlParameter[] para)
         {
             value = value.Trim();
@@ -39,11 +45,15 @@ namespace fengmiapp.Models
             " INSERT INTO " + this._table + " ("+value+") " +
             " VALUES (" + AtValue + ") ";
 
-
-
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
         }
 
+        /// <summary>
+        /// 添加到数据库，同时返回插入的Id号
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="para"></param>
+        /// <returns></returns>
         public int AddBackId(string value, SqlParameter[] para)
         {
             value = value.Trim(',');
@@ -56,19 +66,31 @@ namespace fengmiapp.Models
             sql += " VALUES (" + AtValue + "); ";
             sql += " select @@identity ";
 
-            return SQLHelper.ExecuteScalar(CommandType.Text, sql, para);
+            return this.ExecuteScalar(CommandType.Text, sql, para);
         }
+        #endregion
 
+        #region 修改
+
+        /// <summary>
+        /// 修改数据
+        /// </summary>
+        /// <param name="set"></param>
+        /// <param name="para"></param>
+        /// <returns></returns>
         public int Modify(string set,  SqlParameter[] para)
         {
             string sql = " UPDATE " + this._table + " set " +set +
                     "   Where Id=@Id  ";
 
 
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
 
+        #endregion
+        
+        #region 删除
         public int Delete(int Id)
         {
             string sql = " delete " + this._table + " Where Id=@Id ";
@@ -76,7 +98,7 @@ namespace fengmiapp.Models
 			{
 				new SqlParameter("@Id", Id),
 			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
         }
 
         public int Delete(string Id)
@@ -86,9 +108,11 @@ namespace fengmiapp.Models
 			{
 				new SqlParameter("@Id", Id),
 			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
         }
+        #endregion
 
+        #region 查询
         public DataTable GetDataList()
         {
             string strSql = " Select * from " + this._table + " where 1=1  ";
@@ -96,7 +120,7 @@ namespace fengmiapp.Models
 			{
 			};
             DataTable dt = new DataTable();
-            DataSet ds = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
+            DataSet ds = this.ExecuteToDataSet(CommandType.Text, strSql, para);
             if (ds == null || ds.Tables[0] == null)
             {
                 return null;
@@ -119,7 +143,7 @@ namespace fengmiapp.Models
 			{
 			};
             DataTable dt = new DataTable();
-            DataSet ds = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
+            DataSet ds = this.ExecuteToDataSet(CommandType.Text, strSql, para);
             if (ds == null || ds.Tables[0] == null)
             {
                 return null;
@@ -134,7 +158,7 @@ namespace fengmiapp.Models
         public DataTable GetDataList(string strSql, SqlParameter[] para)
         {
             DataTable dt = new DataTable();
-            DataSet ds = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
+            DataSet ds = this.ExecuteToDataSet(CommandType.Text, strSql, para);
             if (ds == null || ds.Tables[0] == null)
             {
                 return null;
@@ -160,7 +184,7 @@ namespace fengmiapp.Models
             }
 
             DataTable dt = new DataTable();
-            DataSet ds = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
+            DataSet ds = this.ExecuteToDataSet(CommandType.Text, strSql, para);
             if (ds == null || ds.Tables[0] == null)
             {
                 return null;
@@ -180,26 +204,7 @@ namespace fengmiapp.Models
                  new SqlParameter("@Id", Id), 
 			};
             DataTable dt = new DataTable();
-            DataSet ds = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
-            if (ds == null || ds.Tables[0] == null)
-            {
-                return null;
-            }
-            else
-            {
-                dt = ds.Tables[0];
-            }
-            return dt;
-        }
-        public DataTable GetDataById(string Id)
-        {
-            string strSql = " Select * from " + this._table + " where 1=1 and Id=@Id ";
-            SqlParameter[] para = new SqlParameter[]
-			{
-                 new SqlParameter("@Id", Id), 
-			};
-            DataTable dt = new DataTable();
-            DataSet ds = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
+            DataSet ds = this.ExecuteToDataSet(CommandType.Text, strSql, para);
             if (ds == null || ds.Tables[0] == null)
             {
                 return null;
@@ -211,5 +216,25 @@ namespace fengmiapp.Models
             return dt;
         }
 
+        public DataTable GetDataById(string Id)
+        {
+            string strSql = " Select * from " + this._table + " where 1=1 and Id=@Id ";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                 new SqlParameter("@Id", Id), 
+			};
+            DataTable dt = new DataTable();
+            DataSet ds = this.ExecuteToDataSet(CommandType.Text, strSql, para);
+            if (ds == null || ds.Tables[0] == null)
+            {
+                return null;
+            }
+            else
+            {
+                dt = ds.Tables[0];
+            }
+            return dt;
+        }
+        #endregion
     }
 }

@@ -136,8 +136,6 @@ namespace fengmiapp.Models
 
         }
 
-
-
         /// <summary>
         /// 初始化参数
         /// </summary>
@@ -161,8 +159,6 @@ namespace fengmiapp.Models
 			};
             return base.Add(value, para);
         }
-
-
 
         public int ModifyInfo()
         {

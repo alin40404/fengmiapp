@@ -205,8 +205,12 @@ namespace fengmiapp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult dealUserInfo()
+        public ActionResult DealUserInfo()
         {
+            string title = "";
+            string status = "error";
+            string msg = "";
+
             string uId = Request.Params.Get("uId");
 
             string realName = Request.Params.Get("realName");
@@ -238,9 +242,6 @@ namespace fengmiapp.Controllers
             adminUser.Email = email;
             adminUser.UserFace = userFace;
 
-            string title = "";
-            string status = "error";
-            string msg = "";
 
             if (Id > 0)
             {//update
@@ -268,15 +269,13 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：DealUserInfo； ";
+            title += "用户Id：" + uId + "，修改用户个人信息：";
             Common.addLog(logType, title + msg);
 
 
             object obj = new { status = status, msg = msg };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 
@@ -284,8 +283,12 @@ namespace fengmiapp.Controllers
         /// 获取用户个人信息
         /// </summary>
         /// <returns></returns>
-        public ActionResult getUserInfo()
+        public ActionResult GetUserInfo()
         {
+            string title = "";
+            string status = "error";
+            string msg = "";
+
             string uId = Request.Params.Get("uId");
             int Id = 0;
             try
@@ -300,9 +303,6 @@ namespace fengmiapp.Controllers
 
             string phone = adminUser.Phone;
 
-            string title = "";
-            string status = "error";
-            string msg = "";
             object userOjb = new object();
 
             if (!string.IsNullOrEmpty(phone))
@@ -351,8 +351,8 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：GetUserInfo； ";
+            title += "用户Id：" + Id + "，获取用户个人信息：";
             Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg, user = userOjb };
@@ -366,7 +366,7 @@ namespace fengmiapp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult dealUpdatePwd()
+        public ActionResult DealUpdatePwd()
         {
 
             string oldPassword = Request.Params.Get("oldPassword");
@@ -435,16 +435,12 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：DealUpdatePwd； ";
+            title += "用户Id：" + Id + "，修改用户密码：";
             Common.addLog(logType, title + msg);
 
-
-
             object obj = new { status = status, msg = msg };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 
@@ -453,7 +449,7 @@ namespace fengmiapp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult getUserStatus()
+        public ActionResult GetUserStatus()
         {
             string uId = Request.Params.Get("uId");
 
@@ -510,18 +506,14 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：GetUserStatus； ";
+            title += "用户Id：" + Id + "，获取用户状态：";
             Common.addLog(logType, title + msg);
 
 
-
             object obj = new { status = status, msg = msg, user = userOjb };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
-
         }
 
         /// <summary>
@@ -529,7 +521,7 @@ namespace fengmiapp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult dealUserStatus()
+        public ActionResult DealUserStatus()
         {
             string uId = Request.Params.Get("uId");
 
@@ -596,15 +588,12 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：DealUserStatus； ";
+            title += "用户Id：" + i_uId + "，修改用户状态：";
             Common.addLog(logType, title + msg);
 
-
             object obj = new { status = status, msg = msg };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 
@@ -613,7 +602,7 @@ namespace fengmiapp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult dealUserPermit()
+        public ActionResult DealUserPermit()
         {
             string uId = Request.Params.Get("uId");
             string isPermitAddFriend = Request.Params.Get("isPermitAddFriend");
@@ -668,7 +657,8 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-
+            title += "API：DealUserPermit； ";
+            title += "用户Id：" + i_uId + "，修改用户设置：";
             Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg };
@@ -681,8 +671,12 @@ namespace fengmiapp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult dealUserToFriendUserStatus()
+        public ActionResult DealUserToFriendUserStatus()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uId = Request.Params.Get("uId");
             string fuId = Request.Params.Get("fuId");
             string modifyTime = Request.Params.Get("modifyTime");
@@ -712,15 +706,8 @@ namespace fengmiapp.Controllers
                 i_fuId = 0;
             }
 
-
-
-
             UserFriend userfriend = new UserFriend(i_uId, i_fuId);
-
             int UFId = userfriend.Id;
-
-            string status = "error";
-            string msg = "";
 
             if (UFId > 0)
             {//用户可用
@@ -767,11 +754,15 @@ namespace fengmiapp.Controllers
                 status = "error";
                 msg = "修改失败，未加好友";
             }
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+            title += "API：DealUserToFriendUserStatus； ";
+            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，修改用户对某好友状态：";
+            Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
        
@@ -780,8 +771,12 @@ namespace fengmiapp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult dealUserToGroupStatus()
+        public ActionResult DealUserToGroupStatus()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uId = Request.Params.Get("uId");
             string uGId = Request.Params.Get("uGId");
             string modifyTime = Request.Params.Get("modifyTime");
@@ -812,20 +807,11 @@ namespace fengmiapp.Controllers
                 i_uGId = 0;
             }
 
-
-
-
             UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
-
             int Id = userGroupUser.Id;
-
-            string status = "error";
-            string msg = "";
 
             if (Id > 0)
             {//用户可用
-
-
                 DateTime dt_modifyTime = new DateTime();
                 try
                 {
@@ -844,12 +830,9 @@ namespace fengmiapp.Controllers
                 catch { }
 
                 userGroupUser.Status = i_userStatus;
-
                 int result = userGroupUser.ModifyStatus();
-
                 if (result > 0)
                 {
-
                     UserGroupUserStatus userGrStatus = new UserGroupUserStatus();
                     userGrStatus.UId = userGroupUser.UId;
                     userGrStatus.UGId = userGroupUser.UGId;
@@ -872,13 +855,17 @@ namespace fengmiapp.Controllers
                 msg = "修改失败，用户未加入此群组";
             }
 
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+            title += "API：DealUserToGroupStatus； ";
+            title += "用户Id：" + i_uId + "，群Id："+i_uGId+"，修改用户对群状态：";
+            Common.addLog(logType, title + msg);
+
             object obj = new { status = status, msg = msg };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
-
 
         #endregion
 
@@ -997,9 +984,7 @@ namespace fengmiapp.Controllers
                     string email = dt.Rows[i]["email"].ToString();
                     string address = dt.Rows[i]["address"].ToString();
 
-
                     object userObj = new object();
-
                     userObj = new
                     {
                         uId = t_uId,
@@ -1016,11 +1001,8 @@ namespace fengmiapp.Controllers
                         email = email,
                         address = address
                     };
-
                     userObjList.Add(userObj);
                 }
-
-
             }
             else
             {
@@ -1028,20 +1010,15 @@ namespace fengmiapp.Controllers
                 msg = "获取失败";
             }
 
-
-
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            //int adminId = int.Parse(Session["adminId"].ToString());
-
+            title += "API：Shake； ";
+            title += "用户Id：" + i_uId + "，上传时间：" + uploadTime + "，摇一摇：";
             Common.addLog(logType, title + msg);
 
-
             object obj = new { status = status, msg = msg, data = userObjList };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 
@@ -1520,7 +1497,6 @@ namespace fengmiapp.Controllers
                             status = "error";
                             msg = "创建失败";
                         }
-
                     }
                     else
                     {
@@ -1893,9 +1869,7 @@ namespace fengmiapp.Controllers
             }
 
             object obj = new { status = status, msg = msg, userGroup = userGroupObjList };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 
@@ -2037,10 +2011,9 @@ namespace fengmiapp.Controllers
                 userGroupObjList = new List<object>();
             }
 
+
             object obj = new { status = status, msg = msg, userGroup = userGroupObjList };
-
             string contentType = "text/json; charset=utf-8";
-
             return Json(obj, contentType);
         }
 

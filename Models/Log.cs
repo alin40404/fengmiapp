@@ -7,10 +7,10 @@ using System.Web;
 
 namespace fengmiapp.Models
 {
-    public class Log
+    public class Log:CommonModel
     {
         #region 参数
-        private string _table = "[log]";
+
         private int _id = 0;
         private string _describe = string.Empty;
         private string _emergeURL = string.Empty;
@@ -22,13 +22,6 @@ namespace fengmiapp.Models
         #endregion
 
         #region 属性
-        ///<summary>
-        /// Table
-        ///</summary>
-        public string Table
-        {
-            get { return _table; }
-        }
       
         ///<summary>
         /// Id
@@ -89,15 +82,16 @@ namespace fengmiapp.Models
             set { _logTime = value; }
         }
 
-
-
         #endregion
 
         public Log()
         {
+            init();
         }
         public Log(int id)
         {
+            init();
+
             this._id = id;
             string strSql = "SELECT * FROM " + this._table + " where id = @Id ";
             DataTable dt = null;
@@ -106,7 +100,8 @@ namespace fengmiapp.Models
 			{
 				new SqlParameter("Id", _id),
 			};
-            dt = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para).Tables[0];
+
+            dt = base.GetDataList(strSql, para);
 
             if (dt.Rows.Count > 0)
             {
@@ -124,6 +119,16 @@ namespace fengmiapp.Models
                 this._ip = dt.Rows[0]["ip"].ToString();
             }
         }
+     
+        /// <summary>
+        /// 初始化参数
+        /// </summary>
+        private void init()
+        {
+            string table = "[log]";
+            this._table = table;
+            this.Table = table;
+        }
 
         public int Add()
         {
@@ -132,6 +137,9 @@ namespace fengmiapp.Models
             //"VALUES (@logType,@describe,@logTime,@ip,@emergeURL,@userid)";
             string sql = "INSERT INTO " + this._table + "(logType,describe,logTime) " +
            "VALUES (@logType,@describe,@logTime)";
+
+            string value = "logType,describe,logTime";
+
             SqlParameter[] para = new SqlParameter[]
             {
                 new SqlParameter("@describe", _describe),
@@ -142,29 +150,12 @@ namespace fengmiapp.Models
                 //new SqlParameter("@ip", _ip),
              
             };
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+
+            return base.Add(value, para);
 
         }
-        public int Delete(int id)
-        {
-            string sql = "delete " + this._table + " Where id=@id ";                 
-            SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@id", id),
-             
-			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
-        }
-        public int Delete(string id)
-        {
-            string sql = "delete " + this._table + " Where id in (@id) ";
-            SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@id", id),
-             
-			};
-            return SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
-        }
+              
+        /*
         public DataTable GetDataList()
         {
             string strSql = " Select log.id,log.logType,log.describe,log.ip,log.emergeURL,log.logTime,u.adminName  from " + this._table + "as log left join [admin] as u on u.Id=log.userid where 1=1  ";
@@ -221,7 +212,7 @@ namespace fengmiapp.Models
 			};
 
             DataTable dt = new DataTable();
-            DataSet ds = SQLHelper.ExecuteToDataSet(CommandType.Text, strSql, para);
+            DataSet ds = this.ExecuteToDataSet(CommandType.Text, strSql, para);
             if (ds == null || ds.Tables[0] == null)
             {
                 return null;
@@ -233,6 +224,6 @@ namespace fengmiapp.Models
             return dt;
 
         }
-
+        */
     }
 }

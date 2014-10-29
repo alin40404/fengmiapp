@@ -102,7 +102,7 @@ namespace fengmiapp.Models
 
             string strSql = " Select t.* from " + this._table + " as t  where 1=1 and t.uId = @uId and t.fuId = @fuId  ";
 
-            DataTable dt = null;
+            DataTable dt = new DataTable();
 
             SqlParameter[] para = new SqlParameter[]
 			{
@@ -199,12 +199,12 @@ namespace fengmiapp.Models
             int result = 0;
 
             sql += " ; " + sql_deleted + " ; ";
-            result = SQLHelper.ExecuteNonQuery(CommandType.Text, sql, para);
+            result = this.ExecuteNonQuery(CommandType.Text, sql, para);
 
             /*
             if (result > 0)
             {
-                SQLHelper.ExecuteNonQuery(CommandType.Text, sql_deleted, para);
+                this.ExecuteNonQuery(CommandType.Text, sql_deleted, para);
             }
              */
 
