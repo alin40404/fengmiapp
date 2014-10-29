@@ -31,7 +31,7 @@ namespace fengmiapp.Models
         /// </summary>
         protected _SQLHelper()
         {
-            this.open();
+            //this.open();
         }
         /// <summary>
         /// 析构函数，关闭数据库链接
@@ -80,6 +80,7 @@ namespace fengmiapp.Models
         #endregion
 
         #region ExecuteNonQuery
+        
         public  int ExecuteNonQuery(SqlCommand scmd)
         {
             this.open();
@@ -121,6 +122,7 @@ namespace fengmiapp.Models
             this.close();
             return result;
         }
+
         public  int ExecuteNonQuery(SqlConnection connection, CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
         {
             this.open();
@@ -132,9 +134,11 @@ namespace fengmiapp.Models
             return result;
 
         }
+
         #endregion
 
         #region ExecuteReader
+       
         public  SqlDataReader ExecuteReader(string cmdText)
         {
             this.open();
@@ -171,14 +175,20 @@ namespace fengmiapp.Models
             return dr;
 
         }
+       
         #endregion
 
         #region ExecuteToDataSet
         public  DataSet ExecuteToDataSet(SqlCommand scmd)
         {
+            open();
+
             SqlDataAdapter rs = new SqlDataAdapter(scmd);
             DataSet ds = new DataSet();
             rs.Fill(ds);
+           
+            close();
+
             return ds;
         }
         

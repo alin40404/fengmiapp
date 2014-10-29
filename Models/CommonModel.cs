@@ -29,7 +29,7 @@ namespace fengmiapp.Models
         }
         #endregion
 
-        public CommonModel():base()
+        public CommonModel()
         {
         }
 

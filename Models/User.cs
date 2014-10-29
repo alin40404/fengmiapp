@@ -33,6 +33,7 @@ namespace fengmiapp.Models
         #endregion
 
         #region 属性
+       
         ///<summary>
         /// Id
         ///</summary>
@@ -285,7 +286,7 @@ namespace fengmiapp.Models
         public void login()
         {
             string strSql = "select top 1 * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc";
-            //string strSql = "select * from " + this._table + " where ( phone=@phone and password=@password ) order by Id asc ";
+
             SqlParameter[] para = new SqlParameter[]
 			{
 				new SqlParameter("@phone", _phone),
