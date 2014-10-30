@@ -18,6 +18,8 @@ namespace fengmiapp.Models
 
         private int _status = 1;
 
+        private DateTime _modifyTime = DateTime.Now;
+
 
         #endregion
 
@@ -57,6 +59,15 @@ namespace fengmiapp.Models
             set { _status = value; }
         }
 
+        /// <summary>
+        /// ModifyTime
+        /// </summary>
+        public DateTime ModifyTime
+        {
+            get { return this._modifyTime; }
+            set { this._modifyTime = value; }
+        }
+
         #endregion
 
         public UserFriendGroup(): base()
@@ -80,17 +91,8 @@ namespace fengmiapp.Models
 
             if (dt.Rows.Count > 0)
             {
-                this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
-                this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
-                this._gName = dt.Rows[0]["gName"].ToString();
-
-                //status
-                this._status = int.Parse(dt.Rows[0]["status"].ToString());
-
-
+                this.SetField(dt);
             }
-
-
         }
 
         public UserFriendGroup(int uId, string gName)
@@ -110,19 +112,43 @@ namespace fengmiapp.Models
 
             if (dt.Rows.Count > 0)
             {
+                this.SetField(dt);
+                /*
                 this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
                 this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
                 this._gName = dt.Rows[0]["gName"].ToString();
 
                 //status
                 this._status = int.Parse(dt.Rows[0]["status"].ToString());
-
+                */
 
             }
 
 
         }
 
+        protected void SetField(DataTable dt)
+        {
+            try
+            {
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
+                    this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
+                    this._gName = dt.Rows[0]["gName"].ToString();
+
+                    //status
+                    this._status = int.Parse(dt.Rows[0]["status"].ToString());
+
+                    string modifyTime = dt.Rows[0]["modifyTime"].ToString();
+
+                    this._modifyTime = DateTime.Parse(modifyTime);
+
+                }
+            }
+            catch { }
+
+        }
 
         /// <summary>
         /// 初始化参数
@@ -136,12 +162,13 @@ namespace fengmiapp.Models
 
         public int Add()
         {
-            string value = "uId,gName,status";
+            string value = "uId,gName,status,modifyTime";
             SqlParameter[] para = new SqlParameter[]
             {
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@gName", _gName),
                 new SqlParameter("@status", _status),
+                new SqlParameter("@modifyTime", _modifyTime),
              
             };
             return base.Add(value,para);
@@ -149,13 +176,13 @@ namespace fengmiapp.Models
 
         public int AddBackId()
         {
-            string value = "uId,gName,status";
+            string value = "uId,gName,status,modifyTime";
             SqlParameter[] para = new SqlParameter[]
             {
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@gName", _gName),
                 new SqlParameter("@status", _status),
-             
+                new SqlParameter("@modifyTime", _modifyTime),
             };
             return base.AddBackId(value, para);
         }
@@ -180,6 +207,27 @@ namespace fengmiapp.Models
                 new SqlParameter("@Id", _Id),
 			};
             return base.Modify(set, para);
+        }
+
+        public DataTable GetUserFriendGroup()
+        {
+            string strSql = string.Empty;
+            int status = 0;
+            strSql += " Select table1.* from " + this._table + " as table1 ";
+            strSql += " where 1=1 and table1.uId = @uId and table1.status > @status ";
+            strSql += " order by table1.Id desc ";
+
+            DataTable dt = new DataTable();
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+				new SqlParameter("@uId", this._uId),
+                new SqlParameter("@status", status),
+			};
+            dt = base.GetDataList(strSql, para);
+
+            return dt;
+
         }
 
     }

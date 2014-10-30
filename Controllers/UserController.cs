@@ -1437,8 +1437,9 @@ namespace fengmiapp.Controllers
         {
             string status = "error";
             string msg = "";
-            int uFGroupId = 0;
+            string title = "";
 
+            int uFGroupId = 0;
 
             string uId = Request.Params.Get("uId");
             string name = Request.Params.Get("name");
@@ -1470,7 +1471,6 @@ namespace fengmiapp.Controllers
             {
                 status = "error";
                 msg = "创建失败，组名不能为空";
-
             }
             else
             {
@@ -1527,6 +1527,13 @@ namespace fengmiapp.Controllers
                 }
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：CreateUserFriendGroup； ";
+            title += "用户Id：" + i_uId + "，分组名称：" + name + "，创建好友分组：";
+            Common.addLog(logType, title + msg);
+
+
             object obj = new { status = status, msg = msg,uFGroupId = uFGroupId };
             string contentType = "text/json; charset=utf-8";
             return Json(obj, contentType);
@@ -1541,6 +1548,7 @@ namespace fengmiapp.Controllers
         {
             string status = "error";
             string msg = "";
+            string title = "";
 
             string uFGroupId = Request.Params.Get("uFGroupId");
             int i_uFGroupId = 0;
@@ -1578,6 +1586,12 @@ namespace fengmiapp.Controllers
                 msg = "删除失败，好友分组不存在";
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：DeleteUserFriendGroup； ";
+            title += "分组Id：" + i_uFGroupId + "，删除好友分组：";
+            Common.addLog(logType, title + msg);
+
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
 
@@ -1593,6 +1607,7 @@ namespace fengmiapp.Controllers
         {
             string status = "error";
             string msg = "";
+            string title = "";
 
             string uFGroupId = Request.Params.Get("uFGroupId");
             string name = Request.Params.Get("name");
@@ -1619,10 +1634,15 @@ namespace fengmiapp.Controllers
                 }
                 else
                 {
+                    int i_uId = userFriendGroup.UId;
+                    //判断组名是否存在
+                    UserFriendGroup temp_userFriendGroup = new UserFriendGroup(i_uId, name);
+                    int temp_Id = temp_userFriendGroup.Id;
 
-                    if (string.IsNullOrEmpty(name))
-                    {
-
+                    if (temp_Id > 0)
+                    {//组名已经存在
+                        status = "error";
+                        msg = "修改失败，好友分组已存在";
                     }
                     else
                     {
@@ -1647,6 +1667,12 @@ namespace fengmiapp.Controllers
                 msg = "修改失败，好友分组不存在";
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：ModifyUserFriendGroupName； ";
+            title += "分组Id：" + i_uFGroupId + "，修改名称：" + name + "，修改好友分组名称：";
+            Common.addLog(logType, title + msg);
+
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
 
@@ -1662,6 +1688,7 @@ namespace fengmiapp.Controllers
         {
             string status = "error";
             string msg = "";
+            string title = "";
 
             string uFGroupId = Request.Params.Get("uFGroupId");
             string userStatusStr = Request.Params.Get("status");
@@ -1709,6 +1736,13 @@ namespace fengmiapp.Controllers
                 msg = "修改失败，好友分组不存在";
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：ModifyUserFriendGroupStatus； ";
+            title += "分组Id：" + i_uFGroupId + "，分组状态：" + userStatus + "，修改好友分组状态：";
+            Common.addLog(logType, title + msg);
+
+
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
 
@@ -1724,6 +1758,7 @@ namespace fengmiapp.Controllers
         {
             string status = "error";
             string msg = "";
+            string title = "";
 
             string uId = Request.Params.Get("uId");
             string fuId = Request.Params.Get("fuId");
@@ -1779,9 +1814,117 @@ namespace fengmiapp.Controllers
                 msg = "修改失败，用户好友不存在";
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：AddUserFriToUserFriendGroup； ";
+            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，分组Id：" + i_uFGroupId + "，修改好友分组状态：";
+            Common.addLog(logType, title + msg);
+
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
 
+            return Json(obj, contentType);
+        }
+
+        /// <summary>
+        /// 获取好友分组
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult GetUserFriendGroup()
+        {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
+            string uId = Request.Params.Get("uId");
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch
+            {
+            }
+
+            List<object> userFriendGroupObjList = new List<object>();
+
+            if (i_uId < 1)
+            {
+                status = "error";
+                msg = "获取失败，好友分组不存在";
+                userFriendGroupObjList = new List<object>();
+            }
+            else
+            {
+                DataTable dt = new DataTable();
+                UserFriendGroup userFriendGroup = new UserFriendGroup();
+                userFriendGroup.UId = i_uId;
+
+                dt = userFriendGroup.GetUserFriendGroup();
+                int count = dt.Rows.Count;
+
+                if (dt != null)
+                {
+                    status = "succeed";
+                    msg = "获取成功";
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        string uFGroupId = dt.Rows[i]["Id"].ToString();
+                        int i_uFGroupId = 0;
+                        try
+                        {
+                            i_uFGroupId = int.Parse(uFGroupId);
+                        }
+                        catch { }
+
+                        string gName = dt.Rows[i]["gName"].ToString();
+                        string modifyTime = dt.Rows[i]["modifyTime"].ToString();
+                        //status
+                        string userFriendGroupStatus = dt.Rows[i]["status"].ToString();
+                        int i_userFriendGroupStatus = 0;
+                        try
+                        {
+                            i_userFriendGroupStatus = int.Parse(userFriendGroupStatus);
+                        }
+                        catch { }
+
+
+
+                        object userFriendGroupObj = new object();
+
+                        userFriendGroupObj = new
+                        {
+                            uId = i_uId,
+                            uFGroupId = i_uFGroupId,
+                            gName = gName,
+                            modifyTime = modifyTime,
+                            status = i_userFriendGroupStatus,
+                        };
+
+                        userFriendGroupObjList.Add(userFriendGroupObj);
+                    }
+
+                }
+                else
+                {
+                    status = "error";
+                    msg = "获取失败，获取好友分组";
+
+                    userFriendGroupObjList = new List<object>();
+                }
+
+            }
+
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：GetUserFriendGroup； ";
+            title += "用户Id：" + i_uId + "，获取好友分组：";
+            Common.addLog(logType, title + msg);
+
+            object obj = new { status = status, msg = msg, userFriendGroup = userFriendGroupObjList };
+            string contentType = "text/json; charset=utf-8";
             return Json(obj, contentType);
         }
 
