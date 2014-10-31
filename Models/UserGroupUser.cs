@@ -181,7 +181,7 @@ namespace fengmiapp.Models
             strSql += " left join [userGroup] as table2 on table1.uGId = table2.Id ";
 
             //strSql += " where 1=1 and table1.uId = '" + uId + "' and table2.status > " + status;
-            strSql += " where 1=1 and table1.uId =@uId and table2.status > @status ";
+            strSql += " where 1=1 and table1.uId =@uId and table1.status > @status  and table2.status > @status ";
 
             strSql += " order by table1.Id desc ";
 

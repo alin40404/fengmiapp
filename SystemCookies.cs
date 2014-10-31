@@ -120,7 +120,7 @@ namespace fengmiapp
             finally
             {
                 memStream.Close();
-                memStream.Dispose();
+                //memStream.Dispose();
             }
         }
 
@@ -148,7 +148,7 @@ namespace fengmiapp
             finally
             {
                 memStream.Close();
-                memStream.Dispose();
+                //memStream.Dispose();
             }
         }
 

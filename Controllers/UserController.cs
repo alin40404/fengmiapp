@@ -220,8 +220,9 @@ namespace fengmiapp.Controllers
             string userFace = Request.Params.Get("userFace");
             string email = Request.Params.Get("email");
             string address = Request.Params.Get("address");
+            string interests = Request.Params.Get("interests");
 
-
+            
             int Id = 0;
             try
             {
@@ -241,7 +242,7 @@ namespace fengmiapp.Controllers
             adminUser.Address = address;
             adminUser.Email = email;
             adminUser.UserFace = userFace;
-
+            adminUser.Interests = interests;
 
             if (Id > 0)
             {//update
@@ -911,6 +912,8 @@ namespace fengmiapp.Controllers
 
             if (Id > 0)
             {//update
+
+                userAction.ModifyTime = DateTime.Now;
                 result = userAction.ModifyInfo();
             }
             else
@@ -938,7 +941,7 @@ namespace fengmiapp.Controllers
                 //重置用户Id
                 userAction.UId = 0;
                 userAction.Action = action;
-                userAction.Id = Id;
+                userAction.Id = 0;//显示所有 包括自己的用户
                 
                 int number = 20;
                 double hours = -1;//取一小时之前到现在的数据
@@ -1017,7 +1020,7 @@ namespace fengmiapp.Controllers
             title += "用户Id：" + i_uId + "，上传时间：" + uploadTime + "，摇一摇：";
             Common.addLog(logType, title + msg);
 
-            object obj = new { status = status, msg = msg, data = userObjList };
+            object obj = new { status = status, msg = msg, users = userObjList };
             string contentType = "text/json; charset=utf-8";
             return Json(obj, contentType);
         }

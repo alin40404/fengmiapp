@@ -8,7 +8,7 @@ using System.Configuration;
 
 namespace fengmiapp.Models
 {
-    public class _SQLHelper
+    public class _SQLHelper 
     {
         #region 属性
         /// <summary>
@@ -33,6 +33,7 @@ namespace fengmiapp.Models
         {
             //this.open();
         }
+        
         /// <summary>
         /// 析构函数，关闭数据库链接
         /// </summary>
@@ -41,12 +42,13 @@ namespace fengmiapp.Models
             this.close();
         }
 
+
         #region 打开、关闭数据库
         /// <summary>
         ///  获取连接字符串
         /// </summary>
         /// <returns></returns>
-        protected  string getConnectionString()
+        protected string getConnectionString()
         {
             string constr;
             constr = ConfigurationManager.AppSettings["ConnectionString"];
@@ -55,7 +57,7 @@ namespace fengmiapp.Models
         /// <summary>
         /// 打开数据库
         /// </summary>
-        protected  void open()
+        protected void open()
         {
             string constr;
             constr = getConnectionString();
@@ -66,29 +68,38 @@ namespace fengmiapp.Models
             }
             catch (Exception ex)
             {
-                
+
             }
         }
         /// <summary>
         /// 关闭数据库
         /// </summary>
-        protected  void close()
+        protected void close()
         {
             this._ConnectionString.Dispose();
             this._ConnectionString.Close();
         }
+
+        /// <summary>
+        /// 释放所使用的资源
+        /// </summary>
+        protected void dispose()
+        {
+            this._ConnectionString.Dispose();
+        }
+
         #endregion
 
         #region ExecuteNonQuery
-        
-        public  int ExecuteNonQuery(SqlCommand scmd)
+
+        public int ExecuteNonQuery(SqlCommand scmd)
         {
             this.open();
             int result = scmd.ExecuteNonQuery();
             this.close();
             return result;
         }
-        public  int ExecuteNonQuery(string cmdText)
+        public int ExecuteNonQuery(string cmdText)
         {
             this.open();
             SqlCommand cmd = new SqlCommand(cmdText, this._ConnectionString);
@@ -96,7 +107,7 @@ namespace fengmiapp.Models
             this.close();
             return result;
         }
-        public  int ExecuteNonQuery(SqlConnection connection, string cmdText)
+        public int ExecuteNonQuery(SqlConnection connection, string cmdText)
         {
             this.open();
             SqlCommand cmd = new SqlCommand(cmdText, connection);
@@ -104,7 +115,7 @@ namespace fengmiapp.Models
             this.close();
             return result;
         }
-        public  int ExecuteNonQuery(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
+        public int ExecuteNonQuery(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
         {
             this.open();
             int result = 0;
@@ -123,7 +134,7 @@ namespace fengmiapp.Models
             return result;
         }
 
-        public  int ExecuteNonQuery(SqlConnection connection, CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
+        public int ExecuteNonQuery(SqlConnection connection, CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
         {
             this.open();
             SqlCommand cmd = new SqlCommand(cmdText, connection);
@@ -138,22 +149,22 @@ namespace fengmiapp.Models
         #endregion
 
         #region ExecuteReader
-       
-        public  SqlDataReader ExecuteReader(string cmdText)
+
+        public SqlDataReader ExecuteReader(string cmdText)
         {
             this.open();
             SqlCommand cmd = new SqlCommand(cmdText, this._ConnectionString);
             SqlDataReader dr = cmd.ExecuteReader();
             return dr;
         }
-        public  SqlDataReader ExecuteReader(SqlConnection connection, string cmdText)
+        public SqlDataReader ExecuteReader(SqlConnection connection, string cmdText)
         {
             this.open();
             SqlCommand cmd = new SqlCommand(cmdText, connection);
             SqlDataReader dr = cmd.ExecuteReader();
             return dr;
         }
-        public  SqlDataReader ExecuteReader(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
+        public SqlDataReader ExecuteReader(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
         {
             this.open();
             SqlCommand cmd = new SqlCommand(cmdText, this._ConnectionString);
@@ -164,7 +175,7 @@ namespace fengmiapp.Models
             return dr;
 
         }
-        public  SqlDataReader ExecuteReader(SqlConnection connection, CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
+        public SqlDataReader ExecuteReader(SqlConnection connection, CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
         {
             this.open();
             SqlCommand cmd = new SqlCommand(cmdText, connection);
@@ -175,24 +186,24 @@ namespace fengmiapp.Models
             return dr;
 
         }
-       
+
         #endregion
 
         #region ExecuteToDataSet
-        public  DataSet ExecuteToDataSet(SqlCommand scmd)
+        public DataSet ExecuteToDataSet(SqlCommand scmd)
         {
             open();
 
             SqlDataAdapter rs = new SqlDataAdapter(scmd);
             DataSet ds = new DataSet();
             rs.Fill(ds);
-           
+
             close();
 
             return ds;
         }
-        
-        public  DataSet ExecuteToDataSet(string cmdText)
+
+        public DataSet ExecuteToDataSet(string cmdText)
         {
             open();
             SqlDataAdapter rs = new SqlDataAdapter(cmdText, this._ConnectionString);
@@ -201,18 +212,18 @@ namespace fengmiapp.Models
             close();
             return ds;
         }
-        
-        public  DataSet ExecuteToDataSet(SqlConnection connection, string cmdText)
+
+        public DataSet ExecuteToDataSet(SqlConnection connection, string cmdText)
         {
+            open();
             SqlDataAdapter rs = new SqlDataAdapter(cmdText, connection);
             DataSet ds = new DataSet();
             rs.Fill(ds);
-            connection.Dispose();
-            connection.Close();
+            close();
             return ds;
         }
-        
-        public  DataSet ExecuteToDataSet(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
+
+        public DataSet ExecuteToDataSet(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
         {
             open();
             DataSet ds = new DataSet();
@@ -234,7 +245,7 @@ namespace fengmiapp.Models
         #endregion
 
         #region ExecuteScalar
-        public  int ExecuteScalar(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
+        public int ExecuteScalar(CommandType cmdType, string cmdText, params SqlParameter[] commandParameters)
         {
             open();
             int result = 0;
@@ -254,5 +265,6 @@ namespace fengmiapp.Models
             return result;
         }
         #endregion
+
     }
 }

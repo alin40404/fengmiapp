@@ -140,7 +140,6 @@
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\CommonModel.cs" />
     <Compile Include="Models\Log.cs" />
-    <Compile Include="Models\SQLHelper.cs" />
     <Compile Include="Models\UserFriend.cs" />
     <Compile Include="Models\UserFriendStatus.cs" />
     <Compile Include="Models\UserGroup.cs" />
