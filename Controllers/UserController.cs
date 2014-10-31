@@ -1939,6 +1939,10 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetUserGroup()
         {
+            string status = "error";
+            string msg = "";
+            string title="";
+
             string uId = Request.Params.Get("uId");
 
             int i_uId = 0;
@@ -1954,8 +1958,6 @@ namespace fengmiapp.Controllers
             UserGroupUser userGroupUser = new UserGroupUser();
             userGroupUser.UId = i_uId;
 
-            string status = "error";
-            string msg = "";
 
             DataTable dt = new DataTable();
 
@@ -2011,6 +2013,12 @@ namespace fengmiapp.Controllers
                 userGroupObjList = new List<object>();
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：GetUserGroup； ";
+            title += "用户Id：" + i_uId + "，获取用户加入的所有群名称：";
+            Common.addLog(logType, title + msg);
+
             object obj = new { status = status, msg = msg, userGroup = userGroupObjList };
             string contentType = "text/json; charset=utf-8";
             return Json(obj, contentType);
@@ -2023,6 +2031,10 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetUserGroupUser()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uId = Request.Params.Get("uId");
 
             int i_uId = 0;
@@ -2038,8 +2050,6 @@ namespace fengmiapp.Controllers
             UserGroupUser userGroupUser = new UserGroupUser();
             userGroupUser.UId = i_uId;
 
-            string status = "error";
-            string msg = "";
 
             DataTable dt = new DataTable();
 
@@ -2154,6 +2164,11 @@ namespace fengmiapp.Controllers
                 userGroupObjList = new List<object>();
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：GetUserGroupUser； ";
+            title += "用户Id：" + i_uId + "，获取群用户：";
+            Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg, userGroup = userGroupObjList };
             string contentType = "text/json; charset=utf-8";
@@ -2167,6 +2182,10 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult CreateUserGroup()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string name = Request.Params.Get("name");
             string createUId = Request.Params.Get("createUId");
             string userStatusStr = Request.Params.Get("status");
@@ -2200,8 +2219,6 @@ namespace fengmiapp.Controllers
             userGroup.GType = i_gType;
             userGroup.Status = userStatus;
 
-            string status = "error";
-            string msg = "";
             //int result = userGroup.Add();
             int result = userGroup.AddBackId();
 
@@ -2233,6 +2250,13 @@ namespace fengmiapp.Controllers
                 msg = "创建失败";
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：CreateUserGroup； ";
+            title += "群名称：" + name + "，创建用户：" + i_createUId + "，创建群：";
+            Common.addLog(logType, title + msg);
+
+
             object obj = new { status = status, msg = msg, uGId = uGId };
             string contentType = "text/json; charset=utf-8";
 
@@ -2246,6 +2270,10 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult ModifyUserGroupName()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uGId = Request.Params.Get("uGId");
             string name = Request.Params.Get("name");
 
@@ -2260,8 +2288,6 @@ namespace fengmiapp.Controllers
             userGroup.Name = name;
             userGroup.Id = i_uGId;
 
-            string status = "error";
-            string msg = "";
 
             int result = userGroup.ModifyName();
 
@@ -2277,6 +2303,13 @@ namespace fengmiapp.Controllers
                 msg = "修改失败";
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：ModifyUserGroupName； ";
+            title += "群Id：" + i_uGId + "，群名称：" + name + "，修改群名称：";
+            Common.addLog(logType, title + msg);
+
+
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
 
@@ -2284,12 +2317,16 @@ namespace fengmiapp.Controllers
         }
 
         /// <summary>
-        /// 修改群组
+        /// 删除群组
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         public ActionResult DeleteUserGroup()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uGId = Request.Params.Get("uGId");
 
             int i_uGId = 0;
@@ -2303,9 +2340,6 @@ namespace fengmiapp.Controllers
             userGroup.Id = i_uGId;
             int ug_status = 0;
             userGroup.Status = ug_status;
-
-            string status = "error";
-            string msg = "";
 
             int result = userGroup.ModifyStatus();
 
@@ -2321,105 +2355,31 @@ namespace fengmiapp.Controllers
                 msg = "删除失败";
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：DeleteUserGroup； ";
+            title += "群Id：" + i_uGId + "，删除群：";
+            Common.addLog(logType, title + msg);
+
+
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
 
             return Json(obj, contentType);
         }
 
+
         /// <summary>
-        /// 5.添加群用户
+        /// 添加群用户，支持多个
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         public ActionResult AddUserGroupUser()
         {
-            string uGId = Request.Params.Get("uGId");
-            string uId = Request.Params.Get("uId");
-            string uRole = Request.Params.Get("uRole");
-
-            int i_uGId = 0;
-            try
-            {
-                i_uGId = int.Parse(uGId);
-            }
-            catch { }
-            int i_uId = 0;
-            try
-            {
-                i_uId = int.Parse(uId);
-            }
-            catch { }
-
-            int i_uRole = 0;
-            try
-            {
-                i_uRole = int.Parse(uRole);
-            }
-            catch { }
-
-            int userStatus = 1;
-
-            UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
-
-            int Id = userGroupUser.Id;
-
-            userGroupUser.UGId = i_uGId;
-            userGroupUser.UId = i_uId;
-            userGroupUser.URole = i_uRole;
-
-
             string status = "error";
             string msg = "";
+            string title = "";
 
-            int result=0;
-            if (Id > 0)
-            {
-                userStatus = userGroupUser.Status;
-
-                if (userStatus < 1)
-                {
-                    userGroupUser.ModifyStatus();
-                }
-                else
-                {
-                    status = "error";
-                    msg = "添加失败，用户已加入该群";
-                }
-            }
-            else
-            {
-                userStatus = 1;
-                userGroupUser.Status = userStatus;
-
-                result = userGroupUser.Add();
-
-                if (result > 0)
-                {
-                    status = "succeed";
-                    msg = "添加成功";
-                }
-                else
-                {
-                    status = "error";
-                    msg = "添加失败";
-                }
-
-            }
-
-            object obj = new { status = status, msg = msg };
-            string contentType = "text/json; charset=utf-8";
-
-            return Json(obj, contentType);
-        }
-
-        /// <summary>
-        /// 添加多个群用户
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        public ActionResult AddUserGroupUserList()
-        {
             string uGId = Request.Params.Get("uGId");
             string uId = Request.Params.Get("uId");// ","号隔开
             string uRole = Request.Params.Get("uRole");//角色统一
@@ -2442,20 +2402,19 @@ namespace fengmiapp.Controllers
             }
             catch { }
 
-            string status = "error";
-            string msg = "";
             int count=uIdList.Length;
 
             int addResult = 0;
+            string  uIdStr = "";
 
             for (int i = 0; i < count; i++)
             {
-                uId = uIdList[i];
+                uIdStr = uIdList[i];
                 try
                 {
-                    i_uId = int.Parse(uId);
+                    i_uId = int.Parse(uIdStr);
                 }
-                catch { }
+                catch { i_uId = 0; }
 
                 int userStatus = 1;
 
@@ -2487,7 +2446,6 @@ namespace fengmiapp.Controllers
                 {
                     userStatus = 1;
                     userGroupUser.Status = userStatus;
-
                     result = userGroupUser.Add();
 
                     if (result > 0)
@@ -2495,18 +2453,14 @@ namespace fengmiapp.Controllers
                         //status = "succeed";
                        // msg = "添加成功";
                         addResult++;//添加成功
-
                     }
                     else
                     {
                         //status = "error";
                        // msg = "添加失败";
                     }
-                    
                 }
             }
-
-
 
             if (addResult > 0)
             {
@@ -2520,6 +2474,11 @@ namespace fengmiapp.Controllers
                 msg = "添加失败";
             }
 
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：AddUserGroupUser； ";
+            title += "群Id：" + i_uGId + "， 用户Id：" + uId + "，角色：" + uRole + "，添加群用户，支持多个：";
+            Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
@@ -2528,12 +2487,16 @@ namespace fengmiapp.Controllers
         }
 
         /// <summary>
-        /// 6.删除群用户
+        /// 6.删除群用户，支持多个
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         public ActionResult DeleteUserGroupUser()
         {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uGId = Request.Params.Get("uGId");
             string uId = Request.Params.Get("uId");
 
@@ -2546,47 +2509,76 @@ namespace fengmiapp.Controllers
                 i_uGId = int.Parse(uGId);
             }
             catch { }
-            int i_uId = 0;
-            try
+
+            string[] uIdList = uId.Split(',');
+
+            int count=uIdList.Length;
+
+            int delResult = 0;
+            string uIdStr = "";
+
+            for (int i = 0; i < count; i++)
             {
-                i_uId = int.Parse(uId);
-            }
-            catch { }
+                uIdStr = uIdList[i];
 
-            int userStatus = 0;
-
-            UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
-
-            int Id = userGroupUser.Id;
-
-            userGroupUser.Status = userStatus;
-
-            string status = "error";
-            string msg = "";
-
-            int result=0;
-            if (Id > 0)
-            {
-                result = userGroupUser.ModifyStatus();
-
-                if (result > 0)
+                int i_uId = 0;
+                try
                 {
-                    status = "succeed";
-                    msg = "删除成功";
+                    i_uId = int.Parse(uIdStr);
+                }
+                catch { }
+
+                int userStatus = 0;
+                UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
+                int Id = userGroupUser.Id;
+                userGroupUser.Status = userStatus;
+
+                int result = 0;
+                if (Id > 0)
+                {
+                    result = userGroupUser.ModifyStatus();
+
+                    if (result > 0)
+                    {
+                        delResult++;//添加成功
+
+                        //status = "succeed";
+                        //msg = "删除成功";
+                    }
+                    else
+                    {
+                        //status = "error";
+                        //msg = "删除失败";
+                    }
+
                 }
                 else
                 {
-                    status = "error";
-                    msg = "删除失败";
+                    //status = "error";
+                    //msg = "信息不存在，无法删除";
+
                 }
+            }
+
+            if (delResult > 0)
+            {
+                status = "succeed";
+                msg = "删除成功：" + delResult + "条数据删除成功；" + (count - delResult) + "条数据删除失败";
 
             }
             else
             {
                 status = "error";
-                msg = "信息不存在，无法删除";
-
+                msg = "删除失败";
             }
+
+
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：DeleteUserGroupUser； ";
+            title += "群Id：" + i_uGId + "， 用户Id：" + uId + "，删除群用户：";
+            Common.addLog(logType, title + msg);
+
 
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
@@ -2601,6 +2593,11 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult ModifyUserGroupUserRole()
         {
+
+            string status = "error";
+            string msg = "";
+            string title = "";
+
             string uGId = Request.Params.Get("uGId");
             string uId = Request.Params.Get("uId");
             string uRole = Request.Params.Get("uRole");
@@ -2636,9 +2633,6 @@ namespace fengmiapp.Controllers
             userGroupUser.URole = i_uRole;
 
 
-            string status = "error";
-            string msg = "";
-
             int result = 0;
             if (Id > 0)
             {
@@ -2668,6 +2662,13 @@ namespace fengmiapp.Controllers
                     status = "error";
                     msg = "修改失败，用户未加入该群";
             }
+
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：ModifyUserGroupUserRole； ";
+            title += "群Id：" + i_uGId + "， 用户Id：" + uId + "，角色：" + uRole + "，修改群用户角色：";
+            Common.addLog(logType, title + msg);
+
 
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
