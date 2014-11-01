@@ -29,6 +29,8 @@ namespace fengmiapp.Controllers
 
             int uId = 0;
 
+            password = Common.MD5(password);
+
             if (string.IsNullOrEmpty(phone))
             {
                 status = "error";
@@ -43,7 +45,7 @@ namespace fengmiapp.Controllers
             {
                 User user = new User();
                 user.Phone = phone;
-                user.PassWord = Common.MD5(password);
+                user.PassWord = password;
                 user.login();
 
                 uId=user.Id;
@@ -137,6 +139,8 @@ namespace fengmiapp.Controllers
 
             int uId = 0;
 
+            password = Common.MD5(password);
+
             if (string.IsNullOrEmpty(phone))
             {
                 status = "error";
@@ -157,7 +161,6 @@ namespace fengmiapp.Controllers
                 if (uId < 1)
                 {//用户可用
                     user.Phone = phone;
-                    password = Common.MD5(password);
                     user.PassWord = password;
 
                     int result = user.Add();
@@ -212,7 +215,6 @@ namespace fengmiapp.Controllers
             string msg = "";
 
             string uId = Request.Params.Get("uId");
-
             string realName = Request.Params.Get("realName");
             string nickName = Request.Params.Get("nickName");
             string identityCard = Request.Params.Get("identityCard");
@@ -222,31 +224,45 @@ namespace fengmiapp.Controllers
             string address = Request.Params.Get("address");
             string interests = Request.Params.Get("interests");
 
-            
-            int Id = 0;
+            if (string.IsNullOrEmpty(realName)) { realName = string.Empty; }
+            if (string.IsNullOrEmpty(nickName)) { nickName = string.Empty; }
+            if (string.IsNullOrEmpty(identityCard)) { identityCard = string.Empty; }
+            if (string.IsNullOrEmpty(birthDay)) { birthDay = string.Empty; }
+            if (string.IsNullOrEmpty(userFace)) { userFace = string.Empty; }
+            if (string.IsNullOrEmpty(email)) { email = string.Empty; }
+            if (string.IsNullOrEmpty(address)) { address = string.Empty; }
+            if (string.IsNullOrEmpty(interests)) { interests = string.Empty; }
+
+
+            int i_uId = 0;
             try
             {
-                Id = int.Parse(uId);
+                i_uId = int.Parse(uId);
             }
             catch
             {
-                Id = 0;
+                i_uId = 0;
             }
-            User adminUser = new User();
+            User adminUser = new User(i_uId);
 
-            //adminUser.Phone = phone;
-            adminUser.RealName = realName;
-            adminUser.NickName = nickName;
-            adminUser.IdentityCard = identityCard;
-            adminUser.BirthDay = DateTime.Parse(birthDay);
-            adminUser.Address = address;
-            adminUser.Email = email;
-            adminUser.UserFace = userFace;
-            adminUser.Interests = interests;
+           int Id= adminUser.Id;
 
-            if (Id > 0)
+           if (Id > 0)
             {//update
-                adminUser.Id = Id;
+
+                adminUser.RealName = realName;
+                adminUser.NickName = nickName;
+                adminUser.IdentityCard = identityCard;
+                try
+                {
+                    adminUser.BirthDay = DateTime.Parse(birthDay);
+                }
+                catch {}
+                adminUser.Address = address;
+                adminUser.Email = email;
+                adminUser.UserFace = userFace;
+                adminUser.Interests = interests;
+
                 int result = adminUser.ModifyInfo();
                 if (result > 0)
                 {
@@ -264,16 +280,14 @@ namespace fengmiapp.Controllers
             {
                 status = "error";
                 msg = "修改失败,用户帐号不存在";
-
             }
 
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
             title += "API：DealUserInfo； ";
-            title += "用户Id：" + uId + "，修改用户个人信息：";
+            title += "用户Id：" + i_uId + "，修改用户个人信息：";
             Common.addLog(logType, title + msg);
-
 
             object obj = new { status = status, msg = msg };
             string contentType = "text/json; charset=utf-8";
@@ -1568,12 +1582,13 @@ namespace fengmiapp.Controllers
 
             if (Id > 0)
             {
-                int userStatus = 0;
-                userFriendGroup.Status = userStatus;
-                int result = userFriendGroup.ModifyStatus();
+                int result = userFriendGroup.DeleteUserFriendGroup();
 
                 if (result > 0)
                 {
+                    UserFriend userFriend = new UserFriend();
+                    userFriend.DeleteUFGroupUsers();
+
                     status = "succeed";
                     msg = "删除成功";
                 }
@@ -1753,6 +1768,87 @@ namespace fengmiapp.Controllers
         }
 
         /// <summary>
+        /// 把好友移除 好友分组，支持移除多位好友
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult DeleteUserFriToUserFriendGroup()
+        {
+            string status = "error";
+            string msg = "";
+            string title = "";
+
+            string uId = Request.Params.Get("uId");
+            string fuId = Request.Params.Get("fuId");//移除多位好友，请用','分隔
+            
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch { }
+
+            /*
+            int i_fuId = 0;
+            try
+            {
+                i_fuId = int.Parse(fuId);
+            }
+            catch
+            {
+                i_fuId = 0;
+            }
+            */
+
+
+            if (i_uId > 0)
+            {
+                if (string.IsNullOrEmpty(fuId))
+                {
+                    status = "error";
+                    msg = "移除失败，不存在好友信息";
+
+                }
+                else
+                {
+                    UserFriend userFriend = new UserFriend();
+                    //int Id = userFriend.Id;
+
+                    userFriend.UId = i_uId;
+                    int result = userFriend.DeleteUFGroupUsers(fuId);
+
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "移除成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "移除失败";
+                    }
+                }
+            }
+            else
+            {
+                status = "error";
+                msg = "移除失败，用户不存在";
+            }
+
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：DeleteUserFriToUserFriendGroup； ";
+            title += "用户Id：" + i_uId + "，好友Id：" + fuId + "，把好友移除 好友分组：";
+            Common.addLog(logType, title + msg);
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+
+            return Json(obj, contentType);
+        }
+
+
+        /// <summary>
         /// 添加好友到好友分组
         /// </summary>
         /// <returns></returns>
@@ -1764,7 +1860,7 @@ namespace fengmiapp.Controllers
             string title = "";
 
             string uId = Request.Params.Get("uId");
-            string fuId = Request.Params.Get("fuId");
+            string fuId = Request.Params.Get("fuId");//多位好友，请用','分隔
             string uFGroupId = Request.Params.Get("uFGroupId");
             //string userStatusStr = Request.Params.Get("status");
 
@@ -1782,6 +1878,7 @@ namespace fengmiapp.Controllers
                 i_uId = int.Parse(uId);
             }
             catch { }
+
             int i_fuId = 0;
             try
             {
@@ -1791,31 +1888,47 @@ namespace fengmiapp.Controllers
             {
                 i_fuId = 0;
             }
-
-            UserFriend userFriend = new UserFriend(i_uId, i_fuId);
-            int Id = userFriend.Id;
-
-            if (Id > 0)
+            if (i_uId > 0)
             {
-                userFriend.UFGroupId = i_uFGroupId;
-                int result = userFriend.Modify_uFGroupId();
-
-                if (result > 0)
+                if (string.IsNullOrEmpty(fuId))
                 {
-                    status = "succeed";
-                    msg = "添加成功";
+                    status = "error";
+                    msg = "添加失败，不存在好友信息";
+
+                }
+                else if (i_uFGroupId < 1)
+                {
+                    status = "error";
+                    msg = "分组不存在";
+
                 }
                 else
                 {
-                    status = "error";
-                    msg = "添加失败";
+
+                    UserFriend userFriend = new UserFriend();
+                    //int Id = userFriend.Id;
+                    userFriend.UId = i_uId;
+                    userFriend.UFGroupId = i_uFGroupId;
+                    int result = userFriend.Modify_uFGroupId(fuId);
+
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "添加成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "添加失败";
+                    }
                 }
             }
             else
             {
                 status = "error";
-                msg = "修改失败，用户好友不存在";
+                msg = "添加失败，用户不存在";
             }
+
 
             int logType = 1;
             string ip = Request.UserHostAddress;
@@ -2436,6 +2549,7 @@ namespace fengmiapp.Controllers
 
                     if (userStatus < 1)
                     {
+                        userGroupUser.Status = 1;
                         userGroupUser.ModifyStatus();
                         addResult++;//添加成功
                     }

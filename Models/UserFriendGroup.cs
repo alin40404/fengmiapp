@@ -11,7 +11,7 @@ namespace fengmiapp.Models
     {
         #region 参数
 
-        private int _Id = 0;
+        private int _id = 0;
         private int _uId = 0;
 
         private string _gName = string.Empty;
@@ -29,8 +29,8 @@ namespace fengmiapp.Models
         ///</summary>
         public int Id
         {
-            get { return _Id; }
-            set { _Id = value; }
+            get { return _id; }
+            set { _id = value; }
         }
         ///<summary>
         /// UId
@@ -75,23 +75,26 @@ namespace fengmiapp.Models
             init();
         }
 
-        public UserFriendGroup(int Id)
+        public UserFriendGroup(int id)
         {
             init();
 
-            string strSql = " Select table1.* from " + this._table + " as table1  where 1=1 and table1.Id = @Id  ";
-
-            DataTable dt = new DataTable();
-
-            SqlParameter[] para = new SqlParameter[]
-			{
-				new SqlParameter("@Id", Id),
-			};
-            dt = base.GetDataList(strSql,para);
-
-            if (dt.Rows.Count > 0)
+            if (id > 0)
             {
-                this.SetField(dt);
+                string strSql = " Select table1.* from " + this._table + " as table1  where 1=1 and table1.Id = @Id  ";
+
+                DataTable dt = new DataTable();
+
+                SqlParameter[] para = new SqlParameter[]
+			    {
+				    new SqlParameter("@Id", id),
+			    };
+                dt = base.GetDataList(strSql, para);
+
+                if (dt.Rows.Count > 0)
+                {
+                    this.SetField(dt);
+                }
             }
         }
 
@@ -133,7 +136,7 @@ namespace fengmiapp.Models
             {
                 if (dt != null && dt.Rows.Count > 0)
                 {
-                    this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
+                    this._id = int.Parse(dt.Rows[0]["Id"].ToString());
                     this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
                     this._gName = dt.Rows[0]["gName"].ToString();
 
@@ -193,10 +196,21 @@ namespace fengmiapp.Models
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@status", _status),
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
 			};
             return base.Modify(set, para);
         }
+
+        /// <summary>
+        /// 删除好友分组
+        /// </summary>
+        /// <returns></returns>
+        public int DeleteUserFriendGroup()
+        {
+            this._status = 0;
+            return this.ModifyStatus();
+        }
+
 
         public int ModifyName()
         {
@@ -204,7 +218,7 @@ namespace fengmiapp.Models
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@gName", _gName),
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
 			};
             return base.Modify(set, para);
         }

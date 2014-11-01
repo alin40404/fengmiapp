@@ -168,13 +168,13 @@ namespace fengmiapp.Models
             this.init();
         }
         
-        public User(int tempId)
+        public User(int id)
         {
             this.init();
 
-            if (tempId >0)
+            if (id >0)
             {
-                this._id = tempId;
+                this._id = id;
 
                 string strSql = " Select admin.* from " + this._table + " as admin  where 1=1 and admin.Id = @Id order by admin.Id asc ";
 
@@ -182,7 +182,7 @@ namespace fengmiapp.Models
 
                 SqlParameter[] para = new SqlParameter[]
 			    {
-				    new SqlParameter("@Id", _id),
+				    new SqlParameter("@Id", this._id),
 			    };
 
                 dt = base.GetDataList(strSql, para);
@@ -190,6 +190,10 @@ namespace fengmiapp.Models
                 if (dt.Rows.Count > 0)
                 {
                     this.SetField(dt);
+                }
+                else
+                {
+                    this._id = 0;
                 }
             }
         }
@@ -438,21 +442,23 @@ namespace fengmiapp.Models
             {
                 set += "email=@email,";
             }
+            /* 修改头像另外写接口 */
             if (!string.IsNullOrEmpty(this._userFace))
             {
                 set += "userFace=@userFace,";
             }
+             
             if (!string.IsNullOrEmpty(this._address))
             {
                 set += "address=@address,";
             }
             if (!string.IsNullOrEmpty(this._identityCard))
             {
-                set += "identityCard=@identityCard";
+                set += "identityCard=@identityCard,";
             }
             if (!string.IsNullOrEmpty(this._interests))
             {
-                set += "interests=@interests";
+                set += "interests=@interests,";
             }
 
             

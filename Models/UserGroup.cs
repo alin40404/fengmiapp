@@ -11,7 +11,7 @@ namespace fengmiapp.Models
     {
         #region 参数
 
-        private int _Id = 0;
+        private int _id = 0;
         private string _name =string.Empty;
 
         private int _createUId = 0;
@@ -29,8 +29,8 @@ namespace fengmiapp.Models
         ///</summary>
         public int Id
         {
-            get { return _Id; }
-            set { _Id = value; }
+            get { return _id; }
+            set { _id = value; }
         }
         ///<summary>
         /// CreateUId
@@ -83,30 +83,32 @@ namespace fengmiapp.Models
             init();
         }
 
-        public UserGroup(int? Id)
+        public UserGroup(int id)
         {
             init();
-
-            DataTable dt = null;
-            dt = base.GetDataById(Id);
-
-            if (dt.Rows.Count > 0)
+            if (id > 0)
             {
-                this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
+                DataTable dt = new DataTable();
+                dt = base.GetDataById(id);
 
-                this._name = dt.Rows[0]["name"].ToString(); ;
+                if (dt.Rows.Count > 0)
+                {
+                    this._id = int.Parse(dt.Rows[0]["Id"].ToString());
 
-                this._gType = int.Parse(dt.Rows[0]["gType"].ToString()); ;
+                    this._name = dt.Rows[0]["name"].ToString(); ;
 
-                this._createUId = int.Parse(dt.Rows[0]["createUId"].ToString());
+                    this._gType = int.Parse(dt.Rows[0]["gType"].ToString()); ;
+
+                    this._createUId = int.Parse(dt.Rows[0]["createUId"].ToString());
 
 
-                string modifyTime = dt.Rows[0]["modifyTime"].ToString();
-                this._modifyTime = DateTime.Parse(modifyTime);
+                    string modifyTime = dt.Rows[0]["modifyTime"].ToString();
+                    this._modifyTime = DateTime.Parse(modifyTime);
 
-                //status
-                this._status = int.Parse(dt.Rows[0]["status"].ToString());
+                    //status
+                    this._status = int.Parse(dt.Rows[0]["status"].ToString());
 
+                }
             }
         }
 
@@ -156,7 +158,7 @@ namespace fengmiapp.Models
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@status", _status),
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@modifyTime", _modifyTime),
 			};
             return base.Modify(set, para);
@@ -168,7 +170,7 @@ namespace fengmiapp.Models
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@name", _name),
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@modifyTime", _modifyTime),
 			};
             return base.Modify(set, para);
@@ -183,7 +185,7 @@ namespace fengmiapp.Models
 
             string strSql = " Select top " + number + " * from " + this._table + " as t where 1=1 ";
 
-            if (_Id != 0)
+            if (_id != 0)
             {
                 strSql += " and t.Id != @Id  ";
             }
@@ -201,7 +203,7 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@createUId", _createUId),
                 new SqlParameter("@name", _name),
                 new SqlParameter("@gType", _gType),
@@ -216,7 +218,7 @@ namespace fengmiapp.Models
             int number = 1;
             string strSql = " Select top " + number + " * from " + this._table + " as t where 1=1 ";
 
-            if (_Id != 0)
+            if (_id != 0)
             {
                 strSql += " and t.Id != @Id  ";
             }
@@ -234,7 +236,7 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@createUId", _createUId),
                 new SqlParameter("@name", _name),
                 new SqlParameter("@gType", _gType),
@@ -246,9 +248,9 @@ namespace fengmiapp.Models
             {
                 int i = 0;
                 string IdStr = dt.Rows[i]["Id"].ToString();
-                this._Id = int.Parse(IdStr);
+                this._id = int.Parse(IdStr);
             }
-            return this._Id;
+            return this._id;
         }
     }
 }

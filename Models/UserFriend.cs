@@ -179,7 +179,11 @@ namespace fengmiapp.Models
             return base.Modify(set, para);
         }
 
-        //互改好友状态
+        /// <summary>
+        /// 互改多位好友状态
+        /// </summary>
+        /// <param name="fuIdList"></param>
+        /// <returns></returns>
         public int ModifyStatus(string fuIdList)
         {
             string set = "status=@status";
@@ -211,6 +215,77 @@ namespace fengmiapp.Models
             return result;
         }
 
+        /// <summary>
+        /// 删除分组时，修改好友里面的分组Id=0
+        /// </summary>
+        /// <returns></returns>
+        public int DeleteUFGroupUsers()
+        {
+            int result = 0;
+            int newUFGroupId = 0;
+            this._uFGroupId = 0;
+
+            string set = "uFGroupId=@newUFGroupId";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@uFGroupId", _uFGroupId),
+                new SqlParameter("@newUFGroupId", newUFGroupId),
+			};
+
+            string sql = "UPDATE " + this._table + " set " + set +
+"  Where uFGroupId=@uFGroupId ; ";
+
+            result = this.ExecuteNonQuery(CommandType.Text, sql, para);
+
+            return result;
+
+        }
+        
+        /// <summary>
+        /// 把多位好友移除 好友分组
+        /// </summary>
+        /// <param name="fuIdList"></param>
+        /// <returns></returns>
+        public int DeleteUFGroupUsers(string fuIdList)
+        {
+            int result = 0;
+            this._uFGroupId = 0;
+            result=this.Modify_uFGroupId(fuIdList);
+            return result;
+
+        }
+
+        /// <summary>
+        /// 修改 多位好友所在的分组
+        /// </summary>
+        /// <param name="fuIdList">好友Id，','分隔</param>
+        /// <returns></returns>
+        public int Modify_uFGroupId(string fuIdList)
+        {
+            int result = 0;
+            string set = "uFGroupId=@uFGroupId";
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@uFGroupId", _uFGroupId),
+				new SqlParameter("@uId", _uId),
+                //new SqlParameter("@fuIdList", fuIdList),
+			};
+
+            string sql = "UPDATE " + this._table + " set " + set +
+        "  Where uId=@uId and fuId in ( " + fuIdList + " ) ";
+
+            sql += " ; ";
+            result = this.ExecuteNonQuery(CommandType.Text, sql, para);
+
+            return result;
+
+        }
+
+        /// <summary>
+        /// 修改 一个好友所在的分组
+        /// </summary>
+        /// <returns></returns>
         public int Modify_uFGroupId()
         {
             string set = "uFGroupId=@uFGroupId";

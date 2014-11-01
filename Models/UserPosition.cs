@@ -11,7 +11,7 @@ namespace fengmiapp.Models
     {
         #region 参数
 
-        private int _Id = 0;
+        private int _id = 0;
 
         private int _uId = 0;
         private double _longitude = 0;
@@ -30,8 +30,8 @@ namespace fengmiapp.Models
         ///</summary>
         public int Id
         {
-            get { return _Id; }
-            set { _Id = value; }
+            get { return _id; }
+            set { _id = value; }
         }
         ///<summary>
         /// UId
@@ -93,31 +93,31 @@ namespace fengmiapp.Models
             init();
         }
 
-        public UserPosition(int? Id)
+        public UserPosition(int id)
         {
             init();
-
-            DataTable dt = null;
-            dt = base.GetDataById(Id);
-
-            if (dt.Rows.Count > 0)
+            if (id > 0)
             {
-                this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
+                DataTable dt = new DataTable();
+                dt = base.GetDataById(id);
 
-                this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
-                this._placeName = dt.Rows[0]["placeName"].ToString(); ;
-                this._longitude = double.Parse(dt.Rows[0]["longitude"].ToString());
-                this._latitude = double.Parse(dt.Rows[0]["latitude"].ToString());
+                if (dt.Rows.Count > 0)
+                {
+                    this._id = int.Parse(dt.Rows[0]["Id"].ToString());
 
-                string modifyTime = dt.Rows[0]["modifyTime"].ToString();
-                this._modifyTime = DateTime.Parse(modifyTime);
+                    this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
+                    this._placeName = dt.Rows[0]["placeName"].ToString(); ;
+                    this._longitude = double.Parse(dt.Rows[0]["longitude"].ToString());
+                    this._latitude = double.Parse(dt.Rows[0]["latitude"].ToString());
 
-                string uploadTime = dt.Rows[0]["uploadTime"].ToString();
-                this._uploadTime = DateTime.Parse(uploadTime);
+                    string modifyTime = dt.Rows[0]["modifyTime"].ToString();
+                    this._modifyTime = DateTime.Parse(modifyTime);
 
+                    string uploadTime = dt.Rows[0]["uploadTime"].ToString();
+                    this._uploadTime = DateTime.Parse(uploadTime);
+
+                }
             }
-
-
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace fengmiapp.Models
             string strSql = " Select top " + number + " * from " + this._table + " as t where 1=1 ";
 
 
-            if (_Id != 0)
+            if (_id != 0)
             {
                 strSql += " and t.Id != @Id  ";
             }
@@ -174,7 +174,7 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@placeName", _placeName),
                 new SqlParameter("@modifyTime", _modifyTime),
@@ -203,7 +203,7 @@ namespace fengmiapp.Models
             string strSql = " Select top " + top1 + " * from " + this._table + " as t where 1=1 ";
 
 
-            if (_Id != 0)
+            if (_id != 0)
             {
                 strSql += " and t.Id != @Id  ";
             }
@@ -222,7 +222,7 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@placeName", _placeName),
                 new SqlParameter("@modifyTime", _modifyTime),
@@ -239,7 +239,7 @@ namespace fengmiapp.Models
             string strSql = " Select count(*) as amount from " + this._table + " as t where 1=1 ";
 
 
-            if (_Id != 0)
+            if (_id != 0)
             {
                 strSql += " and t.Id != @Id  ";
             }
@@ -257,7 +257,7 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@placeName", _placeName),
                 new SqlParameter("@modifyTime", _modifyTime),

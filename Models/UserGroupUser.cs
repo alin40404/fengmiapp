@@ -11,7 +11,7 @@ namespace fengmiapp.Models
     {
         #region 参数
 
-        private int _Id = 0;
+        private int _id = 0;
         private int _uId = 0;
         //群Id
         private int _uGId = 0;
@@ -32,8 +32,8 @@ namespace fengmiapp.Models
         ///</summary>
         public int Id
         {
-            get { return _Id; }
-            set { _Id = value; }
+            get { return _id; }
+            set { _id = value; }
         }
         ///<summary>
         /// UId
@@ -105,7 +105,7 @@ namespace fengmiapp.Models
 
             if (dt.Rows.Count > 0)
             {
-                this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
+                this._id = int.Parse(dt.Rows[0]["Id"].ToString());
                 this._uId = uId;
                 this._uGId = uGId;
 
@@ -154,7 +154,7 @@ namespace fengmiapp.Models
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@status", _status),
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@modifyTime", _modifyTime),
 			};
             return base.Modify(set, para);
@@ -166,7 +166,7 @@ namespace fengmiapp.Models
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@uRole", _uRole),
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@modifyTime", _modifyTime),
 			};
             return base.Modify(set, para);

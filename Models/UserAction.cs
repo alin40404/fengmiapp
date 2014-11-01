@@ -11,7 +11,7 @@ namespace fengmiapp.Models
     {
         #region 参数
 
-        private int _Id = 0;
+        private int _id = 0;
 
         private int _uId = 0;
         private int _action = 1;
@@ -26,8 +26,8 @@ namespace fengmiapp.Models
         ///</summary>
         public int Id
         {
-            get { return _Id; }
-            set { _Id = value; }
+            get { return _id; }
+            set { _id = value; }
         }
         ///<summary>
         /// UId
@@ -72,28 +72,29 @@ namespace fengmiapp.Models
             init();
         }
 
-        public UserAction(int? Id)
+        public UserAction(int id)
         {
             init();
-
-            DataTable dt = null;
-            dt = base.GetDataById(Id);
-
-            if (dt.Rows.Count > 0)
+            if (id > 0)
             {
-                this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
+                DataTable dt = new DataTable();
+                dt = base.GetDataById(id);
 
-                this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
-                this._action = int.Parse(dt.Rows[0]["action"].ToString());
+                if (dt.Rows.Count > 0)
+                {
+                    this._id = int.Parse(dt.Rows[0]["Id"].ToString());
 
-                string modifyTime = dt.Rows[0]["modifyTime"].ToString();
-                this._modifyTime = DateTime.Parse(modifyTime);
+                    this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
+                    this._action = int.Parse(dt.Rows[0]["action"].ToString());
 
-                string uploadTime = dt.Rows[0]["uploadTime"].ToString();
-                this._uploadTime = DateTime.Parse(uploadTime);
+                    string modifyTime = dt.Rows[0]["modifyTime"].ToString();
+                    this._modifyTime = DateTime.Parse(modifyTime);
 
+                    string uploadTime = dt.Rows[0]["uploadTime"].ToString();
+                    this._uploadTime = DateTime.Parse(uploadTime);
+
+                }
             }
-
 
         }
 
@@ -120,7 +121,7 @@ namespace fengmiapp.Models
             int count = dt.Rows.Count;
             if (count > 0)
             {
-                this._Id = int.Parse(dt.Rows[0]["Id"].ToString());
+                this._id = int.Parse(dt.Rows[0]["Id"].ToString());
 
                 this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
                 this._action = int.Parse(dt.Rows[0]["action"].ToString());
@@ -165,7 +166,7 @@ namespace fengmiapp.Models
             string set = " action=@action,modifyTime=@modifyTime,uploadTime=@uploadTime ";
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@action", _action),
                 new SqlParameter("@modifyTime", _modifyTime),
                 new SqlParameter("@uploadTime", _uploadTime),
@@ -183,7 +184,7 @@ namespace fengmiapp.Models
             string strSql = " Select top " + number + " * from " + this._table + " as t where 1=1 ";
 
 
-            if (_Id != 0)
+            if (_id != 0)
             {
                 strSql += " and t.Id != @Id  ";
             }
@@ -201,7 +202,7 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@action", _action),
                 new SqlParameter("@modifyTime", _modifyTime),
@@ -218,7 +219,7 @@ namespace fengmiapp.Models
             string strSql = " Select count(*) as amount from " + this._table + " as t where 1=1 ";
 
 
-            if (_Id != 0)
+            if (_id != 0)
             {
                 strSql += " and t.Id != @Id  ";
             }
@@ -236,7 +237,7 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@action", _action),
                 new SqlParameter("@modifyTime", _modifyTime),
@@ -274,7 +275,7 @@ namespace fengmiapp.Models
             strSql += " left join [user] as table2 on table1.uId = table2.Id ";
             strSql += " where 1=1 and table2.status > @status ";
 
-            if (_Id != 0)
+            if (_id != 0)
             {
                 strSql += " and table1.Id != @Id  ";
             }
@@ -292,7 +293,7 @@ namespace fengmiapp.Models
             int status = 0;
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@action", _action),
                 new SqlParameter("@status", status),
@@ -317,7 +318,7 @@ namespace fengmiapp.Models
             strSql += " left join [user] as table2 on table1.uId = table2.Id ";
             strSql += " where 1=1 and table2.status > @status ";
 
-            if (_Id != 0)
+            if (_id != 0)
             {
                 strSql += " and table1.Id != @Id  ";
             }
@@ -340,7 +341,7 @@ namespace fengmiapp.Models
             int status = 0;
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@Id", _Id),
+                new SqlParameter("@Id", _id),
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@action", _action),
                 new SqlParameter("@status", status),

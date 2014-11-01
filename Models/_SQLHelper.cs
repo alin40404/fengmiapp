@@ -80,12 +80,22 @@ namespace fengmiapp.Models
             this._ConnectionString.Close();
         }
 
+        public void Close()
+        {
+            this.close();
+        }
+
         /// <summary>
         /// 释放所使用的资源
         /// </summary>
         protected void dispose()
         {
             this._ConnectionString.Dispose();
+        }
+
+        public void Dispose()
+        {
+            this.dispose();
         }
 
         #endregion
