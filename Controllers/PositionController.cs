@@ -20,8 +20,11 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult SetPosition()
         {
-            HttpRequestBase request = Request;
+            string title = "";
+            string status = "error";
+            string msg = "";
 
+            HttpRequestBase request = Request;
             string uId = request.Params.Get("uId");
             string longitude = request.Params.Get("longitude");
             string latitude = request.Params.Get("latitude");
@@ -29,11 +32,6 @@ namespace fengmiapp.Controllers
             string placeName = request.Params.Get("placeName");
             string uploadTime = request.Params.Get("uploadTime");
 
-            UserPosition position = new UserPosition();
-
-            string title = "";
-            string status = "error";
-            string msg = "";
 
             int i_uId = 0;
             try
@@ -44,46 +42,75 @@ namespace fengmiapp.Controllers
             {
                 i_uId = 0;
             }
-            double d_longitude =0;
-            try
-            {
-                d_longitude = double.Parse(longitude);
-            }
-            catch { }
-            double d_latitude = 0;
-            try
-            {
-                d_latitude = double.Parse(latitude);
-            }
-            catch { }
-          
-            DateTime dt_uploadTime= DateTime.Now;
+            DateTime dt_uploadTime = DateTime.Now;
             try
             {
                 dt_uploadTime = DateTime.Parse(uploadTime);
             }
             catch { }
 
+
+            UserPosition position = new UserPosition();
             position.UId = i_uId;
-            position.Longitude = d_longitude;
-            position.Latitude = d_latitude;
-            position.PlaceName = placeName;
-            position.UploadTime = dt_uploadTime;
-            position.ModifyTime = DateTime.Now;
+            position.GetNewestPositionOne();
+            int Id = position.Id;
+            int result = 0;
+            string temp_placeName=position.PlaceName;
 
-            int result = position.Add();
-            if (result > 0)
+            if (Id > 0 && temp_placeName == placeName)
             {
-                status = "succeed";
-                msg = "添加成功";
+                position.UploadTime = dt_uploadTime;
+                position.ModifyTime = DateTime.Now;
 
+                result = position.Modify_Time();
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "上传修改成功";
+
+                }
+                else
+                {
+                    status = "error";
+                    msg = "上传修改失败";
+                }
             }
             else
             {
-                status = "error";
-                msg = "添加失败";
-            }
+                double d_longitude = 0;
+                try
+                {
+                    d_longitude = double.Parse(longitude);
+                }
+                catch { }
+                double d_latitude = 0;
+                try
+                {
+                    d_latitude = double.Parse(latitude);
+                }
+                catch { }
 
+
+                position.UId = i_uId;
+                position.Longitude = d_longitude;
+                position.Latitude = d_latitude;
+                position.PlaceName = placeName;
+                position.UploadTime = dt_uploadTime;
+                position.ModifyTime = DateTime.Now;
+
+                result = position.Add();
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "上传成功";
+
+                }
+                else
+                {
+                    status = "error";
+                    msg = "上传失败";
+                }
+            }
 
             int logType = 3;
             string ip = Request.UserHostAddress;

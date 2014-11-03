@@ -103,6 +103,17 @@ namespace fengmiapp.Models
 
                 if (dt.Rows.Count > 0)
                 {
+                    this.SetField(dt);
+                }
+            }
+        }
+
+        protected void SetField(DataTable dt)
+        {
+            try
+            {
+                if (dt != null && dt.Rows.Count > 0)
+                {
                     this._id = int.Parse(dt.Rows[0]["Id"].ToString());
 
                     this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
@@ -115,9 +126,17 @@ namespace fengmiapp.Models
 
                     string uploadTime = dt.Rows[0]["uploadTime"].ToString();
                     this._uploadTime = DateTime.Parse(uploadTime);
-
                 }
             }
+            catch { }
+
+        }
+
+        public void GetNewestPositionOne()
+        {
+            DataTable dt = new DataTable();
+            dt = this.GetPositionList(1);
+            this.SetField(dt);
         }
 
         /// <summary>
@@ -144,6 +163,18 @@ namespace fengmiapp.Models
 
 			};
             return base.Add(value, para);
+        }
+
+        public int Modify_Time()
+        {
+            string set = "modifyTime=@modifyTime,uploadTime=@uploadTime";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@Id", _id),
+                new SqlParameter("@modifyTime", _modifyTime),
+                new SqlParameter("@uploadTime", _uploadTime),
+			};
+            return base.Modify(set, para);
         }
 
         public DataTable GetPositionList(int number)

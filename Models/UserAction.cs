@@ -82,6 +82,8 @@ namespace fengmiapp.Models
 
                 if (dt.Rows.Count > 0)
                 {
+                    this.SetField(dt);
+                    /*
                     this._id = int.Parse(dt.Rows[0]["Id"].ToString());
 
                     this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
@@ -92,7 +94,7 @@ namespace fengmiapp.Models
 
                     string uploadTime = dt.Rows[0]["uploadTime"].ToString();
                     this._uploadTime = DateTime.Parse(uploadTime);
-
+                    */
                 }
             }
 
@@ -121,6 +123,8 @@ namespace fengmiapp.Models
             int count = dt.Rows.Count;
             if (count > 0)
             {
+                this.SetField(dt);
+                /*
                 this._id = int.Parse(dt.Rows[0]["Id"].ToString());
 
                 this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
@@ -131,9 +135,32 @@ namespace fengmiapp.Models
 
                 string uploadTime = dt.Rows[0]["uploadTime"].ToString();
                 this._uploadTime = DateTime.Parse(uploadTime);
-
+                */
             }
 
+
+        }
+
+        protected void SetField(DataTable dt)
+        {
+            try
+            {
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    this._id = int.Parse(dt.Rows[0]["Id"].ToString());
+
+                    this._uId = int.Parse(dt.Rows[0]["uId"].ToString());
+                    this._action = int.Parse(dt.Rows[0]["action"].ToString());
+
+                    string modifyTime = dt.Rows[0]["modifyTime"].ToString();
+                    this._modifyTime = DateTime.Parse(modifyTime);
+
+                    string uploadTime = dt.Rows[0]["uploadTime"].ToString();
+                    this._uploadTime = DateTime.Parse(uploadTime);
+
+                }
+            }
+            catch { }
 
         }
 
