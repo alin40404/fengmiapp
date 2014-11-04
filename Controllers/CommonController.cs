@@ -10,23 +10,10 @@ namespace fengmiapp.Controllers
 {
     public class CommonController : ApiController
     {
+        /*
         [HttpGet]
         public IEnumerable test()
         {
-            /*
-            return new string[] { "Item1", "Item2" }.Select(s => new
-            {
-                Name = s,
-                Code = s,
-                Items = new ArrayList
-                            {
-                                new { Name = "Item1" },
-                                new { Name = "Item2" },
-                                new { Name = "Item3" },
-                                new { Name = "Item4" },
-                            }
-            });
-             * */
 
             object obj = new object();
             List<object> objList = new List<object>();
@@ -38,6 +25,26 @@ namespace fengmiapp.Controllers
             }
            
             return objList;
+        }
+        */
+
+        [HttpGet]
+        public string token()
+        {
+            DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1));
+            DateTime now=DateTime.Now;
+            long t = (long)(now - startTime).TotalMilliseconds;
+            string secretKey = "DEVFORUSER-ANDRIOD-IOS-CRM-001-KEY";
+
+            string param=string.Empty;
+            param += "t=" + t;
+            param += secretKey;
+            string token = string.Empty;
+            token = Common.MD5(param);
+
+            string msg = string.Empty;
+            msg = "t=" + t + " token=" + token;
+            return msg;
         }
     }
 }

@@ -13,14 +13,16 @@ using System.Drawing;
 using System.IO;
 using System.Drawing.Imaging;
 using System.Data.SqlClient;
+using System.Configuration;
+using System.Security.Cryptography;
 
 namespace fengmiapp
 {
     public class Common
     {
-        #region dataTable转换成Json格式
+        #region DataTable转换成Json格式
         /// <summary>      
-        /// dataTable转换成Json格式      
+        /// DataTable转换成Json格式      
         /// </summary>      
         /// <param name="dt"></param>      
         /// <returns></returns>      
@@ -45,7 +47,8 @@ namespace fengmiapp
 
             return serializer.Serialize(list);
         }
-        #endregion dataTable转换成Json格式
+        
+        #endregion DataTable转换成Json格式
 
         #region DataSet转换成Json格式
         /// <summary>      
@@ -66,81 +69,6 @@ namespace fengmiapp
                 json.Append("}");
             }
             return json.ToString();
-        }
-        #endregion
-
-        #region  验证是否登录
-        /// <summary> 
-        /// 对管理员用户cookie进行检测
-        /// </summary>      
-        public static bool isLogin()
-        {
-            HttpCookie SysCookies = System.Web.HttpContext.Current.Request.Cookies["Systemcookie"];
-            string strNoticeInfo = string.Empty;
-            #region 检测Cookies对象
-            if (SysCookies == null || SysCookies.Value == "")
-            {
-                return false;
-            }
-            #endregion
-
-            #region 检测用户信息是否丢失
-            SystemCookies CookieObj = new SystemCookies("Systemcookie");
-            string adminIdStr = CookieObj.UserID;
-            string powerStr = CookieObj.Role;
-            string userName = CookieObj.UserName;
-
-            if (adminIdStr == "")
-            {
-                return false;
-            }
-            System.Web.HttpContext.Current.Session["adminId"] = adminIdStr;
-            System.Web.HttpContext.Current.Session["adminName"] = userName;
-            System.Web.HttpContext.Current.Session["Power"] = powerStr;
-            #endregion
-            //通过检测
-            return true;
-        }
-
-        #endregion
-
-        #region  是否有权限
-        /// <summary>
-        /// 是否有权限
-        /// </summary>
-        /// <param name="actionPower"></param>
-        /// <returns></returns>
-        public static bool isHavePower(string actionPower)
-        {
-            try
-            {
-                string power = HttpContext.Current.Session["Power"].ToString();
-                if (power.Contains(actionPower))
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-            }
-            return false;
-
-        }
-        public static bool isHavePower()
-        {
-            try
-            {
-                string power = HttpContext.Current.Session["Power"].ToString();
-                if (power=="1")
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-            }
-            return false;
-
         }
         #endregion
 
@@ -188,7 +116,6 @@ namespace fengmiapp
             log.Add();
             return;
         }
-
         public static void addLog(int logType, string describe, string ip, string emergeURL, int adminId)
         {
             DateTime logTime = DateTime.Now;
@@ -201,179 +128,10 @@ namespace fengmiapp
             log.Add();
             return;
         }
+        
         #endregion
 
-        #region  获取权限
-        public static string GetPower(string power, string xml)
-        {
-            string html = "";
-            //提取xml文档
-            XmlDocument xd = new XmlDocument();
-            xd.Load(xml);
-            //获取根节点
-            XmlNode root = xd.DocumentElement;
-
-            //获取节点列表
-            XmlNodeList items = root.ChildNodes;
-            //遍历item项
-            string tempName = "";
-            string tempValue = "";
-            string tempTitle = "";
-            string check = @"  checked=""checked""  ";
-
-            foreach (XmlNode item in items)
-            {
-                //输出属性
-                html += @"<div class=""rolesA clearfix"">";
-                tempName = item.Attributes["name"].Value;
-                tempValue = item.Attributes["value"].Value;
-                tempTitle = item.Attributes["title"].Value;
-
-                if (power.Contains(tempValue))
-                {
-                    check = @"  checked=""checked""  ";
-                }
-                else
-                {
-                    check = " ";
-                }
-
-                html += @"<h2><label>&nbsp;&nbsp;<input type=""hidden"" name=""" + tempName + @""" value=""" + tempValue + @"""" + check + " />" + tempTitle + "</label></h2>";
-                //输出子节点
-                html += @"<div class=""rolesB"">";
-
-                foreach (XmlNode item1 in item)
-                {
-                    tempName = item1.Attributes["name"].Value;
-                    tempValue = item1.Attributes["value"].Value;
-                    tempTitle = item1.Attributes["title"].Value;
-
-                    if (power.Contains(tempValue))
-                    {
-                        check = @"  checked=""checked""  ";
-                    }
-                    else
-                    {
-                        check = "  ";
-                    }
-
-                    html += @"<label><strong><input type=""checkbox"" name=""" + tempName + @""""" value=""" + tempValue + @"""" + check + " />" + tempTitle + "</strong></label>";
-
-                    html += @"<div class=""rolesC"">";
-
-                    foreach (XmlNode item2 in item1)
-                    {
-                        tempName = item2.Attributes["name"].Value;
-                        tempValue = item2.Attributes["value"].Value;
-                        tempTitle = item2.Attributes["title"].Value;
-                        if (power.Contains(tempValue))
-                        {
-                            check = @"  checked=""checked"" ";
-                        }
-                        else
-                        {
-                            check = "  ";
-                        }
-                        html += @"<label><input type=""checkbox"" name=""" + tempName + @""" value=""" + tempValue + @"""" + check + ">" + tempTitle + "</label>&nbsp;&nbsp;&nbsp;";
-
-                    }
-                    html += @"</div>";
-
-                }
-                html += @"</div>";
-                html += @"</div>";
-            }
-
-            return html;
-        }
-
-        public static string GetPower(string power, string xml,string disabled)
-        {
-            string html = "";
-            //提取xml文档
-            XmlDocument xd = new XmlDocument();
-            xd.Load(xml);
-            //获取根节点
-            XmlNode root = xd.DocumentElement;
-
-            //获取节点列表
-            XmlNodeList items = root.ChildNodes;
-            //遍历item项
-            string tempName = "";
-            string tempValue = "";
-            string tempTitle = "";
-            string check = @"  checked=""checked""  ";
-            string disable = @"  disabled=""disabled""  ";
-            if (string.IsNullOrEmpty(disabled)) {
-                disable = "";
-            }
-            foreach (XmlNode item in items)
-            {
-                //输出属性
-                html += @"<div class=""rolesA clearfix"">";
-                tempName = item.Attributes["name"].Value;
-                tempValue = item.Attributes["value"].Value;
-                tempTitle = item.Attributes["title"].Value;
-
-                if (power.Contains(tempValue))
-                {
-                    check = @"  checked=""checked""  ";
-                }
-                else
-                {
-                    check = " ";
-                }
-
-                html += @"<h2><label>&nbsp;&nbsp;<input type=""hidden"" name=""" + tempName + @""" value=""" + tempValue + @"""" + check + disable + " />" + tempTitle + "</label></h2>";
-                //输出子节点
-                html += @"<div class=""rolesB"">";
-
-                foreach (XmlNode item1 in item)
-                {
-                    tempName = item1.Attributes["name"].Value;
-                    tempValue = item1.Attributes["value"].Value;
-                    tempTitle = item1.Attributes["title"].Value;
-
-                    if (power.Contains(tempValue))
-                    {
-                        check = @"  checked=""checked""  ";
-                    }
-                    else
-                    {
-                        check = "  ";
-                    }
-
-                    html += @"<label><strong><input type=""checkbox"" name=""" + tempName + @""""" value=""" + tempValue + @"""" + check + disable + " />" + tempTitle + "</strong></label>";
-
-                    html += @"<div class=""rolesC"">";
-
-                    foreach (XmlNode item2 in item1)
-                    {
-                        tempName = item2.Attributes["name"].Value;
-                        tempValue = item2.Attributes["value"].Value;
-                        tempTitle = item2.Attributes["title"].Value;
-                        if (power.Contains(tempValue))
-                        {
-                            check = @"  checked=""checked"" ";
-                        }
-                        else
-                        {
-                            check = "  ";
-                        }
-                        html += @"<label><input type=""checkbox"" name=""" + tempName + @""" value=""" + tempValue + @"""" + check + disable + ">" + tempTitle + "</label>&nbsp;&nbsp;&nbsp;";
-
-                    }
-                    html += @"</div>";
-
-                }
-                html += @"</div>";
-                html += @"</div>";
-            }
-
-            return html;
-        }
-
-        #endregion
+        #region 清除Session
 
         public static void ClearSession(HttpSessionStateBase session)
         {
@@ -384,114 +142,9 @@ namespace fengmiapp
         {
             session.Remove(name);
         }
-
-        public static string getLine(string count)
-        {
-            string str = "";
-            try
-            {
-                int num = int.Parse(count);
-                for (int i = 1; i < num; i++)
-                {
-                    str += "--";
-                }
-            }
-            catch { }
-            return str;
-        }
-
-        public static string GetElement(string value,string xml)
-        {
-            string html = "";
-            //提取xml文档
-            XmlDocument xd = new XmlDocument();
-            xd.Load(xml);
-            //获取根节点
-            XmlNode root = xd.DocumentElement;
-
-            //获取节点列表
-            XmlNodeList items = root.ChildNodes;
-            //遍历item项
-            string tempName = "";
-            string tempValue = "";
-            string tempTitle = "";
-            string check = @"  checked=""checked""  ";
-            string disabled = "";
-
-            foreach (XmlNode item in items)
-            {
-                //输出属性
-                //tempName = item.Attributes["name"].Value;
-                //tempValue = item.Attributes["value"].Value;
-                //tempTitle = item.Attributes["title"].Value;
-
-                string inputType = "";
-                try
-                {
-                    inputType = item.Attributes["inputType"].Value;
-                }
-                catch
-                {
-                    inputType = "";
-                }
-                if (string.IsNullOrEmpty(inputType))
-                {
-                    continue;
-                }
-                else
-                {
-                    //输出子节点
-                    html += @"<div>";
-                    switch (inputType)
-                    {
-                        case "radio":
-                        case "checkbox":
-                            tempName = item.Attributes["name"].Value;
-                            foreach (XmlNode item1 in item)
-                            {
-                                tempValue = item1.Attributes["value"].Value;
-                                tempTitle = item1.Attributes["title"].Value;
-                                string datatype = item1.Attributes["datatype"].Value; 
-                                datatype = @" datatype=""" + datatype+@"""";
-                                string nullmsg = item1.Attributes["nullmsg"].Value;
-                                nullmsg = @" nullmsg=""" + nullmsg + @"""";
-
-                                string errormsg = item1.Attributes["errormsg"].Value;
-                                errormsg = @" errormsg=""" + errormsg + @"""";
-
-                                string classTemp = item1.Attributes["class"].Value;
-                                classTemp = @" class=""" + classTemp + @"""";
-                                if (value == tempValue) { check = @"  checked=""checked""  "; } else { check = ""; }
-
-                                html += @"<input value=""" + tempValue + @"""  type=""" + inputType + @""" name=""" + tempName + @"""" + check + disabled +classTemp+datatype+nullmsg+errormsg+ "  />" + tempTitle + "&nbsp;&nbsp;";
-
-                            }
-
-                            break;
-                        case "select":
-                            foreach (XmlNode item1 in item)
-                            {
-                                tempValue = item1.Attributes["value"].Value;
-                                tempTitle = item1.Attributes["title"].Value;
-
-                                if (value == tempValue) { check = @"  selected=""selected""  "; } else { check = ""; }
-
-                                html += @"<option value=""" + tempValue + @"""  type=""" + inputType + @""" " + check + disabled +"  />" + tempTitle + "</option>";
-
-                            }
-
-                            break;
-                        default:
-                            break;
-                    }
-                    html += @"</div>";
-                }
-            }
-
-            return html;
-
-        }
-
+        
+        #endregion
+       
         public static string GetNameFromXML(string value, string xml)
         {
             string html = "";
@@ -507,8 +160,8 @@ namespace fengmiapp
             string tempName = "";
             string tempValue = "";
             string tempTitle = "";
-            string check = @"  checked=""checked""  ";
-            string disabled = "";
+            //string check = @"  checked=""checked""  ";
+           // string disabled = "";
 
             foreach (XmlNode item in items)
             {
@@ -559,6 +212,7 @@ namespace fengmiapp
             }
             return VNum;
         }
+        
         /// <summary>
         ///  生成随机颜色
         /// </summary>
@@ -580,6 +234,7 @@ namespace fengmiapp
         /// 
         /// </summary>
         /// <param name="ValidateCode"></param>
+        
         public static byte[] CreateImage(string ValidateCode)
         {
             int int_ImageWidth = ValidateCode.Length * 14;
@@ -618,6 +273,128 @@ namespace fengmiapp
                 code = System.Web.Security.FormsAuthentication.HashPasswordForStoringInConfigFile(code, "MD5");
             }
             return code;
+        }
+
+        /*
+        /// <summary>
+        /// MD5加密，UTF-8编码
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public static string MD5Encrypt(string code)
+        {
+            if (!string.IsNullOrEmpty(code))
+            {
+
+                MD5 md5 = new MD5CryptoServiceProvider();
+                byte[] fromData = System.Text.Encoding.Unicode.GetBytes(code);
+                byte[] targetData = md5.ComputeHash(fromData);
+                string byte2String = string.Empty;
+
+                for (int i = 0; i < targetData.Length; i++)
+                {
+                    byte2String += targetData[i].ToString("x");
+                }
+
+                code = byte2String;
+            }
+            return code;
+        }
+        */
+
+        /// <summary>
+        /// 时间戳转为C#格式时间
+        /// </summary>
+        /// <param name="timeStamp">Unix时间戳格式</param>
+        /// <returns>C#格式时间</returns>
+        public static DateTime GetTime(string timeStamp)
+        {
+            DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+
+            long lTime = 0;
+            try
+            {
+                //lTime = long.Parse(timeStamp + "0000000");
+               // lTime = long.Parse(timeStamp);
+                lTime = long.Parse(timeStamp + "0000");
+            }
+            catch { }
+            TimeSpan toNow = new TimeSpan(lTime);
+            return dtStart.Add(toNow);
+        }
+
+        /// <summary>
+        /// DateTime时间格式转换为Unix时间戳格式
+        /// </summary>
+        /// <param name="time"> DateTime时间格式</param>
+        /// <returns>Unix时间戳格式，单位是秒</returns>
+        public static int ConvertDateTimeInt(System.DateTime time)
+        {
+            System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1));
+            return (int)(time - startTime).TotalSeconds;
+        }
+
+        /// <summary>
+        /// DateTime时间格式转换为Unix时间戳格式
+        /// </summary>
+        /// <param name="time"> DateTime时间格式</param>
+        /// <returns>Unix时间戳格式，单位是毫秒</returns>
+        public static long ConvertDateTimeLong(System.DateTime time)
+        {
+            System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1));
+            return (long)(time - startTime).TotalMilliseconds;
+        }
+
+        public static bool IsValidSecretSuccess(string token, string timeStamp)
+        {
+            bool result = false;
+            string SecretKey = ConfigurationManager.AppSettings["SecretKey"];
+            string AvailableTimeStr = ConfigurationManager.AppSettings["AvailableTime"];
+            double AvailableTime =1;
+            try
+            {
+                AvailableTime = double.Parse(AvailableTimeStr);
+            }
+            catch { }
+
+            if (string.IsNullOrEmpty(SecretKey))
+            {
+                result = false;
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(timeStamp))
+                {
+                    result = false;
+                }
+                else
+                {
+                    DateTime now = DateTime.Now;
+                    DateTime time = Common.GetTime(timeStamp);
+                    double hour = (now - time).TotalHours;
+                    if (AvailableTime >= hour)
+                    {
+                        string param = string.Empty;
+                        param += "t=" + timeStamp;
+                        param += SecretKey;
+                        string tokenOld = Common.MD5(param);
+                        if (token == tokenOld)
+                        {
+                            result = true;
+                        }
+                        else
+                        {
+                            result = false;
+                        }
+                    }
+                    else
+                    {//密钥过期
+                        result = false;
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

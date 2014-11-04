@@ -9,10 +9,15 @@ using fengmiapp.Models;
 
 namespace fengmiapp.Controllers
 {
-    public class PositionController : Controller
+    public class PositionController : AbstraCommonController
     {
         //
         // GET: /Position/
+
+        public PositionController()
+        {
+        }
+
         /// <summary>
         /// 上传用户定位信息
         /// </summary>

@@ -9,10 +9,21 @@ using fengmiapp.Models;
 
 namespace fengmiapp.Controllers
 {
-    public class UserController : Controller
+    public class UserController : AbstraCommonController
     {
+        /*
+         * token 
+         * t=now(); 时间戳
+         * SecretKey="DEVFORUSER-ANDRIOD-IOS-CRM-001-KEY"; 自定义密钥
+         * md5 加密
+         */
+
+        public UserController()
+        {
+        }
+
         #region 用户验证、登录、注册操作
-       
+
         /// <summary>
         /// 1.验证用户登录
         /// </summary>
@@ -20,51 +31,60 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult PostValidUser()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
+            int logType = 1;
+            string ip = string.Empty;
+            int uId = 0;
 
             string phone = Request.Params.Get("phone");
             string password = Request.Params.Get("password");
-
-            int uId = 0;
-
             password = Common.MD5(password);
 
-            if (string.IsNullOrEmpty(phone))
-            {
-                status = "error";
-                msg = "失败，帐号不能为空";
-            }
-            else if (string.IsNullOrEmpty(password))
-            {
-                status = "error";
-                msg = "失败，密码不能为空";
-            }
-            else
-            {
-                User user = new User();
-                user.Phone = phone;
-                user.PassWord = password;
-                user.login();
 
-                uId=user.Id;
+            if (this.IsEffetive)
+            {
 
-                if (uId>0)
+                if (string.IsNullOrEmpty(phone))
                 {
-                    status = "succeed";
-                    msg = "验证成功";
+                    status = "error";
+                    msg = "失败，帐号不能为空";
+                }
+                else if (string.IsNullOrEmpty(password))
+                {
+                    status = "error";
+                    msg = "失败，密码不能为空";
                 }
                 else
                 {
-                    uId = 0;
-                    status = "error";
-                    msg = "帐号或密码错误";
+                    User user = new User();
+                    user.Phone = phone;
+                    user.PassWord = password;
+                    user.login();
+
+                    uId = user.Id;
+
+                    if (uId > 0)
+                    {
+                        status = "succeed";
+                        msg = "验证成功";
+                    }
+                    else
+                    {
+                        uId = 0;
+                        status = "error";
+                        msg = "帐号或密码错误";
+                    }
                 }
             }
-
-            int logType = 1;
-            string ip = Request.UserHostAddress;
+            else
+            {
+                msg = this.ValidMsg;
+            }
+            ip = Request.UserHostAddress;
             title += "API：PostValidUser； ";
             title += "用户名："+phone+"，密码："+password+";  ";
             title += "用户Id：" + uId + "，验证用户登录：";
@@ -87,12 +107,12 @@ namespace fengmiapp.Controllers
             string msg = "";
             string title = "";
 
+            string uId = "0";
             string phone = Request.Params.Get("phone");
             //string password = Request.Params.Get("password");
             DataTable dt = new DataTable();
             User user = new User(phone);
 
-            string uId = "0";
 
             if (user.Phone == phone)
             {

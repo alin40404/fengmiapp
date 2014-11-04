@@ -66,7 +66,7 @@ namespace fengmiapp.Models
             {
                 this._ConnectionString.Open();
             }
-            catch (Exception ex)
+            catch
             {
 
             }
@@ -246,7 +246,7 @@ namespace fengmiapp.Models
 
                 rs.Fill(ds);
             }
-            catch (Exception ex)
+            catch
             {
             }
             close();
