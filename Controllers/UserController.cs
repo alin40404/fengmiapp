@@ -31,7 +31,7 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult PostValidUser()
         {
-            this.init();
+            //this.init();
 
             string status = "error";
             string msg = "";
@@ -44,8 +44,8 @@ namespace fengmiapp.Controllers
             string password = Request.Params.Get("password");
             password = Common.MD5(password);
 
-            if (this.IsEffetive)
-            {
+            //if (this.IsEffetive)
+            //{
 
                 if (string.IsNullOrEmpty(phone))
                 {
@@ -78,11 +78,12 @@ namespace fengmiapp.Controllers
                         msg = "帐号或密码错误";
                     }
                 }
-            }
-            else
-            {
-                msg = this.ValidMsg;
-            }
+            //}
+            //else
+            //{
+            //    msg = this.ValidMsg;
+            //}
+
             ip = Request.UserHostAddress;
             title += "API：PostValidUser； ";
             title += "用户名："+phone+"，密码："+password+";  ";
