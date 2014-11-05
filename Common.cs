@@ -369,6 +369,21 @@ namespace fengmiapp
                 }
                 else
                 {
+                    string param = string.Empty;
+                    param += "t=" + timeStamp;
+                    param += SecretKey;
+                    string tokenOld = Common.MD5(param);
+                    if (token == tokenOld)
+                    {
+                        result = true;
+                    }
+                    else
+                    {
+                        result = false;
+                    }
+
+                    #region 时效性验证
+                    /*
                     DateTime now = DateTime.Now;
                     DateTime time = Common.GetTime(timeStamp);
                     double hour = (now - time).TotalHours;
@@ -391,6 +406,8 @@ namespace fengmiapp
                     {//密钥过期
                         result = false;
                     }
+                    */
+                    #endregion
                 }
             }
 

@@ -44,7 +44,6 @@ namespace fengmiapp.Controllers
             string password = Request.Params.Get("password");
             password = Common.MD5(password);
 
-
             if (this.IsEffetive)
             {
 
