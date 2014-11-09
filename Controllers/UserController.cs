@@ -31,7 +31,7 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult PostValidUser()
         {
-            //this.init();
+            this.init();
 
             string status = "error";
             string msg = "";
@@ -44,8 +44,8 @@ namespace fengmiapp.Controllers
             string password = Request.Params.Get("password");
             password = Common.MD5(password);
 
-            //if (this.IsEffetive)
-            //{
+            if (this.IsEffetive)
+            {
 
                 if (string.IsNullOrEmpty(phone))
                 {
@@ -78,11 +78,11 @@ namespace fengmiapp.Controllers
                         msg = "帐号或密码错误";
                     }
                 }
-            //}
-            //else
-            //{
-            //    msg = this.ValidMsg;
-            //}
+            }
+            else
+            {
+                msg = this.ValidMsg;
+            }
 
             ip = Request.UserHostAddress;
             title += "API：PostValidUser； ";
@@ -103,28 +103,39 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult isUserExist()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
 
             string uId = "0";
             string phone = Request.Params.Get("phone");
-            //string password = Request.Params.Get("password");
-            DataTable dt = new DataTable();
-            User user = new User(phone);
 
-
-            if (user.Phone == phone)
+            if (this.IsEffetive)
             {
-                uId = user.Id.ToString();
-                status = "succeed";
-                msg = "帐号存在";
+
+                //string password = Request.Params.Get("password");
+                DataTable dt = new DataTable();
+                User user = new User(phone);
+
+
+                if (user.Phone == phone)
+                {
+                    uId = user.Id.ToString();
+                    status = "succeed";
+                    msg = "帐号存在";
+                }
+                else
+                {
+                    uId = "0";
+                    status = "error";
+                    msg = "帐号不存在";
+                }
             }
             else
             {
-                uId = "0";
-                status = "error";
-                msg = "帐号不存在";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -149,6 +160,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult Register()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -161,46 +174,54 @@ namespace fengmiapp.Controllers
 
             password = Common.MD5(password);
 
-            if (string.IsNullOrEmpty(phone))
+            if (this.IsEffetive)
             {
-                status = "error";
-                msg = "注册失败，帐号不能为空";
 
-            }
-            else if (string.IsNullOrEmpty(password))
-            {
-                status = "error";
-                msg = "注册失败，密码不能为空";
-            }
-            else
-            {
-                DataTable dt = new DataTable();
-                User user = new User(phone);
-                uId = user.Id;
+                if (string.IsNullOrEmpty(phone))
+                {
+                    status = "error";
+                    msg = "注册失败，帐号不能为空";
 
-                if (uId < 1)
-                {//用户可用
-                    user.Phone = phone;
-                    user.PassWord = password;
+                }
+                else if (string.IsNullOrEmpty(password))
+                {
+                    status = "error";
+                    msg = "注册失败，密码不能为空";
+                }
+                else
+                {
+                    DataTable dt = new DataTable();
+                    User user = new User(phone);
+                    uId = user.Id;
 
-                    int result = user.Add();
+                    if (uId < 1)
+                    {//用户可用
+                        user.Phone = phone;
+                        user.PassWord = password;
 
-                    if (result > 0)
-                    {
-                        status = "succeed";
-                        msg = "注册成功";
+                        int result = user.Add();
+
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "注册成功";
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "注册失败";
+                        }
                     }
                     else
                     {
                         status = "error";
-                        msg = "注册失败";
+                        msg = "注册失败，帐号已存在";
                     }
                 }
-                else
-                {
-                    status = "error";
-                    msg = "注册失败，帐号已存在";
-                }
+            }
+            else
+            {
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -230,6 +251,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DealUserInfo()
         {
+            this.init();
+
             string title = "";
             string status = "error";
             string msg = "";
