@@ -413,5 +413,19 @@ namespace fengmiapp
 
             return result;
         }
+
+        /// <summary>
+        /// 得到随机的文件名
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFileName()
+        {
+            Random rd = new Random();
+            StringBuilder serial = new StringBuilder();
+            serial.Append(DateTime.Now.ToString("yyMMddHHmmssff"));
+            serial.Append(rd.Next(0, 9999).ToString());
+            return serial.ToString();
+        }
+
     }
 }

@@ -396,6 +396,21 @@ namespace fengmiapp.Models
 
         }
 
+        public int ModifyUserFace()
+        {
+            string sql = "UPDATE " + "" + this._table + "" + " set " +
+                    " userFace=@userFace " +
+                    " Where Id=@Id  ";
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@Id", _id),
+                new SqlParameter("@userFace", _userFace),
+			};
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
+
+        }
+
         public int ModifyPermit()
         {
             string sql = "UPDATE " + "" + this._table + "" + " set " +

@@ -286,43 +286,52 @@ namespace fengmiapp.Controllers
             {
                 i_uId = 0;
             }
-            User adminUser = new User(i_uId);
 
-           int Id= adminUser.Id;
 
-           if (Id > 0)
-            {//update
+            if (this.IsEffetive)
+            {
+                User adminUser = new User(i_uId);
 
-                adminUser.RealName = realName;
-                adminUser.NickName = nickName;
-                adminUser.IdentityCard = identityCard;
-                try
-                {
-                    adminUser.BirthDay = DateTime.Parse(birthDay);
-                }
-                catch {}
-                adminUser.Address = address;
-                adminUser.Email = email;
-                adminUser.UserFace = userFace;
-                adminUser.Interests = interests;
+                int Id = adminUser.Id;
 
-                int result = adminUser.ModifyInfo();
-                if (result > 0)
-                {
-                    status = "succeed";
-                    msg = "修改成功";
+                if (Id > 0)
+                {//update
 
+                    adminUser.RealName = realName;
+                    adminUser.NickName = nickName;
+                    adminUser.IdentityCard = identityCard;
+                    try
+                    {
+                        adminUser.BirthDay = DateTime.Parse(birthDay);
+                    }
+                    catch { }
+                    adminUser.Address = address;
+                    adminUser.Email = email;
+                    adminUser.UserFace = userFace;
+                    adminUser.Interests = interests;
+
+                    int result = adminUser.ModifyInfo();
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "修改成功";
+
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "修改失败";
+                    }
                 }
                 else
                 {
                     status = "error";
-                    msg = "修改失败";
+                    msg = "修改失败,用户帐号不存在";
                 }
             }
             else
             {
-                status = "error";
-                msg = "修改失败,用户帐号不存在";
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
@@ -343,9 +352,12 @@ namespace fengmiapp.Controllers
         /// <returns></returns>
         public ActionResult GetUserInfo()
         {
+            this.init();
+
             string title = "";
             string status = "error";
             string msg = "";
+            string ip = Request.UserHostAddress;
 
             string uId = Request.Params.Get("uId");
             int Id = 0;
@@ -357,57 +369,68 @@ namespace fengmiapp.Controllers
             {
                 Id = 0;
             }
-            User adminUser = new User(Id);
-
-            string phone = adminUser.Phone;
-
+           
             object userOjb = new object();
 
-            if (!string.IsNullOrEmpty(phone))
-            {//get
-                string realName = adminUser.RealName;
-                string nickName = adminUser.NickName;
-                string identityCard = adminUser.IdentityCard;
-                string birthDay = adminUser.BirthDay.ToString("yyyy-MM-dd");//HH:mm:ss
-                string userFace = adminUser.UserFace;
-                string email = adminUser.Email;
-                string address = adminUser.Address;
-                int userStatus = adminUser.Status;
-                string interests = adminUser.Interests;
-                int isPermitAddFriend = adminUser.IsPermitAddFriend;
+            if (this.IsEffetive)
+            {
+                User adminUser = new User(Id);
+                string phone = adminUser.Phone;
 
+                if (!string.IsNullOrEmpty(phone))
+                {//get
+                    string realName = adminUser.RealName;
+                    string nickName = adminUser.NickName;
+                    string identityCard = adminUser.IdentityCard;
+                    string birthDay = adminUser.BirthDay.ToString("yyyy-MM-dd");//HH:mm:ss
+                    string userFace = adminUser.UserFace;
+                    string email = adminUser.Email;
+                    string address = adminUser.Address;
+                    int userStatus = adminUser.Status;
+                    string interests = adminUser.Interests;
+                    int isPermitAddFriend = adminUser.IsPermitAddFriend;
 
+                    string port = Request.Url.Port.ToString();
+                    string host = "http://" + ip + ":" + port + "/";
+                    if (userFace != string.Empty)
+                    {
+                        userFace = host + userFace;
+                    }
 
-                userOjb = new
+                    
+                    userOjb = new
+                    {
+                        phone = phone,
+                        realName = realName,
+                        nickName = nickName,
+                        identityCard = identityCard,
+                        birthDay = birthDay,
+                        userFace = userFace,
+                        email = email,
+                        address = address,
+                        userStatus = userStatus,
+                        interests = interests,
+                        isPermitAddFriend = isPermitAddFriend,
+
+                    };
+
+                    status = "succeed";
+                    msg = "获取成功";
+
+                }
+                else
                 {
-                    phone = phone,
-                    realName = realName,
-                    nickName = nickName,
-                    identityCard = identityCard,
-                    birthDay = birthDay,
-                    userFace = userFace,
-                    email = email,
-                    address = address,
-                    userStatus = userStatus,
-                    interests = interests,
-                    isPermitAddFriend = isPermitAddFriend,
-
-                };
-
-
-                status = "succeed";
-                msg = "获取成功";
-
+                    status = "error";
+                    msg = "  获取失败,用户帐号不存在";
+                    userOjb = new object();
+                }
             }
             else
             {
-                status = "error";
-                msg = "  获取失败,用户帐号不存在";
-                userOjb = new object();
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
-            string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
             title += "API：GetUserInfo； ";
             title += "用户Id：" + Id + "，获取用户个人信息：";
@@ -426,6 +449,11 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DealUpdatePwd()
         {
+            this.init();
+
+                        string title = "";
+            string msg = "";
+            string status = "error";
 
             string oldPassword = Request.Params.Get("oldPassword");
             string password = Request.Params.Get("password");
@@ -441,54 +469,61 @@ namespace fengmiapp.Controllers
                 Id = 0;
             }
 
-            string title = "";
-            string msg = "";
-            string status = "error";
 
-            if (Id > 0)
-            {//update
-                User adminUser = new User(Id);
-                if (!string.IsNullOrEmpty(oldPassword))
-                {
-                    oldPassword = Common.MD5(oldPassword);
-                    if (oldPassword != adminUser.PassWord)
-                    {
-                        msg = "修改密码失败，原密码不正确";
-                        status = "error";
-                    }
-                    else
-                    {
-                        adminUser.Id = Id;
-                        password = Common.MD5(password);
-                        adminUser.PassWord = password;
 
-                        int result = adminUser.ModifyPWD();
-                        if (result > 0)
+            if (this.IsEffetive)
+            {
+
+                if (Id > 0)
+                {//update
+                    User adminUser = new User(Id);
+                    if (!string.IsNullOrEmpty(oldPassword))
+                    {
+                        oldPassword = Common.MD5(oldPassword);
+                        if (oldPassword != adminUser.PassWord)
                         {
-                            msg = "修改成功";
-                            status = "succeed";
+                            msg = "修改密码失败，原密码不正确";
+                            status = "error";
                         }
                         else
                         {
-                            msg = "修改失败";
-                            status = "error";
+                            adminUser.Id = Id;
+                            password = Common.MD5(password);
+                            adminUser.PassWord = password;
+
+                            int result = adminUser.ModifyPWD();
+                            if (result > 0)
+                            {
+                                msg = "修改成功";
+                                status = "succeed";
+                            }
+                            else
+                            {
+                                msg = "修改失败";
+                                status = "error";
+
+                            }
 
                         }
-
                     }
+                    else
+                    {
+                        msg = "修改密码失败，原密码不能为空";
+                        status = "error";
+                    }
+
                 }
                 else
                 {
-                    msg = "修改密码失败，原密码不能为空";
+                    msg = "修改失败,用户帐号不存在";
                     status = "error";
                 }
-
             }
             else
             {
-                msg = "修改失败,用户帐号不存在";
-                status = "error";
+                msg = this.ValidMsg;
             }
+
 
             int logType = 3;
             string ip = Request.UserHostAddress;
@@ -509,6 +544,12 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetUserStatus()
         {
+            this.init();
+
+            string title = "";
+            string status = "error";
+            string msg = "";
+
             string uId = Request.Params.Get("uId");
 
             int Id = 0;
@@ -520,45 +561,49 @@ namespace fengmiapp.Controllers
             {
                 Id = 0;
             }
-            User adminUser = new User(Id);
 
-            string phone = adminUser.Phone;
-
-            string title = "";
-            string status = "error";
-            string msg = "";
             object userOjb = new object();
 
-            if (!string.IsNullOrEmpty(phone))
-            {//get
-                //1 在线 ，2 隐身
-                int userStatus = adminUser.Status;
+            if (this.IsEffetive)
+            {
 
-                //string realName = adminUser.RealName;
-                //string nickName = adminUser.NickName;
-                //string identityCard = adminUser.IdentityCard;
-                //string birthDay = adminUser.BirthDay.ToString("yyyy-MM-dd HH:mm:ss");
-                //string userFace = adminUser.UserFace;
-                string email = adminUser.Email;
-                //string address = adminUser.Address;
+                User adminUser = new User(Id);
+                string phone = adminUser.Phone;
+                if (!string.IsNullOrEmpty(phone))
+                {//get
+                    //1 在线 ，2 隐身
+                    int userStatus = adminUser.Status;
 
-                userOjb = new
+                    //string realName = adminUser.RealName;
+                    //string nickName = adminUser.NickName;
+                    //string identityCard = adminUser.IdentityCard;
+                    //string birthDay = adminUser.BirthDay.ToString("yyyy-MM-dd HH:mm:ss");
+                    //string userFace = adminUser.UserFace;
+                    string email = adminUser.Email;
+                    //string address = adminUser.Address;
+
+                    userOjb = new
+                    {
+                        uId = uId,
+                        phone = phone,
+                        email = email,
+                        status = userStatus,
+                    };
+
+                    status = "succeed";
+                    msg = "获取成功";
+
+                }
+                else
                 {
-                    uId = uId,
-                    phone = phone,
-                    email = email,
-                    status = userStatus,
-                };
-
-                status = "succeed";
-                msg = "获取成功";
-
+                    status = "error";
+                    msg = "  获取失败,用户帐号不存在";
+                    userOjb = new object();
+                }
             }
             else
             {
-                status = "error";
-                msg = "  获取失败,用户帐号不存在";
-                userOjb = new object();
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
@@ -581,6 +626,12 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DealUserStatus()
         {
+            this.init();
+
+            string title = "";
+            string status = "error";
+            string msg = "";
+
             string uId = Request.Params.Get("uId");
 
             string userStatus = Request.Params.Get("status");
@@ -594,53 +645,58 @@ namespace fengmiapp.Controllers
             {
                 i_uId = 0;
             }
-            User adminUser = new User(i_uId);
 
-            int Id = adminUser.Id;
-
-            string title = "";
-            string status = "error";
-            string msg = "";
-
-            //1 在线 ，2 隐身
-            int i_status = 1;
-            try
+            if (this.IsEffetive)
             {
+                User adminUser = new User(i_uId);
+
+                int Id = adminUser.Id;
+
+
+                //1 在线 ，2 隐身
+                int i_status = 1;
                 try
                 {
-                    i_status = int.Parse(userStatus);
-                }
-                catch { }
-                adminUser.Status = i_status;
-
-
-                if (Id > 0)
-                {//update
-                   
-                    int result = adminUser.ModifyStatus();
-                    if (result > 0)
+                    try
                     {
-                        status = "succeed";
-                        msg = "修改成功";
+                        i_status = int.Parse(userStatus);
+                    }
+                    catch { }
+                    adminUser.Status = i_status;
 
+
+                    if (Id > 0)
+                    {//update
+
+                        int result = adminUser.ModifyStatus();
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "修改成功";
+
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "修改失败";
+                        }
                     }
                     else
                     {
                         status = "error";
-                        msg = "修改失败";
+                        msg = "修改失败,用户帐号不存在";
+
                     }
                 }
-                else
+                catch
                 {
                     status = "error";
-                    msg = "修改失败,用户帐号不存在";
-
+                    msg = "修改失败，修改状态有误";
                 }
             }
-            catch
+            else
             {
-                status = "error";
-                msg = "修改失败，修改状态有误";
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
@@ -662,6 +718,12 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DealUserPermit()
         {
+            this.init();
+
+            string title = "";
+            string status = "error";
+            string msg = "";
+
             string uId = Request.Params.Get("uId");
             string isPermitAddFriend = Request.Params.Get("isPermitAddFriend");
 
@@ -674,42 +736,45 @@ namespace fengmiapp.Controllers
             {
                 i_uId = 0;
             }
-
-
-            User adminUser = new User(i_uId);
-            int Id = adminUser.Id;
-            string title = "";
-            string status = "error";
-            string msg = "";
-
-            //1 允许 ，0 不允许
-            int i_isPermitAddFriend = 1;
-            try
+            if (this.IsEffetive)
             {
-                i_isPermitAddFriend = int.Parse(isPermitAddFriend);
-            }
-            catch { }
-            adminUser.IsPermitAddFriend = i_isPermitAddFriend;
 
-            if (Id > 0)
-            {//update
-                int result = adminUser.ModifyPermit();
-                if (result > 0)
+                User adminUser = new User(i_uId);
+                int Id = adminUser.Id;
+
+                //1 允许 ，0 不允许
+                int i_isPermitAddFriend = 1;
+                try
                 {
-                    status = "succeed";
-                    msg = "修改成功";
+                    i_isPermitAddFriend = int.Parse(isPermitAddFriend);
+                }
+                catch { }
+                adminUser.IsPermitAddFriend = i_isPermitAddFriend;
+
+                if (Id > 0)
+                {//update
+                    int result = adminUser.ModifyPermit();
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "修改成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "修改失败";
+                    }
                 }
                 else
                 {
                     status = "error";
-                    msg = "修改失败";
+                    msg = "修改失败,用户帐号不存在";
+
                 }
             }
             else
             {
-                status = "error";
-                msg = "修改失败,用户帐号不存在";
-
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
@@ -731,6 +796,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DealUserToFriendUserStatus()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -740,7 +807,6 @@ namespace fengmiapp.Controllers
             string modifyTime = Request.Params.Get("modifyTime");
             string userFriendStatus = Request.Params.Get("status");
 
-            DataTable dt = new DataTable();
 
             //int i_uId=int.Parse(uId);
             //int i_fuId=int.Parse(fuId);
@@ -764,54 +830,65 @@ namespace fengmiapp.Controllers
                 i_fuId = 0;
             }
 
-            UserFriend userfriend = new UserFriend(i_uId, i_fuId);
-            int UFId = userfriend.Id;
+            if (this.IsEffetive)
+            {
+                DataTable dt = new DataTable();
 
-            if (UFId > 0)
-            {//用户可用
-                DateTime dt_modifyTime = new DateTime();
-                try
-                {
-                    dt_modifyTime = DateTime.Parse(modifyTime);
-                }
-                catch
-                {
-                }
-                userfriend.ModifyTime = dt_modifyTime;
+                UserFriend userfriend = new UserFriend(i_uId, i_fuId);
+                int UFId = userfriend.Id;
 
-                int i_userFriendStatus = 0;
-                try
-                {
-                    i_userFriendStatus = int.Parse(userFriendStatus);
-                }
-                catch { }
+                if (UFId > 0)
+                {//用户可用
+                    DateTime dt_modifyTime = new DateTime();
+                    try
+                    {
+                        dt_modifyTime = DateTime.Parse(modifyTime);
+                    }
+                    catch
+                    {
+                    }
+                    userfriend.ModifyTime = dt_modifyTime;
 
-                userfriend.Status = i_userFriendStatus;
-                int result = userfriend.ModifyStatus();
+                    int i_userFriendStatus = 0;
+                    try
+                    {
+                        i_userFriendStatus = int.Parse(userFriendStatus);
+                    }
+                    catch { }
 
-                if (result > 0)
-                {
-                    UserFriendStatus userfrStatus = new UserFriendStatus();
-                    userfrStatus.UId = userfriend.UId;
-                    userfrStatus.FuId = userfriend.FuId;
-                    userfrStatus.UploadTime = dt_modifyTime;
-                    userfrStatus.Status = i_userFriendStatus;
-                    userfrStatus.Add();
+                    userfriend.Status = i_userFriendStatus;
+                    int result = userfriend.ModifyStatus();
 
-                    status = "succeed";
-                    msg = "修改成功";
+                    if (result > 0)
+                    {
+                        UserFriendStatus userfrStatus = new UserFriendStatus();
+                        userfrStatus.UId = userfriend.UId;
+                        userfrStatus.FuId = userfriend.FuId;
+                        userfrStatus.UploadTime = dt_modifyTime;
+                        userfrStatus.Status = i_userFriendStatus;
+                        userfrStatus.Add();
+
+                        status = "succeed";
+                        msg = "修改成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "修改失败";
+                    }
                 }
                 else
                 {
                     status = "error";
-                    msg = "修改失败";
+                    msg = "修改失败，未加好友";
                 }
+
             }
             else
             {
-                status = "error";
-                msg = "修改失败，未加好友";
+                msg = this.ValidMsg;
             }
+
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
@@ -831,6 +908,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DealUserToGroupStatus()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -838,9 +917,7 @@ namespace fengmiapp.Controllers
             string uId = Request.Params.Get("uId");
             string uGId = Request.Params.Get("uGId");
             string modifyTime = Request.Params.Get("modifyTime");
-            string userStatus = Request.Params.Get("status");
-
-            DataTable dt = new DataTable();
+            string userStatus = Request.Params.Get("status");            
 
             //int i_uId = int.Parse(uId);
             //int i_uGId = int.Parse(uGId);
@@ -864,53 +941,60 @@ namespace fengmiapp.Controllers
             {
                 i_uGId = 0;
             }
+            if (this.IsEffetive)
+            {
+                DataTable dt = new DataTable();
+                UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
+                int Id = userGroupUser.Id;
 
-            UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
-            int Id = userGroupUser.Id;
+                if (Id > 0)
+                {//用户可用
+                    DateTime dt_modifyTime = new DateTime();
+                    try
+                    {
+                        dt_modifyTime = DateTime.Parse(modifyTime);
+                    }
+                    catch
+                    {
+                    }
+                    userGroupUser.ModifyTime = dt_modifyTime;
 
-            if (Id > 0)
-            {//用户可用
-                DateTime dt_modifyTime = new DateTime();
-                try
-                {
-                    dt_modifyTime = DateTime.Parse(modifyTime);
-                }
-                catch
-                {
-                }
-                userGroupUser.ModifyTime = dt_modifyTime;
+                    int i_userStatus = 0;
+                    try
+                    {
+                        i_userStatus = int.Parse(userStatus);
+                    }
+                    catch { }
 
-                int i_userStatus = 0;
-                try
-                {
-                    i_userStatus = int.Parse(userStatus);
-                }
-                catch { }
+                    userGroupUser.Status = i_userStatus;
+                    int result = userGroupUser.ModifyStatus();
+                    if (result > 0)
+                    {
+                        UserGroupUserStatus userGrStatus = new UserGroupUserStatus();
+                        userGrStatus.UId = userGroupUser.UId;
+                        userGrStatus.UGId = userGroupUser.UGId;
+                        userGrStatus.UploadTime = dt_modifyTime;
+                        userGrStatus.Status = i_userStatus;
+                        userGrStatus.Add();
 
-                userGroupUser.Status = i_userStatus;
-                int result = userGroupUser.ModifyStatus();
-                if (result > 0)
-                {
-                    UserGroupUserStatus userGrStatus = new UserGroupUserStatus();
-                    userGrStatus.UId = userGroupUser.UId;
-                    userGrStatus.UGId = userGroupUser.UGId;
-                    userGrStatus.UploadTime = dt_modifyTime;
-                    userGrStatus.Status = i_userStatus;
-                    userGrStatus.Add();
-
-                    status = "succeed";
-                    msg = "修改成功";
+                        status = "succeed";
+                        msg = "修改成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "修改失败";
+                    }
                 }
                 else
                 {
                     status = "error";
-                    msg = "修改失败";
+                    msg = "修改失败，用户未加入此群组";
                 }
             }
             else
             {
-                status = "error";
-                msg = "修改失败，用户未加入此群组";
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
@@ -936,9 +1020,14 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult Shake()
         {
+            this.init();
+
             string title = "";
             string status = "error";
             string msg = "";
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
 
             HttpRequestBase request = Request;
             string uId = request.Params.Get("uId");
@@ -962,117 +1051,128 @@ namespace fengmiapp.Controllers
             catch { }
 
             int result = 0;
-
-            UserAction userAction = new UserAction(i_uId,action);
-            int Id = userAction.Id;
-            userAction.UploadTime = dt_uploadTime;
-
-            if (Id > 0)
-            {//update
-
-                userAction.ModifyTime = DateTime.Now;
-                result = userAction.ModifyInfo();
-            }
-            else
-            {
-                userAction.UId = i_uId;
-                userAction.Action = action;
-
-                result = userAction.Add();
-                if (result > 0)
-                {
-                    userAction = new UserAction(i_uId, action);
-                }
-            }
-
+            
             List<object> userObjList = new List<object>();
 
-
-            if (result > 0)
+            if (this.IsEffetive)
             {
-                status = "succeed";
-                msg = "获取成功";
+                UserAction userAction = new UserAction(i_uId, action);
+                int Id = userAction.Id;
+                userAction.UploadTime = dt_uploadTime;
 
-                DataTable dt = new DataTable();
+                if (Id > 0)
+                {//update
 
-                //重置用户Id
-                userAction.UId = 0;
-                userAction.Action = action;
-                userAction.Id = 0;//显示所有 包括自己的用户
-                
-                int number = 20;
-                double hours = -1;//取一小时之前到现在的数据
-                //dt = userAction.GetActionUserList(number);
-                dt = userAction.GetActionUserList(number, hours);
-                int count = dt.Rows.Count;
-
-                for (int i = 0; i < count; i++)
+                    userAction.ModifyTime = DateTime.Now;
+                    result = userAction.ModifyInfo();
+                }
+                else
                 {
+                    userAction.UId = i_uId;
+                    userAction.Action = action;
 
-                    string t_uId = dt.Rows[i]["uId"].ToString();
-                    string t_action = dt.Rows[i]["action"].ToString();
-                    string t_uploadTime = dt.Rows[i]["uploadTime"].ToString();
-                    string t_modifyTime = dt.Rows[i]["modifyTime"].ToString();
-                    try
+                    result = userAction.Add();
+                    if (result > 0)
                     {
-                        t_uploadTime = DateTime.Parse(t_uploadTime).ToString("yyyy-MM-dd HH:mm:ss");
+                        userAction = new UserAction(i_uId, action);
                     }
-                    catch { }
-                    try
+                }
+
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "获取成功";
+
+                    DataTable dt = new DataTable();
+
+                    //重置用户Id
+                    userAction.UId = 0;
+                    userAction.Action = action;
+                    userAction.Id = 0;//显示所有 包括自己的用户
+
+                    int number = 20;
+                    double hours = -1;//取一小时之前到现在的数据
+                    //dt = userAction.GetActionUserList(number);
+                    dt = userAction.GetActionUserList(number, hours);
+                    int count = dt.Rows.Count;
+                    string port = Request.Url.Port.ToString();
+                    string host = "http://" + ip + ":" + port + "/";
+
+                    for (int i = 0; i < count; i++)
                     {
-                        t_modifyTime = DateTime.Parse(t_modifyTime).ToString("yyyy-MM-dd HH:mm:ss");
+
+                        string t_uId = dt.Rows[i]["uId"].ToString();
+                        string t_action = dt.Rows[i]["action"].ToString();
+                        string t_uploadTime = dt.Rows[i]["uploadTime"].ToString();
+                        string t_modifyTime = dt.Rows[i]["modifyTime"].ToString();
+                        try
+                        {
+                            t_uploadTime = DateTime.Parse(t_uploadTime).ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                        catch { }
+                        try
+                        {
+                            t_modifyTime = DateTime.Parse(t_modifyTime).ToString("yyyy-MM-dd HH:mm:ss");
+                        }
+                        catch { }
+
+
+                        string phone = dt.Rows[i]["phone"].ToString();
+                        string realName = dt.Rows[i]["realName"].ToString();
+                        string nickName = dt.Rows[i]["nickName"].ToString();
+                        string identityCard = dt.Rows[i]["identityCard"].ToString();
+                        string t_birthDay = dt.Rows[i]["birthDay"].ToString();
+
+                        string birthDay = "";
+                        try
+                        {
+                            birthDay = DateTime.Parse(t_birthDay).ToString("yyyy-MM-dd");
+                        }
+                        catch { }
+
+                        string userFace = dt.Rows[i]["userFace"].ToString();
+                        if (userFace != string.Empty)
+                        {
+                            userFace = host + userFace;
+                        }
+
+
+
+                        string email = dt.Rows[i]["email"].ToString();
+                        string address = dt.Rows[i]["address"].ToString();
+
+                        object userObj = new object();
+                        userObj = new
+                        {
+                            uId = t_uId,
+                            action = t_action,
+                            uploadTime = t_uploadTime,
+                            modifyTime = t_modifyTime,
+
+                            phone = phone,
+                            realName = realName,
+                            nickName = nickName,
+                            identityCard = identityCard,
+                            birthDay = birthDay,
+                            userFace = userFace,
+                            email = email,
+                            address = address
+                        };
+                        userObjList.Add(userObj);
                     }
-                    catch { }
-
-
-                    string phone = dt.Rows[i]["phone"].ToString();
-                    string realName = dt.Rows[i]["realName"].ToString();
-                    string nickName = dt.Rows[i]["nickName"].ToString();
-                    string identityCard = dt.Rows[i]["identityCard"].ToString();
-                    string t_birthDay = dt.Rows[i]["birthDay"].ToString();
-
-                    string birthDay = "";
-                    try
-                    {
-                        birthDay = DateTime.Parse(t_birthDay).ToString("yyyy-MM-dd");
-                    }
-                    catch { }
-
-                    string userFace = dt.Rows[i]["userFace"].ToString();
-                    //string userFace = Encoding.UTF8.GetString((byte[])dt.Rows[i]["userFace"]);
-
-                    string email = dt.Rows[i]["email"].ToString();
-                    string address = dt.Rows[i]["address"].ToString();
-
-                    object userObj = new object();
-                    userObj = new
-                    {
-                        uId = t_uId,
-                        action = t_action,
-                        uploadTime = t_uploadTime,
-                        modifyTime = t_modifyTime,
-
-                        phone = phone,
-                        realName = realName,
-                        nickName = nickName,
-                        identityCard = identityCard,
-                        birthDay = birthDay,
-                        userFace = userFace,
-                        email = email,
-                        address = address
-                    };
-                    userObjList.Add(userObj);
+                }
+                else
+                {
+                    status = "error";
+                    msg = "获取失败";
                 }
             }
             else
             {
-                status = "error";
-                msg = "获取失败";
+                msg = this.ValidMsg;
             }
 
-            int logType = 3;
-            string ip = Request.UserHostAddress;
-            string emergeURL = Request.Url.ToString();
             title += "API：Shake； ";
             title += "用户Id：" + i_uId + "，上传时间：" + uploadTime + "，摇一摇：";
             Common.addLog(logType, title + msg);
@@ -1093,6 +1193,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult AddFriend()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -1142,132 +1244,140 @@ namespace fengmiapp.Controllers
                 i_uFGroupId = 0;
             }
             #endregion
-
-            UserFriend userFriend = new UserFriend(i_uId, i_fuId);
-
-            UserFriend userFriend_added = new UserFriend();
-
-            int Id = userFriend.Id;
-            int Id_added = 0;
-
-
-            int userStatus =1 ;
-            int result = 0;
-
-            if (Id > 0)
+            if (this.IsEffetive)
             {
-                userStatus = userFriend.Status; //添加好友 修改状态
+                UserFriend userFriend = new UserFriend(i_uId, i_fuId);
 
-                if (userStatus > 0)
+                UserFriend userFriend_added = new UserFriend();
+
+                int Id = userFriend.Id;
+                int Id_added = 0;
+
+
+                int userStatus = 1;
+                int result = 0;
+
+                if (Id > 0)
                 {
-                    status = "error";
-                    msg = "添加失败，已经是好友";
-                }
-                else
-                {
-                    userStatus = 1;
-                    userFriend.Status = userStatus;
+                    userStatus = userFriend.Status; //添加好友 修改状态
 
-                    //通知对方
-
-
-                    result = userFriend.ModifyStatus();
-
-                    if (result > 0)
+                    if (userStatus > 0)
                     {
-                        status = "succeed";
-                        msg = "已经恢复为好友";
+                        status = "error";
+                        msg = "添加失败，已经是好友";
+                    }
+                    else
+                    {
+                        userStatus = 1;
+                        userFriend.Status = userStatus;
 
-                       userFriend_added = new UserFriend(i_fuId, i_uId);
-                       Id_added = userFriend_added.Id;
+                        //通知对方
 
-                        if (Id_added > 0)
+
+                        result = userFriend.ModifyStatus();
+
+                        if (result > 0)
                         {
-                            int tempStatus = userFriend_added.Status;
-                            if (tempStatus < 1)
+                            status = "succeed";
+                            msg = "已经恢复为好友";
+
+                            userFriend_added = new UserFriend(i_fuId, i_uId);
+                            Id_added = userFriend_added.Id;
+
+                            if (Id_added > 0)
                             {
+                                int tempStatus = userFriend_added.Status;
+                                if (tempStatus < 1)
+                                {
+                                    userFriend_added.Status = userStatus;
+                                    userFriend_added.ModifyStatus();
+                                }
+                            }
+                            else
+                            {
+                                userFriend_added.UId = i_fuId;
+                                userFriend_added.FuId = i_uId;
+                                userFriend_added.AddType = i_addType;
+                                userFriend_added.UFGroupId = i_uFGroupId;
                                 userFriend_added.Status = userStatus;
-                                userFriend_added.ModifyStatus();
+                                userFriend_added.Add();
                             }
                         }
                         else
                         {
-                            userFriend_added.UId =i_fuId ;
-                            userFriend_added.FuId = i_uId;
-                            userFriend_added.AddType = i_addType;
-                            userFriend_added.UFGroupId = i_uFGroupId;
-                            userFriend_added.Status = userStatus;
-                            userFriend_added.Add();
+                            status = "error";
+                            msg = "恢复为好友失败";
                         }
+
+                    }
+
+                }
+                else
+                {
+                    if (i_uId <= 0 || i_fuId <= 0)
+                    {
+                        status = "error";
+                        msg = "添加失败，用户Id有误";
+
                     }
                     else
                     {
-                        status = "error";
-                        msg = "恢复为好友失败";
-                    }
+                        userFriend.UId = i_uId;
+                        userFriend.FuId = i_fuId;
+                        userFriend.AddType = i_addType;
+                        userFriend.UFGroupId = i_uFGroupId;
 
+                        userStatus = 1;//默认在线
+
+                        userFriend.Status = userStatus;
+                        //通知对方
+
+                        result = userFriend.Add();
+
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "添加成功";
+
+                            userFriend_added = new UserFriend(i_fuId, i_uId);
+                            Id_added = userFriend_added.Id;
+
+                            if (Id_added > 0)
+                            {
+                                int tempStatus = userFriend_added.Status;
+                                if (tempStatus < 1)
+                                {
+                                    userFriend_added.Status = userStatus;
+                                    userFriend_added.ModifyStatus();
+                                }
+                            }
+                            else
+                            {
+                                userFriend_added.UId = i_fuId;
+                                userFriend_added.FuId = i_uId;
+                                userFriend_added.AddType = i_addType;
+                                userFriend_added.UFGroupId = i_uFGroupId;
+                                userFriend_added.Status = userStatus;
+
+                                userFriend_added.Add();
+
+                            }
+
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "添加失败";
+                        }
+                    }
                 }
 
             }
             else
             {
-                if (i_uId <= 0 || i_fuId <= 0)
-                {
-                    status = "error";
-                    msg = "添加失败，用户Id有误";
-
-                }
-                else
-                {
-                    userFriend.UId = i_uId;
-                    userFriend.FuId = i_fuId;
-                    userFriend.AddType = i_addType;
-                    userFriend.UFGroupId = i_uFGroupId;
-
-                    userStatus = 1;//默认在线
-
-                    userFriend.Status = userStatus;
-                    //通知对方
-
-                    result = userFriend.Add();
-
-                    if (result > 0)
-                    {
-                        status = "succeed";
-                        msg = "添加成功";
-
-                        userFriend_added = new UserFriend(i_fuId, i_uId);
-                        Id_added = userFriend_added.Id;
-
-                        if (Id_added > 0)
-                        {
-                            int tempStatus=userFriend_added.Status;
-                            if (tempStatus < 1)
-                            {
-                                userFriend_added.Status = userStatus;
-                                userFriend_added.ModifyStatus();
-                            }
-                        }
-                        else
-                        {
-                            userFriend_added.UId = i_fuId;
-                            userFriend_added.FuId = i_uId;
-                            userFriend_added.AddType = i_addType;
-                            userFriend_added.UFGroupId = i_uFGroupId;
-                            userFriend_added.Status = userStatus;
-
-                            userFriend_added.Add();
-
-                        }
-
-                    }
-                    else
-                    {
-                        status = "error";
-                        msg = "添加失败";
-                    }
-                }
+                msg = this.ValidMsg;
             }
+
 
             int logType = 1;
             string ip = Request.UserHostAddress;
@@ -1290,6 +1400,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DeleteFriend()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -1310,38 +1422,44 @@ namespace fengmiapp.Controllers
             //int i_fuId = int.Parse(fuId);
             //UserFriend userFriend = new UserFriend(i_uId, i_fuId);
             //UserFriend userFriend_added = new UserFriend(i_fuId, i_uId);
-
-            UserFriend userFriend = new UserFriend();
-
-            int userStatus = 0; //删除好友
-            int result = 0;
-
-
-            if (i_uId <= 0)
+            if (this.IsEffetive)
             {
-                status = "error";
-                msg = "删除失败，uId错误";
-            }
-            else
-            {
-                userFriend.UId = i_uId;
-                userFriend.Status = userStatus; 
+                UserFriend userFriend = new UserFriend();
 
-                result = userFriend.ModifyStatus(fuId);
+                int userStatus = 0; //删除好友
+                int result = 0;
 
-                if (result > 0)
+
+                if (i_uId <= 0)
                 {
-                    status = "succeed";
-                    msg = "删除成功";
-
-
+                    status = "error";
+                    msg = "删除失败，uId错误";
                 }
                 else
                 {
-                    status = "error";
-                    msg = "删除失败";
-                }
+                    userFriend.UId = i_uId;
+                    userFriend.Status = userStatus;
 
+                    result = userFriend.ModifyStatus(fuId);
+
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "删除成功";
+
+
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "删除失败";
+                    }
+
+                }
+            }
+            else
+            {
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -1364,9 +1482,13 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetFriend()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
+            int logType = 1;
+            string ip = Request.UserHostAddress;
 
             string uId = Request.Params.Get("uId");
             //string fuId = Request.Params.Get("fuId");
@@ -1382,98 +1504,107 @@ namespace fengmiapp.Controllers
                 i_uId = 0;
             }
 
-            UserFriend userFriend = new UserFriend();
-
-            //userFriend.UId = int.Parse(uId);
-            //userFriend.FuId = int.Parse(fuId);
-            //userFriend.AddType = int.Parse(addType);
-            //userFriend.UFGroupId = int.Parse(uFGroupId);
-
-            //int userStatus = 1;//默认在线
-
-            //userFriend.Status = userStatus;
-
-
-            DataTable dt = new DataTable();
-
-            userFriend.UId = i_uId;
-            dt = userFriend.GetUserFriends();
-
-            int count = dt.Rows.Count;
-
             List<object> userFriendObjList = new List<object>();
 
-            if (dt != null)
+            if (this.IsEffetive)
             {
-                status = "succeed";
-                msg = "获取成功";
+                UserFriend userFriend = new UserFriend();
 
-                for (int i = 0; i < count; i++)
+                //userFriend.UId = int.Parse(uId);
+                //userFriend.FuId = int.Parse(fuId);
+                //userFriend.AddType = int.Parse(addType);
+                //userFriend.UFGroupId = int.Parse(uFGroupId);
+
+                //int userStatus = 1;//默认在线
+
+                //userFriend.Status = userStatus;
+
+                DataTable dt = new DataTable();
+                userFriend.UId = i_uId;
+                dt = userFriend.GetUserFriends();
+                int count = dt.Rows.Count;
+
+                string port = Request.Url.Port.ToString();
+                string host = "http://" + ip + ":" + port + "/";
+
+                if (dt != null)
                 {
+                    status = "succeed";
+                    msg = "获取成功";
 
-                    //string uId = Request.Params.Get("uId");
-                    string fuId = dt.Rows[i]["fuId"].ToString();
-                    string addType = dt.Rows[i]["addType"].ToString();
-                    string uFGroupId = dt.Rows[i]["uFGroupId"].ToString();
-                    string modifyTime = dt.Rows[i]["modifyTime"].ToString();
-                    //status
-                    string userStatus = dt.Rows[i]["status"].ToString();
-
-
-                    string phone = dt.Rows[i]["phone"].ToString();
-                    string realName = dt.Rows[i]["realName"].ToString();
-                    string nickName = dt.Rows[i]["nickName"].ToString();
-                    string identityCard = dt.Rows[i]["identityCard"].ToString();
-                    string t_birthDay = dt.Rows[i]["birthDay"].ToString();
-
-                    string birthDay = "";
-                    try
+                    for (int i = 0; i < count; i++)
                     {
-                        birthDay = DateTime.Parse(t_birthDay).ToString("yyyy-MM-dd");
+
+                        //string uId = Request.Params.Get("uId");
+                        string fuId = dt.Rows[i]["fuId"].ToString();
+                        string addType = dt.Rows[i]["addType"].ToString();
+                        string uFGroupId = dt.Rows[i]["uFGroupId"].ToString();
+                        string modifyTime = dt.Rows[i]["modifyTime"].ToString();
+                        //status
+                        string userStatus = dt.Rows[i]["status"].ToString();
+
+
+                        string phone = dt.Rows[i]["phone"].ToString();
+                        string realName = dt.Rows[i]["realName"].ToString();
+                        string nickName = dt.Rows[i]["nickName"].ToString();
+                        string identityCard = dt.Rows[i]["identityCard"].ToString();
+                        string t_birthDay = dt.Rows[i]["birthDay"].ToString();
+
+                        string birthDay = "";
+                        try
+                        {
+                            birthDay = DateTime.Parse(t_birthDay).ToString("yyyy-MM-dd");
+                        }
+                        catch { }
+
+                        string userFace = dt.Rows[i]["userFace"].ToString();
+                        if (userFace != string.Empty)
+                        {
+                            userFace = host + userFace;
+                        }
+
+                        string email = dt.Rows[i]["email"].ToString();
+                        string address = dt.Rows[i]["address"].ToString();
+
+
+                        object userFriendObj = new object();
+
+                        userFriendObj = new
+                        {
+                            uId = uId,
+                            fuId = fuId,
+                            addType = addType,
+                            uFGroupId = uFGroupId,
+                            modifyTime = modifyTime,
+                            status = userStatus,
+
+                            phone = phone,
+                            realName = realName,
+                            nickName = nickName,
+                            identityCard = identityCard,
+                            birthDay = birthDay,
+                            userFace = userFace,
+                            email = email,
+                            address = address
+                        };
+
+                        userFriendObjList.Add(userFriendObj);
                     }
-                    catch { }
 
-                    string userFace = dt.Rows[i]["userFace"].ToString();
-                    //string userFace = Encoding.UTF8.GetString((byte[])dt.Rows[i]["userFace"]);
-
-                    string email = dt.Rows[i]["email"].ToString();
-                    string address = dt.Rows[i]["address"].ToString();
-
-
-                    object userFriendObj = new object();
-
-                    userFriendObj = new
-                    {
-                        uId = uId,
-                        fuId = fuId,
-                        addType = addType,
-                        uFGroupId = uFGroupId,
-                        modifyTime = modifyTime,
-                        status = userStatus,
-
-                        phone = phone,
-                        realName = realName,
-                        nickName = nickName,
-                        identityCard = identityCard,
-                        birthDay = birthDay,
-                        userFace = userFace,
-                        email = email,
-                        address = address
-                    };
-
-                    userFriendObjList.Add(userFriendObj);
                 }
-
+                else
+                {
+                    status = "error";
+                    msg = "获取失败";
+                    userFriendObjList = new List<object>();
+                }
             }
             else
             {
-                status = "error";
-                msg = "获取失败";
-                userFriendObjList = new List<object>();
+                msg = this.ValidMsg;
             }
 
-            int logType = 1;
-            string ip = Request.UserHostAddress;
+
             title += "API：GetFriend； ";
             title += "用户Id：" + i_uId + "，获取好友：";
             Common.addLog(logType, title + msg);
@@ -1495,6 +1626,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult CreateUserFriendGroup()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -1521,32 +1654,61 @@ namespace fengmiapp.Controllers
             }
             catch { }
 
+            if (this.IsEffetive)
+            {
 
-            if (string.IsNullOrEmpty(uId))
-            {
-                status = "error";
-                msg = "创建失败，用户Id不能为空";
-            }
-            else if (string.IsNullOrEmpty(name))
-            {
-                status = "error";
-                msg = "创建失败，组名不能为空";
-            }
-            else
-            {
-                UserFriendGroup userFriendGroup = new UserFriendGroup(i_uId, name);
-                int Id = userFriendGroup.Id;
-
-                int result = 0;
-                if (Id > 0)
+                if (string.IsNullOrEmpty(uId))
                 {
-                    int ufg_status = 1;
-                    ufg_status = userFriendGroup.Status;
-                    if (ufg_status < 1)
+                    status = "error";
+                    msg = "创建失败，用户Id不能为空";
+                }
+                else if (string.IsNullOrEmpty(name))
+                {
+                    status = "error";
+                    msg = "创建失败，组名不能为空";
+                }
+                else
+                {
+                    UserFriendGroup userFriendGroup = new UserFriendGroup(i_uId, name);
+                    int Id = userFriendGroup.Id;
+
+                    int result = 0;
+                    if (Id > 0)
                     {
-                        ufg_status = 1;
-                        userFriendGroup.Status = ufg_status;
-                        result = userFriendGroup.ModifyStatus();
+                        int ufg_status = 1;
+                        ufg_status = userFriendGroup.Status;
+                        if (ufg_status < 1)
+                        {
+                            ufg_status = 1;
+                            userFriendGroup.Status = ufg_status;
+                            result = userFriendGroup.ModifyStatus();
+                            if (result > 0)
+                            {
+                                status = "succeed";
+                                msg = "创建成功";
+                            }
+                            else
+                            {
+                                status = "error";
+                                msg = "创建失败";
+                            }
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "创建失败，组名已经存在";
+                        }
+                        uFGroupId = Id;
+                    }
+                    else
+                    {
+                        userFriendGroup.GName = name;
+                        userFriendGroup.UId = i_uId;
+                        userFriendGroup.Status = userStatus;
+                        result = userFriendGroup.AddBackId();
+
+                        uFGroupId = result;
+
                         if (result > 0)
                         {
                             status = "succeed";
@@ -1558,33 +1720,11 @@ namespace fengmiapp.Controllers
                             msg = "创建失败";
                         }
                     }
-                    else
-                    {
-                        status = "error";
-                        msg = "创建失败，组名已经存在";
-                    }
-                    uFGroupId = Id;
                 }
-                else
-                {
-                    userFriendGroup.GName = name;
-                    userFriendGroup.UId = i_uId;
-                    userFriendGroup.Status = userStatus;
-                    result = userFriendGroup.AddBackId();
-
-                    uFGroupId = result;
-
-                    if (result > 0)
-                    {
-                        status = "succeed";
-                        msg = "创建成功";
-                    }
-                    else
-                    {
-                        status = "error";
-                        msg = "创建失败";
-                    }
-                }
+            }
+            else
+            {
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -1606,6 +1746,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DeleteUserFriendGroup()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -1620,31 +1762,40 @@ namespace fengmiapp.Controllers
             {
             }
 
-            UserFriendGroup userFriendGroup = new UserFriendGroup(i_uFGroupId);
-            int Id = userFriendGroup.Id;
-
-            if (Id > 0)
+            if (this.IsEffetive)
             {
-                int result = userFriendGroup.DeleteUserFriendGroup();
 
-                if (result > 0)
+                UserFriendGroup userFriendGroup = new UserFriendGroup(i_uFGroupId);
+                int Id = userFriendGroup.Id;
+
+                if (Id > 0)
                 {
-                    UserFriend userFriend = new UserFriend();
-                    userFriend.DeleteUFGroupUsers();
+                    int result = userFriendGroup.DeleteUserFriendGroup();
 
-                    status = "succeed";
-                    msg = "删除成功";
+                    if (result > 0)
+                    {
+                        UserFriend userFriend = new UserFriend();
+                        userFriend.DeleteUFGroupUsers();
+
+                        status = "succeed";
+                        msg = "删除成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "删除失败";
+                    }
                 }
                 else
                 {
                     status = "error";
-                    msg = "删除失败";
+                    msg = "删除失败，好友分组不存在";
                 }
+
             }
             else
             {
-                status = "error";
-                msg = "删除失败，好友分组不存在";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -1666,6 +1817,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult ModifyUserFriendGroupName()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -1683,49 +1836,56 @@ namespace fengmiapp.Controllers
             {
             }
 
-            UserFriendGroup userFriendGroup = new UserFriendGroup(i_uFGroupId);
-            int Id = userFriendGroup.Id;
-
-            if (Id > 0)
+            if (this.IsEffetive)
             {
-                if (string.IsNullOrEmpty(name))
-                {
-                    status = "error";
-                    msg = "修改组名不能为空";
-                }
-                else
-                {
-                    int i_uId = userFriendGroup.UId;
-                    //判断组名是否存在
-                    UserFriendGroup temp_userFriendGroup = new UserFriendGroup(i_uId, name);
-                    int temp_Id = temp_userFriendGroup.Id;
+                UserFriendGroup userFriendGroup = new UserFriendGroup(i_uFGroupId);
+                int Id = userFriendGroup.Id;
 
-                    if (temp_Id > 0)
-                    {//组名已经存在
+                if (Id > 0)
+                {
+                    if (string.IsNullOrEmpty(name))
+                    {
                         status = "error";
-                        msg = "修改失败，好友分组已存在";
+                        msg = "修改组名不能为空";
                     }
                     else
                     {
-                        userFriendGroup.GName = name;
-                        int result = userFriendGroup.ModifyName();
-                        if (result > 0)
-                        {
-                            status = "succeed";
-                            msg = "修改成功";
+                        int i_uId = userFriendGroup.UId;
+                        //判断组名是否存在
+                        UserFriendGroup temp_userFriendGroup = new UserFriendGroup(i_uId, name);
+                        int temp_Id = temp_userFriendGroup.Id;
+
+                        if (temp_Id > 0)
+                        {//组名已经存在
+                            status = "error";
+                            msg = "修改失败，好友分组已存在";
                         }
                         else
                         {
-                            status = "error";
-                            msg = "修改失败";
+                            userFriendGroup.GName = name;
+                            int result = userFriendGroup.ModifyName();
+                            if (result > 0)
+                            {
+                                status = "succeed";
+                                msg = "修改成功";
+                            }
+                            else
+                            {
+                                status = "error";
+                                msg = "修改失败";
+                            }
                         }
                     }
+                }
+                else
+                {
+                    status = "error";
+                    msg = "修改失败，好友分组不存在";
                 }
             }
             else
             {
-                status = "error";
-                msg = "修改失败，好友分组不存在";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -1747,6 +1907,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult ModifyUserFriendGroupStatus()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -1770,31 +1932,37 @@ namespace fengmiapp.Controllers
             catch
             {
             }
-
-            UserFriendGroup userFriendGroup = new UserFriendGroup(i_uFGroupId);
-            int Id = userFriendGroup.Id;
-
-            if (Id > 0)
+            if (this.IsEffetive)
             {
+                UserFriendGroup userFriendGroup = new UserFriendGroup(i_uFGroupId);
+                int Id = userFriendGroup.Id;
 
-                userFriendGroup.Status = userStatus;
-                int result = userFriendGroup.ModifyStatus();
-
-                if (result > 0)
+                if (Id > 0)
                 {
-                    status = "succeed";
-                    msg = "修改成功";
+
+                    userFriendGroup.Status = userStatus;
+                    int result = userFriendGroup.ModifyStatus();
+
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "修改成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "修改失败";
+                    }
                 }
                 else
                 {
                     status = "error";
-                    msg = "修改失败";
+                    msg = "修改失败，好友分组不存在";
                 }
             }
             else
             {
-                status = "error";
-                msg = "修改失败，好友分组不存在";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -1817,6 +1985,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DeleteUserFriToUserFriendGroup()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -1843,39 +2013,46 @@ namespace fengmiapp.Controllers
             }
             */
 
-
-            if (i_uId > 0)
+            if (this.IsEffetive)
             {
-                if (string.IsNullOrEmpty(fuId))
+
+                if (i_uId > 0)
                 {
-                    status = "error";
-                    msg = "移除失败，不存在好友信息";
-
-                }
-                else
-                {
-                    UserFriend userFriend = new UserFriend();
-                    //int Id = userFriend.Id;
-
-                    userFriend.UId = i_uId;
-                    int result = userFriend.DeleteUFGroupUsers(fuId);
-
-                    if (result > 0)
+                    if (string.IsNullOrEmpty(fuId))
                     {
-                        status = "succeed";
-                        msg = "移除成功";
+                        status = "error";
+                        msg = "移除失败，不存在好友信息";
+
                     }
                     else
                     {
-                        status = "error";
-                        msg = "移除失败";
+                        UserFriend userFriend = new UserFriend();
+                        //int Id = userFriend.Id;
+
+                        userFriend.UId = i_uId;
+                        int result = userFriend.DeleteUFGroupUsers(fuId);
+
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "移除成功";
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "移除失败";
+                        }
                     }
+                }
+                else
+                {
+                    status = "error";
+                    msg = "移除失败，用户不存在";
                 }
             }
             else
             {
-                status = "error";
-                msg = "移除失败，用户不存在";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -1898,6 +2075,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult AddUserFriToUserFriendGroup()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -1931,47 +2110,55 @@ namespace fengmiapp.Controllers
             {
                 i_fuId = 0;
             }
-            if (i_uId > 0)
+
+            if (this.IsEffetive)
             {
-                if (string.IsNullOrEmpty(fuId))
+                if (i_uId > 0)
                 {
-                    status = "error";
-                    msg = "添加失败，不存在好友信息";
-
-                }
-                else if (i_uFGroupId < 1)
-                {
-                    status = "error";
-                    msg = "分组不存在";
-
-                }
-                else
-                {
-
-                    UserFriend userFriend = new UserFriend();
-                    //int Id = userFriend.Id;
-                    userFriend.UId = i_uId;
-                    userFriend.UFGroupId = i_uFGroupId;
-                    int result = userFriend.Modify_uFGroupId(fuId);
-
-                    if (result > 0)
+                    if (string.IsNullOrEmpty(fuId))
                     {
-                        status = "succeed";
-                        msg = "添加成功";
+                        status = "error";
+                        msg = "添加失败，不存在好友信息";
+
+                    }
+                    else if (i_uFGroupId < 1)
+                    {
+                        status = "error";
+                        msg = "分组不存在";
+
                     }
                     else
                     {
-                        status = "error";
-                        msg = "添加失败";
+
+                        UserFriend userFriend = new UserFriend();
+                        //int Id = userFriend.Id;
+                        userFriend.UId = i_uId;
+                        userFriend.UFGroupId = i_uFGroupId;
+                        int result = userFriend.Modify_uFGroupId(fuId);
+
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "添加成功";
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "添加失败";
+                        }
                     }
                 }
+                else
+                {
+                    status = "error";
+                    msg = "添加失败，用户不存在";
+                }
+
             }
             else
             {
-                status = "error";
-                msg = "添加失败，用户不存在";
+                msg = this.ValidMsg;
             }
-
 
             int logType = 1;
             string ip = Request.UserHostAddress;
@@ -1992,6 +2179,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetUserFriendGroup()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -2005,75 +2194,81 @@ namespace fengmiapp.Controllers
             catch
             {
             }
-
+           
             List<object> userFriendGroupObjList = new List<object>();
-
-            if (i_uId < 1)
+            if (this.IsEffetive)
             {
-                status = "error";
-                msg = "获取失败，好友分组不存在";
-                userFriendGroupObjList = new List<object>();
-            }
-            else
-            {
-                DataTable dt = new DataTable();
-                UserFriendGroup userFriendGroup = new UserFriendGroup();
-                userFriendGroup.UId = i_uId;
-
-                dt = userFriendGroup.GetUserFriendGroup();
-                int count = dt.Rows.Count;
-
-                if (dt != null)
+                if (i_uId < 1)
                 {
-                    status = "succeed";
-                    msg = "获取成功";
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        string uFGroupId = dt.Rows[i]["Id"].ToString();
-                        int i_uFGroupId = 0;
-                        try
-                        {
-                            i_uFGroupId = int.Parse(uFGroupId);
-                        }
-                        catch { }
-
-                        string gName = dt.Rows[i]["gName"].ToString();
-                        string modifyTime = dt.Rows[i]["modifyTime"].ToString();
-                        //status
-                        string userFriendGroupStatus = dt.Rows[i]["status"].ToString();
-                        int i_userFriendGroupStatus = 0;
-                        try
-                        {
-                            i_userFriendGroupStatus = int.Parse(userFriendGroupStatus);
-                        }
-                        catch { }
-
-
-
-                        object userFriendGroupObj = new object();
-
-                        userFriendGroupObj = new
-                        {
-                            uId = i_uId,
-                            uFGroupId = i_uFGroupId,
-                            gName = gName,
-                            modifyTime = modifyTime,
-                            status = i_userFriendGroupStatus,
-                        };
-
-                        userFriendGroupObjList.Add(userFriendGroupObj);
-                    }
-
+                    status = "error";
+                    msg = "获取失败，好友分组不存在";
+                    userFriendGroupObjList = new List<object>();
                 }
                 else
                 {
-                    status = "error";
-                    msg = "获取失败，获取好友分组";
+                    DataTable dt = new DataTable();
+                    UserFriendGroup userFriendGroup = new UserFriendGroup();
+                    userFriendGroup.UId = i_uId;
 
-                    userFriendGroupObjList = new List<object>();
+                    dt = userFriendGroup.GetUserFriendGroup();
+                    int count = dt.Rows.Count;
+
+                    if (dt != null)
+                    {
+                        status = "succeed";
+                        msg = "获取成功";
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            string uFGroupId = dt.Rows[i]["Id"].ToString();
+                            int i_uFGroupId = 0;
+                            try
+                            {
+                                i_uFGroupId = int.Parse(uFGroupId);
+                            }
+                            catch { }
+
+                            string gName = dt.Rows[i]["gName"].ToString();
+                            string modifyTime = dt.Rows[i]["modifyTime"].ToString();
+                            //status
+                            string userFriendGroupStatus = dt.Rows[i]["status"].ToString();
+                            int i_userFriendGroupStatus = 0;
+                            try
+                            {
+                                i_userFriendGroupStatus = int.Parse(userFriendGroupStatus);
+                            }
+                            catch { }
+
+
+
+                            object userFriendGroupObj = new object();
+
+                            userFriendGroupObj = new
+                            {
+                                uId = i_uId,
+                                uFGroupId = i_uFGroupId,
+                                gName = gName,
+                                modifyTime = modifyTime,
+                                status = i_userFriendGroupStatus,
+                            };
+
+                            userFriendGroupObjList.Add(userFriendGroupObj);
+                        }
+
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "获取失败，获取好友分组";
+
+                        userFriendGroupObjList = new List<object>();
+                    }
+
                 }
-
+            }
+            else
+            {
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -2098,6 +2293,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetUserGroup()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title="";
@@ -2113,63 +2310,57 @@ namespace fengmiapp.Controllers
             {
                 i_uId = 0;
             }
-
-            UserGroupUser userGroupUser = new UserGroupUser();
-            userGroupUser.UId = i_uId;
-
-
-            DataTable dt = new DataTable();
-
-            dt = userGroupUser.GetUserGroupWithUid();
-
-            int count = dt.Rows.Count;
-
             List<object> userGroupObjList = new List<object>();
-
-            if (dt != null)
+            if (this.IsEffetive)
             {
-                status = "succeed";
-                msg = "获取成功";
+                UserGroupUser userGroupUser = new UserGroupUser();
+                userGroupUser.UId = i_uId;
 
-                for (int i = 0; i < count; i++)
+                DataTable dt = new DataTable();
+                dt = userGroupUser.GetUserGroupWithUid();
+                int count = dt.Rows.Count;
+                if (dt != null)
                 {
+                    status = "succeed";
+                    msg = "获取成功";
 
-                    //string uId = Request.Params.Get("uId");
-                    string uGId = dt.Rows[i]["uGId"].ToString();
-                    string uRole = dt.Rows[i]["uRole"].ToString();
-                    string modifyTime = dt.Rows[i]["modifyTime"].ToString();
-                    //status
-                    string userStatus = dt.Rows[i]["status"].ToString();
-
-
-                    string gType = dt.Rows[i]["gType"].ToString();
-                    string name = dt.Rows[i]["name"].ToString();
-                    string createUId = dt.Rows[i]["createUId"].ToString();
-      
-
-                    object userFriendObj = new object();
-
-                    userFriendObj = new
+                    for (int i = 0; i < count; i++)
                     {
-                        uId = uId,
-                        uGId = uGId,
-                        uRole = uRole,
-                        modifyTime = modifyTime,
-                        status = userStatus,
+                        //string uId = Request.Params.Get("uId");
+                        string uGId = dt.Rows[i]["uGId"].ToString();
+                        string uRole = dt.Rows[i]["uRole"].ToString();
+                        string modifyTime = dt.Rows[i]["modifyTime"].ToString();
+                        //status
+                        string userStatus = dt.Rows[i]["status"].ToString();
+                        string gType = dt.Rows[i]["gType"].ToString();
+                        string name = dt.Rows[i]["name"].ToString();
+                        string createUId = dt.Rows[i]["createUId"].ToString();
+                        object userFriendObj = new object();
+                        userFriendObj = new
+                        {
+                            uId = uId,
+                            uGId = uGId,
+                            uRole = uRole,
+                            modifyTime = modifyTime,
+                            status = userStatus,
 
-                        name = name,
-                        createUId = createUId,
-                    };
+                            name = name,
+                            createUId = createUId,
+                        };
 
-                    userGroupObjList.Add(userFriendObj);
+                        userGroupObjList.Add(userFriendObj);
+                    }
                 }
-
+                else
+                {
+                    status = "error";
+                    msg = "获取失败";
+                    userGroupObjList = new List<object>();
+                }
             }
             else
             {
-                status = "error";
-                msg = "获取失败";
-                userGroupObjList = new List<object>();
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -2190,9 +2381,13 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetUserGroupUser()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
+            int logType = 1;
+            string ip = Request.UserHostAddress;
 
             string uId = Request.Params.Get("uId");
 
@@ -2205,126 +2400,123 @@ namespace fengmiapp.Controllers
             {
                 i_uId = 0;
             }
-
-            UserGroupUser userGroupUser = new UserGroupUser();
-            userGroupUser.UId = i_uId;
-
-
-            DataTable dt = new DataTable();
-
             List<object> userGroupObjList = new List<object>();
-
-            dt = userGroupUser.GetUserGroupWithUid();
-            int count = dt.Rows.Count;
-            if (dt != null)
+            if (this.IsEffetive)
             {
-                status = "succeed";
-                msg = "获取成功";
+                UserGroupUser userGroupUser = new UserGroupUser();
+                userGroupUser.UId = i_uId;
+                DataTable dt = new DataTable();
+                dt = userGroupUser.GetUserGroupWithUid();
+                int count = dt.Rows.Count;
+                string port = Request.Url.Port.ToString();
+                string host = "http://" + ip + ":" + port + "/";
 
-                for (int i = 0; i < count; i++)
+                if (dt != null)
                 {
-                    string uGId = dt.Rows[i]["uGId"].ToString();
-                    string modifyTime = dt.Rows[i]["modifyTime"].ToString();
+                    status = "succeed";
+                    msg = "获取成功";
 
-                    string gType = dt.Rows[i]["gType"].ToString();
-                    string name = dt.Rows[i]["name"].ToString();
-                    string createUId = dt.Rows[i]["createUId"].ToString();
-
-                    int i_uGId = 0;
-                    try
+                    for (int i = 0; i < count; i++)
                     {
-                        i_uGId = int.Parse(uGId);
-                    }
-                    catch
-                    {
-                        i_uGId = 0;
-                    }
+                        string uGId = dt.Rows[i]["uGId"].ToString();
+                        string modifyTime = dt.Rows[i]["modifyTime"].ToString();
 
-                    DataTable ug_dt = new DataTable();
+                        string gType = dt.Rows[i]["gType"].ToString();
+                        string name = dt.Rows[i]["name"].ToString();
+                        string createUId = dt.Rows[i]["createUId"].ToString();
 
-                    userGroupUser.UGId = i_uGId;
-                    ug_dt = userGroupUser.GetUserGroupWithUGid();
-
-                    int ug_count = ug_dt.Rows.Count;
-
-                    List<object> userGroupUserObjList = new List<object>();
-
-                    for (int j = 0; j < ug_count; j++)
-                    {
-                        //status
-                        string ugStatus = ug_dt.Rows[j]["status"].ToString();
-                        string uRole = ug_dt.Rows[j]["uRole"].ToString();
-
-                        string ug_uId = ug_dt.Rows[j]["uId"].ToString();
-                        string phone = ug_dt.Rows[j]["phone"].ToString();
-                        string realName = ug_dt.Rows[j]["realName"].ToString();
-                        string nickName = ug_dt.Rows[j]["nickName"].ToString();
-                        string identityCard = ug_dt.Rows[j]["identityCard"].ToString();
-                        string birthDay = ug_dt.Rows[j]["birthDay"].ToString();
+                        int i_uGId = 0;
                         try
                         {
-                            birthDay = DateTime.Parse(birthDay).ToString("yyyy-MM-dd");
+                            i_uGId = int.Parse(uGId);
                         }
-                        catch { birthDay = ""; }
-
-                        //string birthDay = DateTime.Parse().ToString("yyyy-MM-dd");
-
-                        string userFace = ug_dt.Rows[j]["userFace"].ToString();
-                        string email = ug_dt.Rows[j]["email"].ToString();
-                        string address = ug_dt.Rows[j]["address"].ToString();
-
-
-                        object userObj = new object();
-
-                        userObj = new
+                        catch
                         {
-                            uRole = uRole,
-                            status = ugStatus,
-                            uId = ug_uId,
+                            i_uGId = 0;
+                        }
 
-                            phone = phone,
-                            realName = realName,
-                            nickName = nickName,
-                            identityCard = identityCard,
-                            birthDay = birthDay,
-                            userFace = userFace,
-                            email = email,
-                            address = address
+                        DataTable ug_dt = new DataTable();
+
+                        userGroupUser.UGId = i_uGId;
+                        ug_dt = userGroupUser.GetUserGroupWithUGid();
+
+                        int ug_count = ug_dt.Rows.Count;
+
+                        List<object> userGroupUserObjList = new List<object>();
+
+                        for (int j = 0; j < ug_count; j++)
+                        {
+                            //status
+                            string ugStatus = ug_dt.Rows[j]["status"].ToString();
+                            string uRole = ug_dt.Rows[j]["uRole"].ToString();
+
+                            string ug_uId = ug_dt.Rows[j]["uId"].ToString();
+                            string phone = ug_dt.Rows[j]["phone"].ToString();
+                            string realName = ug_dt.Rows[j]["realName"].ToString();
+                            string nickName = ug_dt.Rows[j]["nickName"].ToString();
+                            string identityCard = ug_dt.Rows[j]["identityCard"].ToString();
+                            string birthDay = ug_dt.Rows[j]["birthDay"].ToString();
+                            try
+                            {
+                                birthDay = DateTime.Parse(birthDay).ToString("yyyy-MM-dd");
+                            }
+                            catch { birthDay = ""; }
+
+                            //string birthDay = DateTime.Parse().ToString("yyyy-MM-dd");
+                            string userFace = ug_dt.Rows[j]["userFace"].ToString();
+                            if (userFace != string.Empty)
+                            {
+                                userFace = host + userFace;
+                            }
+
+
+                            string email = ug_dt.Rows[j]["email"].ToString();
+                            string address = ug_dt.Rows[j]["address"].ToString();
+
+                            object userObj = new object();
+
+                            userObj = new
+                            {
+                                uRole = uRole,
+                                status = ugStatus,
+                                uId = ug_uId,
+
+                                phone = phone,
+                                realName = realName,
+                                nickName = nickName,
+                                identityCard = identityCard,
+                                birthDay = birthDay,
+                                userFace = userFace,
+                                email = email,
+                                address = address
+                            };
+                            userGroupUserObjList.Add(userObj);
+                        }
+                        object userGroupObj = new object();
+                        userGroupObj = new
+                        {
+                            uGId = uGId,
+                            modifyTime = modifyTime,
+
+                            name = name,
+                            createUId = createUId,
+                            userGroupUser = userGroupUserObjList,
                         };
-
-                        userGroupUserObjList.Add(userObj);
-
+                        userGroupObjList.Add(userGroupObj);
                     }
-
-
-
-                    object userGroupObj = new object();
-
-                    userGroupObj = new
-                    {
-
-                        uGId = uGId,
-                        modifyTime = modifyTime,
-
-                        name = name,
-                        createUId = createUId,
-                        userGroupUser = userGroupUserObjList,
-                    };
-
-                    userGroupObjList.Add(userGroupObj);
-
                 }
-
+                else
+                {
+                    status = "error";
+                    msg = "获取失败";
+                    userGroupObjList = new List<object>();
+                }
             }
             else
             {
-                status = "error";
-                msg = "获取失败";
-                userGroupObjList = new List<object>();
+                msg = this.ValidMsg;
             }
 
-            int logType = 1;
-            string ip = Request.UserHostAddress;
             title += "API：GetUserGroupUser； ";
             title += "用户Id：" + i_uId + "，获取群用户：";
             Common.addLog(logType, title + msg);
@@ -2341,6 +2533,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult CreateUserGroup()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -2371,42 +2565,51 @@ namespace fengmiapp.Controllers
             }
             catch { }
 
-            UserGroup userGroup = new UserGroup();
-
-            userGroup.Name = name;
-            userGroup.CreateUId = i_createUId;
-            userGroup.GType = i_gType;
-            userGroup.Status = userStatus;
-
-            //int result = userGroup.Add();
-            int result = userGroup.AddBackId();
-
             int uGId = 0;
-            
-            if (result > 0)
+
+            if (this.IsEffetive)
             {
-                status = "succeed";
-                msg = "创建成功";
+                UserGroup userGroup = new UserGroup();
 
-                //uGId = userGroup.GetUserGroupId();
-                uGId = result;
+                userGroup.Name = name;
+                userGroup.CreateUId = i_createUId;
+                userGroup.GType = i_gType;
+                userGroup.Status = userStatus;
 
-                UserGroupUser userGroupUser = new UserGroupUser();
+                //int result = userGroup.Add();
+                int result = userGroup.AddBackId();
 
-                int i_uGId = uGId;
-                int i_uId = i_createUId;
-                int i_uRole = 1;
-                userGroupUser.UGId = i_uGId;
-                userGroupUser.UId = i_uId;
-                userGroupUser.URole = i_uRole;
-                userGroupUser.Status = userStatus;
-                result = userGroupUser.Add();
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "创建成功";
+
+                    //uGId = userGroup.GetUserGroupId();
+                    uGId = result;
+
+                    UserGroupUser userGroupUser = new UserGroupUser();
+
+                    int i_uGId = uGId;
+                    int i_uId = i_createUId;
+                    int i_uRole = 1;
+                    userGroupUser.UGId = i_uGId;
+                    userGroupUser.UId = i_uId;
+                    userGroupUser.URole = i_uRole;
+                    userGroupUser.Status = userStatus;
+                    result = userGroupUser.Add();
+
+                }
+                else
+                {
+                    status = "error";
+                    msg = "创建失败";
+                }
 
             }
             else
             {
-                status = "error";
-                msg = "创建失败";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -2429,6 +2632,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult ModifyUserGroupName()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -2443,23 +2648,31 @@ namespace fengmiapp.Controllers
             }
             catch { }
 
-            UserGroup userGroup = new UserGroup();
-            userGroup.Name = name;
-            userGroup.Id = i_uGId;
-
-
-            int result = userGroup.ModifyName();
-
-            if (result > 0)
+            if (this.IsEffetive)
             {
-                status = "succeed";
-                msg = "修改成功";
+                UserGroup userGroup = new UserGroup();
+                userGroup.Name = name;
+                userGroup.Id = i_uGId;
+
+
+                int result = userGroup.ModifyName();
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "修改成功";
+
+                }
+                else
+                {
+                    status = "error";
+                    msg = "修改失败";
+                }
 
             }
             else
             {
-                status = "error";
-                msg = "修改失败";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -2482,6 +2695,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DeleteUserGroup()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -2494,24 +2709,32 @@ namespace fengmiapp.Controllers
                 i_uGId = int.Parse(uGId);
             }
             catch { }
-
-            UserGroup userGroup = new UserGroup();
-            userGroup.Id = i_uGId;
-            int ug_status = 0;
-            userGroup.Status = ug_status;
-
-            int result = userGroup.ModifyStatus();
-
-            if (result > 0)
+            if (this.IsEffetive)
             {
-                status = "succeed";
-                msg = "删除成功";
+
+                UserGroup userGroup = new UserGroup();
+                userGroup.Id = i_uGId;
+                int ug_status = 0;
+                userGroup.Status = ug_status;
+
+                int result = userGroup.ModifyStatus();
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "删除成功";
+
+                }
+                else
+                {
+                    status = "error";
+                    msg = "删除失败";
+                }
 
             }
             else
             {
-                status = "error";
-                msg = "删除失败";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -2535,6 +2758,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult AddUserGroupUser()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -2560,78 +2785,84 @@ namespace fengmiapp.Controllers
                 i_uRole = int.Parse(uRole);
             }
             catch { }
-
-            int count=uIdList.Length;
-
-            int addResult = 0;
-            string  uIdStr = "";
-
-            for (int i = 0; i < count; i++)
+            if (this.IsEffetive)
             {
-                uIdStr = uIdList[i];
-                try
+                int count = uIdList.Length;
+
+                int addResult = 0;
+                string uIdStr = "";
+
+                for (int i = 0; i < count; i++)
                 {
-                    i_uId = int.Parse(uIdStr);
-                }
-                catch { i_uId = 0; }
-
-                int userStatus = 1;
-
-                UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
-
-                int Id = userGroupUser.Id;
-
-                userGroupUser.UGId = i_uGId;
-                userGroupUser.UId = i_uId;
-                userGroupUser.URole = i_uRole;
-
-                int result = 0;
-                if (Id > 0)
-                {
-                    userStatus = userGroupUser.Status;
-
-                    if (userStatus < 1)
+                    uIdStr = uIdList[i];
+                    try
                     {
-                        userGroupUser.Status = 1;
-                        userGroupUser.ModifyStatus();
-                        addResult++;//添加成功
+                        i_uId = int.Parse(uIdStr);
+                    }
+                    catch { i_uId = 0; }
+
+                    int userStatus = 1;
+
+                    UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
+
+                    int Id = userGroupUser.Id;
+
+                    userGroupUser.UGId = i_uGId;
+                    userGroupUser.UId = i_uId;
+                    userGroupUser.URole = i_uRole;
+
+                    int result = 0;
+                    if (Id > 0)
+                    {
+                        userStatus = userGroupUser.Status;
+
+                        if (userStatus < 1)
+                        {
+                            userGroupUser.Status = 1;
+                            userGroupUser.ModifyStatus();
+                            addResult++;//添加成功
+                        }
+                        else
+                        {
+                            //status = "error";
+                            //msg = "添加失败，用户已加入该群";
+                        }
                     }
                     else
                     {
-                        //status = "error";
-                        //msg = "添加失败，用户已加入该群";
+                        userStatus = 1;
+                        userGroupUser.Status = userStatus;
+                        result = userGroupUser.Add();
+
+                        if (result > 0)
+                        {
+                            //status = "succeed";
+                            // msg = "添加成功";
+                            addResult++;//添加成功
+                        }
+                        else
+                        {
+                            //status = "error";
+                            // msg = "添加失败";
+                        }
                     }
+                }
+
+                if (addResult > 0)
+                {
+                    status = "succeed";
+                    msg = "添加成功：" + addResult + "条数据添加成功；" + (count - addResult) + "条数据添加失败";
+
                 }
                 else
                 {
-                    userStatus = 1;
-                    userGroupUser.Status = userStatus;
-                    result = userGroupUser.Add();
-
-                    if (result > 0)
-                    {
-                        //status = "succeed";
-                       // msg = "添加成功";
-                        addResult++;//添加成功
-                    }
-                    else
-                    {
-                        //status = "error";
-                       // msg = "添加失败";
-                    }
+                    status = "error";
+                    msg = "添加失败";
                 }
-            }
-
-            if (addResult > 0)
-            {
-                status = "succeed";
-                msg = "添加成功："+addResult+"条数据添加成功；"+(count-addResult)+"条数据添加失败";
-
             }
             else
             {
-                status = "error";
-                msg = "添加失败";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;
@@ -2653,6 +2884,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult DeleteUserGroupUser()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -2669,69 +2902,74 @@ namespace fengmiapp.Controllers
                 i_uGId = int.Parse(uGId);
             }
             catch { }
-
-            string[] uIdList = uId.Split(',');
-
-            int count=uIdList.Length;
-
-            int delResult = 0;
-            string uIdStr = "";
-
-            for (int i = 0; i < count; i++)
+            if (this.IsEffetive)
             {
-                uIdStr = uIdList[i];
+                string[] uIdList = uId.Split(',');
 
-                int i_uId = 0;
-                try
+                int count = uIdList.Length;
+
+                int delResult = 0;
+                string uIdStr = "";
+
+                for (int i = 0; i < count; i++)
                 {
-                    i_uId = int.Parse(uIdStr);
-                }
-                catch { }
+                    uIdStr = uIdList[i];
 
-                int userStatus = 0;
-                UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
-                int Id = userGroupUser.Id;
-                userGroupUser.Status = userStatus;
-
-                int result = 0;
-                if (Id > 0)
-                {
-                    result = userGroupUser.ModifyStatus();
-
-                    if (result > 0)
+                    int i_uId = 0;
+                    try
                     {
-                        delResult++;//添加成功
+                        i_uId = int.Parse(uIdStr);
+                    }
+                    catch { }
 
-                        //status = "succeed";
-                        //msg = "删除成功";
+                    int userStatus = 0;
+                    UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
+                    int Id = userGroupUser.Id;
+                    userGroupUser.Status = userStatus;
+
+                    int result = 0;
+                    if (Id > 0)
+                    {
+                        result = userGroupUser.ModifyStatus();
+
+                        if (result > 0)
+                        {
+                            delResult++;//添加成功
+
+                            //status = "succeed";
+                            //msg = "删除成功";
+                        }
+                        else
+                        {
+                            //status = "error";
+                            //msg = "删除失败";
+                        }
+
                     }
                     else
                     {
                         //status = "error";
-                        //msg = "删除失败";
+                        //msg = "信息不存在，无法删除";
+
                     }
+                }
+
+                if (delResult > 0)
+                {
+                    status = "succeed";
+                    msg = "删除成功：" + delResult + "条数据删除成功；" + (count - delResult) + "条数据删除失败";
 
                 }
                 else
                 {
-                    //status = "error";
-                    //msg = "信息不存在，无法删除";
-
+                    status = "error";
+                    msg = "删除失败";
                 }
-            }
-
-            if (delResult > 0)
-            {
-                status = "succeed";
-                msg = "删除成功：" + delResult + "条数据删除成功；" + (count - delResult) + "条数据删除失败";
-
             }
             else
             {
-                status = "error";
-                msg = "删除失败";
+                msg = this.ValidMsg;
             }
-
 
             int logType = 1;
             string ip = Request.UserHostAddress;
@@ -2753,6 +2991,7 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult ModifyUserGroupUserRole()
         {
+            this.init();
 
             string status = "error";
             string msg = "";
@@ -2783,44 +3022,51 @@ namespace fengmiapp.Controllers
             catch { }
 
             int userStatus = 1;
-
-            UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
-
-            int Id = userGroupUser.Id;
-
-            userGroupUser.UGId = i_uGId;
-            userGroupUser.UId = i_uId;
-            userGroupUser.URole = i_uRole;
-
-
-            int result = 0;
-            if (Id > 0)
+            if (this.IsEffetive)
             {
-                userStatus = userGroupUser.Status;
-                if (userStatus < 1)
+
+                UserGroupUser userGroupUser = new UserGroupUser(i_uId, i_uGId);
+
+                int Id = userGroupUser.Id;
+
+                userGroupUser.UGId = i_uGId;
+                userGroupUser.UId = i_uId;
+                userGroupUser.URole = i_uRole;
+
+
+                int result = 0;
+                if (Id > 0)
                 {
-                    status = "error";
-                    msg = "修改失败，用户已退群";
-                }
-                else
-                {
-                    result = userGroupUser.Modify_uRole();
-                    if (result > 0)
+                    userStatus = userGroupUser.Status;
+                    if (userStatus < 1)
                     {
-                        status = "succeed";
-                        msg = "修改成功";
+                        status = "error";
+                        msg = "修改失败，用户已退群";
                     }
                     else
                     {
-                        status = "error";
-                        msg = "修改失败";
+                        result = userGroupUser.Modify_uRole();
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "修改成功";
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "修改失败";
+                        }
                     }
+                }
+                else
+                {
+                    status = "error";
+                    msg = "修改失败，用户未加入该群";
                 }
             }
             else
             {
-                    status = "error";
-                    msg = "修改失败，用户未加入该群";
+                msg = this.ValidMsg;
             }
 
             int logType = 1;

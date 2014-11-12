@@ -25,6 +25,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult SetPosition()
         {
+            this.init();
+
             string title = "";
             string status = "error";
             string msg = "";
@@ -47,74 +49,81 @@ namespace fengmiapp.Controllers
             {
                 i_uId = 0;
             }
-            DateTime dt_uploadTime = DateTime.Now;
-            try
+            if (this.IsEffetive)
             {
-                dt_uploadTime = DateTime.Parse(uploadTime);
-            }
-            catch { }
-
-
-            UserPosition position = new UserPosition();
-            position.UId = i_uId;
-            position.GetNewestPositionOne();
-            int Id = position.Id;
-            int result = 0;
-            string temp_placeName=position.PlaceName;
-
-            if (Id > 0 && temp_placeName == placeName)
-            {
-                position.UploadTime = dt_uploadTime;
-                position.ModifyTime = DateTime.Now;
-
-                result = position.Modify_Time();
-                if (result > 0)
+                DateTime dt_uploadTime = DateTime.Now;
+                try
                 {
-                    status = "succeed";
-                    msg = "上传修改成功";
+                    dt_uploadTime = DateTime.Parse(uploadTime);
+                }
+                catch { }
 
+
+                UserPosition position = new UserPosition();
+                position.UId = i_uId;
+                position.GetNewestPositionOne();
+                int Id = position.Id;
+                int result = 0;
+                string temp_placeName = position.PlaceName;
+
+                if (Id > 0 && temp_placeName == placeName)
+                {
+                    position.UploadTime = dt_uploadTime;
+                    position.ModifyTime = DateTime.Now;
+
+                    result = position.Modify_Time();
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "上传修改成功";
+
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "上传修改失败";
+                    }
                 }
                 else
                 {
-                    status = "error";
-                    msg = "上传修改失败";
+                    double d_longitude = 0;
+                    try
+                    {
+                        d_longitude = double.Parse(longitude);
+                    }
+                    catch { }
+                    double d_latitude = 0;
+                    try
+                    {
+                        d_latitude = double.Parse(latitude);
+                    }
+                    catch { }
+
+
+                    position.UId = i_uId;
+                    position.Longitude = d_longitude;
+                    position.Latitude = d_latitude;
+                    position.PlaceName = placeName;
+                    position.UploadTime = dt_uploadTime;
+                    position.ModifyTime = DateTime.Now;
+
+                    result = position.Add();
+                    if (result > 0)
+                    {
+                        status = "succeed";
+                        msg = "上传成功";
+
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "上传失败";
+                    }
                 }
             }
             else
             {
-                double d_longitude = 0;
-                try
-                {
-                    d_longitude = double.Parse(longitude);
-                }
-                catch { }
-                double d_latitude = 0;
-                try
-                {
-                    d_latitude = double.Parse(latitude);
-                }
-                catch { }
-
-
-                position.UId = i_uId;
-                position.Longitude = d_longitude;
-                position.Latitude = d_latitude;
-                position.PlaceName = placeName;
-                position.UploadTime = dt_uploadTime;
-                position.ModifyTime = DateTime.Now;
-
-                result = position.Add();
-                if (result > 0)
-                {
-                    status = "succeed";
-                    msg = "上传成功";
-
-                }
-                else
-                {
-                    status = "error";
-                    msg = "上传失败";
-                }
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
@@ -140,6 +149,12 @@ namespace fengmiapp.Controllers
         public ActionResult GetPosition()
         {
             //HttpRequestBase request = Request;
+            this.init();
+            string status = "error";
+            string msg = "";
+            string title = "";
+            
+            int total = 0;
 
             string uId = Request.Params.Get("uId");
             string perPage = Request.Params.Get("perPage");
@@ -158,62 +173,65 @@ namespace fengmiapp.Controllers
                 i_page = int.Parse(page);
             }
             catch { i_page = 1; }
-
-
             int i_uId = int.Parse(uId);
 
-            UserPosition position = new UserPosition();
-            position.UId = i_uId;
-
-            DataTable dt = new DataTable();
-            string status = "error";
-            string msg = "";
-            string title = "";
-
-            if (i_page == 1)
-            {
-                dt = position.GetPositionList(i_perPage);
-            }
-            else
-            {
-                dt = position.GetPositionList(i_page, i_perPage);
-            }
-
-            int count = dt.Rows.Count;
-            int total = position.GetPositionListCount();
-
             List<object> listObj = new List<object>();
-            if (count < 1)
+
+            if (this.IsEffetive)
             {
-                status = "error";
-                msg = "无数据";
+
+                UserPosition position = new UserPosition();
+                position.UId = i_uId;
+                DataTable dt = new DataTable();
+
+                if (i_page == 1)
+                {
+                    dt = position.GetPositionList(i_perPage);
+                }
+                else
+                {
+                    dt = position.GetPositionList(i_page, i_perPage);
+                }
+
+                int count = dt.Rows.Count;
+                 total = position.GetPositionListCount();
+
+                if (count < 1)
+                {
+                    status = "error";
+                    msg = "无数据";
+                }
+                else
+                {
+                    status = "succeed";
+                    msg = "已获取";
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        DataRow dr = dt.Rows[i];
+                        string Id = dr["Id"].ToString();
+
+                        string longitude = dr["longitude"].ToString();
+                        string latitude = dr["latitude"].ToString();
+                        string placeName = dr["placeName"].ToString();
+                        string uploadTime = dr["uploadTime"].ToString();
+                        string modifyTime = dr["modifyTime"].ToString();
+
+                        listObj.Add(new
+                       {
+                           longitude = longitude,
+                           latitude = latitude,
+                           placeName = placeName,
+                           uploadTime = uploadTime,
+                           modifyTime = modifyTime,
+
+                       });
+                    }
+                }
             }
             else
             {
-                status = "succeed";
-                msg = "已获取";
-
-                for (int i = 0; i < count; i++)
-                {
-                    DataRow dr = dt.Rows[i];
-                    string Id = dr["Id"].ToString();
-
-                    string longitude = dr["longitude"].ToString();
-                    string latitude = dr["latitude"].ToString();
-                    string placeName = dr["placeName"].ToString();
-                    string uploadTime = dr["uploadTime"].ToString();
-                    string modifyTime = dr["modifyTime"].ToString();
-
-                    listObj.Add(new
-                   {
-                       longitude = longitude,
-                       latitude = latitude,
-                       placeName = placeName,
-                       uploadTime = uploadTime,
-                       modifyTime = modifyTime,
-
-                   });
-                }
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
@@ -247,6 +265,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetUserNewestPosition()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -257,91 +277,96 @@ namespace fengmiapp.Controllers
 
             List<object> listObj = new List<object>();
 
-
-            int uIdCount = uIdList.Length;
-            if (uIdCount < 1)
+            if (this.IsEffetive)
             {
-                status = "error";
-                msg = "参数有误";
-
-            }
-            else
-            {
-
-                string userStatus = string.Empty;
-                string uId = string.Empty;
-
-                for (int i_U = 0; i_U < uIdCount; i_U++)
+                int uIdCount = uIdList.Length;
+                if (uIdCount < 1)
                 {
-                    uId = uIdList[i_U];
-                    int i_uId = 0;
-                    try
-                    {
-                        i_uId = int.Parse(uId);
-                    }
-                    catch
-                    {
-                        i_uId = 0;
-                    }
+                    status = "error";
+                    msg = "参数有误";
+                }
+                else
+                {
+                    string userStatus = string.Empty;
+                    string uId = string.Empty;
 
-                    UserPosition position = new UserPosition();
-                    position.UId = i_uId;
-
-                    int number = 1;
-                    DataTable dt = new DataTable();
-                    dt = position.GetPositionList(number);
-                    int count = dt.Rows.Count;
-                    object obj_t = new object();
-                    if (count < 1)
+                    for (int i_U = 0; i_U < uIdCount; i_U++)
                     {
-                        obj_t = new
+                        uId = uIdList[i_U];
+                        int i_uId = 0;
+                        try
                         {
-                            uId = uId,
-                            position = new { },
-                        };
+                            i_uId = int.Parse(uId);
+                        }
+                        catch
+                        {
+                            i_uId = 0;
+                        }
+
+                        UserPosition position = new UserPosition();
+                        position.UId = i_uId;
+
+                        int number = 1;
+                        DataTable dt = new DataTable();
+                        dt = position.GetPositionList(number);
+                        int count = dt.Rows.Count;
+                        object obj_t = new object();
+                        if (count < 1)
+                        {
+                            obj_t = new
+                            {
+                                uId = uId,
+                                position = new { },
+                            };
+
+                        }
+                        else
+                        {
+                            int i = 0;
+                            DataRow dr = dt.Rows[i];
+                            string Id = dr["Id"].ToString();
+
+                            string longitude = dr["longitude"].ToString();
+                            string latitude = dr["latitude"].ToString();
+                            string placeName = dr["placeName"].ToString();
+                            string uploadTime = dr["uploadTime"].ToString();
+                            string modifyTime = dr["modifyTime"].ToString();
+
+                            obj_t = new
+                            {
+                                uId = uId,
+                                position = new
+                                {
+                                    longitude = longitude,
+                                    latitude = latitude,
+                                    placeName = placeName,
+                                    uploadTime = uploadTime,
+                                    modifyTime = modifyTime,
+                                },
+
+                            };
+                        }
+
+                        listObj.Add(obj_t);
+                    }
+                    if (listObj != null)
+                    {
+                        status = "succeed";
+                        msg = "获取成功";
 
                     }
                     else
                     {
-                        int i = 0;
-                        DataRow dr = dt.Rows[i];
-                        string Id = dr["Id"].ToString();
-
-                        string longitude = dr["longitude"].ToString();
-                        string latitude = dr["latitude"].ToString();
-                        string placeName = dr["placeName"].ToString();
-                        string uploadTime = dr["uploadTime"].ToString();
-                        string modifyTime = dr["modifyTime"].ToString();
-
-                        obj_t = new
-                        {
-                            uId = uId,
-                            position = new
-                            {
-                                longitude = longitude,
-                                latitude = latitude,
-                                placeName = placeName,
-                                uploadTime = uploadTime,
-                                modifyTime = modifyTime,
-                            },
-
-                        };
+                        status = "error";
+                        msg = "获取失败";
                     }
 
-                    listObj.Add(obj_t);
-                }
-                if (listObj != null)
-                {
-                    status = "succeed";
-                    msg = "获取成功";
-
-                }
-                else
-                {
-                    status = "error";
-                    msg = "获取失败";
                 }
 
+            }
+            else
+            {
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
@@ -369,6 +394,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetUserNewestPositionByUGid()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -386,92 +413,100 @@ namespace fengmiapp.Controllers
             }
 
             List<object> listObj = new List<object>();
-            DataTable ug_dt = new DataTable();
-            UserGroupUser userGroupUser = new UserGroupUser();
-            userGroupUser.UGId = i_uGId;
-            ug_dt = userGroupUser.GetUserGroupWithUGid();
-
-            int ug_count = ug_dt.Rows.Count;
-
-            if (ug_count < 1)
+            if (this.IsEffetive)
             {
-                status = "error";
-                msg = "参数有误";
 
-            }
-            else
-            {
-                for (int j = 0; j < ug_count; j++)
+                DataTable ug_dt = new DataTable();
+                UserGroupUser userGroupUser = new UserGroupUser();
+                userGroupUser.UGId = i_uGId;
+                ug_dt = userGroupUser.GetUserGroupWithUGid();
+
+                int ug_count = ug_dt.Rows.Count;
+
+                if (ug_count < 1)
                 {
-                    string ug_uId = ug_dt.Rows[j]["uId"].ToString();
-                    string uId = ug_uId;
+                    status = "error";
+                    msg = "参数有误";
 
-                    int i_uId = 0;
-                    try
-                    {
-                        i_uId = int.Parse(uId);
-                    }
-                    catch
-                    {
-                        i_uId = 0;
-                    }
-
-                    UserPosition position = new UserPosition();
-                    position.UId = i_uId;
-
-                    int number = 1;
-                    DataTable dt = new DataTable();
-                    dt = position.GetPositionList(number);
-                    int count = dt.Rows.Count;
-                    object obj_t = new object();
-                    if (count < 1)
-                    {
-                        obj_t = new
-                        {
-                            uId = uId,
-                            position = new { },
-                        };
-
-                    }
-                    else
-                    {
-                        int i = 0;
-                        DataRow dr = dt.Rows[i];
-                        string Id = dr["Id"].ToString();
-
-                        string longitude = dr["longitude"].ToString();
-                        string latitude = dr["latitude"].ToString();
-                        string placeName = dr["placeName"].ToString();
-                        string uploadTime = dr["uploadTime"].ToString();
-                        string modifyTime = dr["modifyTime"].ToString();
-
-                        obj_t = new
-                        {
-                            uId = uId,
-                            position = new
-                            {
-                                longitude = longitude,
-                                latitude = latitude,
-                                placeName = placeName,
-                                uploadTime = uploadTime,
-                                modifyTime = modifyTime,
-                            },
-
-                        };
-                    }
-                    listObj.Add(obj_t);
-                }
-
-                if (listObj != null)
-                {
-                    status = "succeed";
-                    msg = "获取成功";
                 }
                 else
                 {
-                    status = "error";
-                    msg = "获取失败";
+                    for (int j = 0; j < ug_count; j++)
+                    {
+                        string ug_uId = ug_dt.Rows[j]["uId"].ToString();
+                        string uId = ug_uId;
+
+                        int i_uId = 0;
+                        try
+                        {
+                            i_uId = int.Parse(uId);
+                        }
+                        catch
+                        {
+                            i_uId = 0;
+                        }
+
+                        UserPosition position = new UserPosition();
+                        position.UId = i_uId;
+
+                        int number = 1;
+                        DataTable dt = new DataTable();
+                        dt = position.GetPositionList(number);
+                        int count = dt.Rows.Count;
+                        object obj_t = new object();
+                        if (count < 1)
+                        {
+                            obj_t = new
+                            {
+                                uId = uId,
+                                position = new { },
+                            };
+
+                        }
+                        else
+                        {
+                            int i = 0;
+                            DataRow dr = dt.Rows[i];
+                            string Id = dr["Id"].ToString();
+
+                            string longitude = dr["longitude"].ToString();
+                            string latitude = dr["latitude"].ToString();
+                            string placeName = dr["placeName"].ToString();
+                            string uploadTime = dr["uploadTime"].ToString();
+                            string modifyTime = dr["modifyTime"].ToString();
+
+                            obj_t = new
+                            {
+                                uId = uId,
+                                position = new
+                                {
+                                    longitude = longitude,
+                                    latitude = latitude,
+                                    placeName = placeName,
+                                    uploadTime = uploadTime,
+                                    modifyTime = modifyTime,
+                                },
+
+                            };
+                        }
+                        listObj.Add(obj_t);
+                    }
+
+                    if (listObj != null)
+                    {
+                        status = "succeed";
+                        msg = "获取成功";
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "获取失败";
+                    }
                 }
+            }
+            else
+            {
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
@@ -499,6 +534,8 @@ namespace fengmiapp.Controllers
         [HttpPost]
         public ActionResult GetNewestPosition()
         {
+            this.init();
+
             string status = "error";
             string msg = "";
             string title = "";
@@ -513,90 +550,92 @@ namespace fengmiapp.Controllers
             {
                 i_uId = 0;
             }
-
-            UserFriend userFriend = new UserFriend();
-
-            DataTable dt_uf = new DataTable();
-            userFriend.UId = i_uId;
-            dt_uf = userFriend.GetUserFriends();
-
             List<object> listObj = new List<object>();
 
-
-            int countUF = dt_uf.Rows.Count;
-            if (countUF < 1)
+            if (this.IsEffetive)
             {
-                status = "error";
-                msg = "无数据";
+                UserFriend userFriend = new UserFriend();
+                DataTable dt_uf = new DataTable();
+                userFriend.UId = i_uId;
+                dt_uf = userFriend.GetUserFriends();
 
+                int countUF = dt_uf.Rows.Count;
+                if (countUF < 1)
+                {
+                    status = "error";
+                    msg = "无数据";
+
+                }
+                else
+                {
+                    status = "succeed";
+                    msg = "已获取";
+                    string userStatus = string.Empty;
+                    string fuId = string.Empty;
+                    for (int i_UF = 0; i_UF < countUF; i_UF++)
+                    {
+                        fuId = dt_uf.Rows[i_UF]["fuId"].ToString();
+                        userStatus = dt_uf.Rows[i_UF]["userStatus"].ToString();
+                        int i_fuId = 0;
+                        try
+                        {
+                            i_fuId = int.Parse(fuId);
+                        }
+                        catch { }
+
+                        UserPosition position = new UserPosition();
+                        position.UId = i_fuId;
+
+                        int number = 1;
+                        DataTable dt = new DataTable();
+                        dt = position.GetPositionList(number);
+                        int count = dt.Rows.Count;
+                        object obj_t = new object();
+                        if (count < 1)
+                        {
+                            obj_t = new
+                            {
+                                uId = uId,
+                                fuId = fuId,
+                                status = userStatus,
+                                position = new { },
+                            };
+                        }
+                        else
+                        {
+                            int i = 0;
+                            DataRow dr = dt.Rows[i];
+                            string Id = dr["Id"].ToString();
+
+                            string longitude = dr["longitude"].ToString();
+                            string latitude = dr["latitude"].ToString();
+                            string placeName = dr["placeName"].ToString();
+                            string uploadTime = dr["uploadTime"].ToString();
+                            string modifyTime = dr["modifyTime"].ToString();
+
+                            obj_t = new
+                            {
+                                uId = uId,
+                                fuId = fuId,
+                                status = userStatus,
+                                position = new
+                                {
+                                    longitude = longitude,
+                                    latitude = latitude,
+                                    placeName = placeName,
+                                    uploadTime = uploadTime,
+                                    modifyTime = modifyTime,
+                                },
+
+                            };
+                        }
+                        listObj.Add(obj_t);
+                    }
+                }
             }
             else
             {
-                status = "succeed";
-                msg = "已获取";
-                string userStatus = string.Empty;
-                string fuId = string.Empty;
-                for (int i_UF = 0; i_UF < countUF; i_UF++)
-                {
-                    fuId = dt_uf.Rows[i_UF]["fuId"].ToString();
-                    userStatus = dt_uf.Rows[i_UF]["userStatus"].ToString();
-
-                    int i_fuId = 0;
-                    try
-                    {
-                        i_fuId = int.Parse(fuId);
-                    }
-                    catch { }
-
-                    UserPosition position = new UserPosition();
-                    position.UId = i_fuId;
-
-                    int number = 1;
-                    DataTable dt = new DataTable();
-                    dt = position.GetPositionList(number);
-                    int count = dt.Rows.Count;
-                    object obj_t = new object();
-                    if (count < 1)
-                    {
-                        obj_t = new
-                        {
-                            uId = uId,
-                            fuId = fuId,
-                            status=userStatus,
-                            position = new { },
-                        };
-
-                    }
-                    else
-                    {
-                        int i = 0;
-                        DataRow dr = dt.Rows[i];
-                        string Id = dr["Id"].ToString();
-
-                        string longitude = dr["longitude"].ToString();
-                        string latitude = dr["latitude"].ToString();
-                        string placeName = dr["placeName"].ToString();
-                        string uploadTime = dr["uploadTime"].ToString();
-                        string modifyTime = dr["modifyTime"].ToString();
-
-                        obj_t = new
-                        {
-                            uId = uId,
-                            fuId = fuId,
-                            status = userStatus,
-                            position = new
-                            {
-                                longitude = longitude,
-                                latitude = latitude,
-                                placeName = placeName,
-                                uploadTime = uploadTime,
-                                modifyTime = modifyTime,
-                            },
-
-                        };
-                    }
-                    listObj.Add(obj_t);
-                }
+                msg = this.ValidMsg;
             }
 
             int logType = 3;
