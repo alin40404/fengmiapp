@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -45,7 +46,7 @@ namespace fengmiapp.Controllers
             DateTime now=DateTime.Now;
             long t = (long)(now - startTime).TotalMilliseconds;
             string secretKey = "DEVFORUSER-ANDRIOD-IOS-CRM-001-KEY";
-
+            t = 1415853862667;
             string param=string.Empty;
             param += "t=" + t;
             param += secretKey;
@@ -58,7 +59,7 @@ namespace fengmiapp.Controllers
         }
 
         /// <summary>
-        /// 上传头像
+        /// 上传图片
         /// </summary>
         /// <returns></returns>
         public ActionResult UploadFile()
@@ -100,6 +101,7 @@ namespace fengmiapp.Controllers
                         //源图片路径
                         try
                         {
+                            /*
                             string _fileNamePath = Request.Files["uploadfile"].FileName;
                             int fileLength = Request.Files["uploadfile"].ContentLength;
                             Stream fileStream = Request.Files["uploadfile"].InputStream;
@@ -108,8 +110,12 @@ namespace fengmiapp.Controllers
                             fileStream.Read(fileData, 0, fileLength);
 
                             string _savedFileResult = this.uploadFile(_fileNamePath, fileData); //开始上传
-                            //把编译成的json格式返回到前台
+                           
                             msg = _savedFileResult;
+                            */
+
+                            this._isReusable =Fileupload.UploadFile(Request.Files[0],out this._saveImageUrl);
+                           
                             int result = 0;
                             if (this._isReusable)
                             {
@@ -118,29 +124,31 @@ namespace fengmiapp.Controllers
                                 if (result > 0)
                                 {
                                     status = "succeed";
+                                    msg = "图片保存成功";
                                 }
                                 else
                                 {
                                     status = "error";
-                                    msg = "头像保存失败";
+                                    msg = "图片保存失败";
 
                                 }
                             }
                             else
                             {
                                 status = "error";
+                                msg = "图片上传失败";
                             }
                         }
-                        catch
+                        catch(Exception ex)
                         {
                             status = "error";
-                            msg = "未知错误";
+                            msg = "未知错误"+ex.Message;
                         }
                     }
                     else
                     {
                         status = "error";
-                        msg = "修改头像失败,用户帐号不存在";
+                        msg = "修改图片失败,用户帐号不存在";
                     }
                 }
             }
@@ -151,7 +159,7 @@ namespace fengmiapp.Controllers
 
             ip = Request.UserHostAddress;
             title += "API：UploadFile； ";
-            title += "用户Id：" + i_uId + "，上传头像：";
+            title += "用户Id：" + i_uId + "，上传图片：";
             Common.addLog(logType, title + msg);
 
             string port = Request.Url.Port.ToString();
@@ -165,57 +173,6 @@ namespace fengmiapp.Controllers
             object obj = new { status = status, msg = msg, userFace = userFace };
             string contentType = "text/json; charset=utf-8";
             return Json(obj, contentType);
-        }
-
-        private string uploadFile(string filenamePath)
-        {
-            if (string.IsNullOrEmpty(filenamePath))
-            {
-                this._isReusable = false;
-                return "图片文件为空";
-
-            }
-            //图片格式
-            string fileNameExit = filenamePath.Substring(filenamePath.IndexOf('.')).ToLower();
-            if (!this.checkfileExit(fileNameExit))
-            {
-                this._isReusable = false;
-                return "图片格式不正确";
-            }
-            //保存路径
-            string toFilePath = "../Content/UploadFiles/";
-            //物理完整路径
-            //HttpContext.Current.
-            string toFileFullPath = Server.MapPath(toFilePath);
-            //检查是否有该路径，没有就创建
-            if (!Directory.Exists(toFileFullPath))
-            {
-                Directory.CreateDirectory(toFileFullPath);
-            }
-            //生成将要保存的随机文件名
-            string toFileName =Common.GetFileName();
-
-            //将要保存的完整路径
-            string saveFile = toFileFullPath + toFileName + fileNameExit;
-
-            //创建WebClient实例
-            WebClient myWebClient = new WebClient();
-            //设定window网络安全认证
-            /*Credentials 属性包含的身份验证凭据用于访问主机上的资源。
-             * 在多数客户端方案中，应使用 DefaultCredentials，这是当前登录的用户的凭据。
-             * 为此，将 UseDefaultCredentials 属性设置为 true，而不是设置此属性。
-             * */
-            myWebClient.Credentials = CredentialCache.DefaultCredentials;
-
-            //要上传的文件
-            FileStream fs = new FileStream(filenamePath, FileMode.Open, FileAccess.Read);
-
-            BinaryReader br = new BinaryReader(fs);
-            //使用UploadFile方法可以用下面的格式
-            //将本地文件发送到资源，并返回包含任何响应的 Byte 数组。
-            myWebClient.UploadFile(saveFile, filenamePath);
-            this._isReusable = true;
-            return "图片保存成功";
         }
 
         private string uploadFile(string filenamePath, byte[] fileData)
@@ -239,6 +196,7 @@ namespace fengmiapp.Controllers
             //物理完整路径
             //HttpContext.Current.
             string toFileFullPath = Server.MapPath(toFilePath);
+
             //检查是否有该路径，没有就创建
             if (!Directory.Exists(toFileFullPath))
             {
@@ -252,7 +210,27 @@ namespace fengmiapp.Controllers
             string saveUrlFile = toFilePath + toFileName + fileNameExit;
 
             Image headimage = this.GetPicture(fileData);
-            headimage.Save(saveFile);
+            System.Drawing.Imaging.ImageFormat imageFormat=System.Drawing.Imaging.ImageFormat.Png;
+            if (fileNameExit == ".gif")
+            {
+                imageFormat = System.Drawing.Imaging.ImageFormat.Gif;
+            }
+            else if (fileNameExit == ".jpg")
+            {
+                imageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
+            }
+            else
+            {
+                imageFormat = System.Drawing.Imaging.ImageFormat.Png;
+            }
+           
+            Bitmap bmp = new Bitmap(headimage);
+            //bmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            headimage.Dispose();
+            bmp.Save(saveFile, imageFormat);
+            //bmp.Save(headimage, imageFormat);
+            //headimage.Save(saveFile, imageFormat);
+            
             this._saveImageUrl = saveUrlFile;
             this._isReusable = true;
             return "图片保存成功";
@@ -298,7 +276,7 @@ namespace fengmiapp.Controllers
         /// </summary>
         /// <param name="streamByte"></param>
         /// <returns></returns>
-        public System.Drawing.Image GetPicture(byte[] streamByte)
+        private System.Drawing.Image GetPicture(byte[] streamByte)
         {
             System.IO.MemoryStream ms = new System.IO.MemoryStream(streamByte);
             System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
