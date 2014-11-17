@@ -391,6 +391,7 @@ namespace fengmiapp.Controllers
                     int isPermitAddFriend = adminUser.IsPermitAddFriend;
 
                     string port = Request.Url.Port.ToString();
+                    ip = Request.Url.Host;
                     string host = "http://" + ip + ":" + port + "/";
                     if (userFace != string.Empty)
                     {
@@ -1097,6 +1098,7 @@ namespace fengmiapp.Controllers
                     dt = userAction.GetActionUserList(number, hours);
                     int count = dt.Rows.Count;
                     string port = Request.Url.Port.ToString();
+                    ip = Request.Url.Host;
                     string host = "http://" + ip + ":" + port + "/";
 
                     for (int i = 0; i < count; i++)
@@ -1523,7 +1525,7 @@ namespace fengmiapp.Controllers
                 userFriend.UId = i_uId;
                 dt = userFriend.GetUserFriends();
                 int count = dt.Rows.Count;
-
+                ip = Request.Url.Host;
                 string port = Request.Url.Port.ToString();
                 string host = "http://" + ip + ":" + port + "/";
 
@@ -2408,6 +2410,7 @@ namespace fengmiapp.Controllers
                 DataTable dt = new DataTable();
                 dt = userGroupUser.GetUserGroupWithUid();
                 int count = dt.Rows.Count;
+                ip = Request.Url.Host;
                 string port = Request.Url.Port.ToString();
                 string host = "http://" + ip + ":" + port + "/";
 

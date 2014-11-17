@@ -114,7 +114,7 @@ namespace fengmiapp.Controllers
                             msg = _savedFileResult;
                             */
 
-                            this._isReusable =Fileupload.UploadFile(Request.Files[0],out this._saveImageUrl);
+                            this._isReusable = Fileupload.UploadFile(Request.Files["uploadfile"], out this._saveImageUrl,out msg);
                            
                             int result = 0;
                             if (this._isReusable)
@@ -136,13 +136,13 @@ namespace fengmiapp.Controllers
                             else
                             {
                                 status = "error";
-                                msg = "图片上传失败";
+                                //msg = "图片上传失败";
                             }
                         }
                         catch(Exception ex)
                         {
                             status = "error";
-                            msg = "未知错误"+ex.Message;
+                            msg = "未知错误";
                         }
                     }
                     else
@@ -157,7 +157,8 @@ namespace fengmiapp.Controllers
                 msg = this.ValidMsg;
             }
 
-            ip = Request.UserHostAddress;
+            //ip = Request.UserHostAddress;
+            ip = Request.Url.Host;
             title += "API：UploadFile； ";
             title += "用户Id：" + i_uId + "，上传图片：";
             Common.addLog(logType, title + msg);
@@ -174,6 +175,127 @@ namespace fengmiapp.Controllers
             string contentType = "text/json; charset=utf-8";
             return Json(obj, contentType);
         }
+
+
+        /// <summary>
+        /// 上传图片
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult UploadFileTest()
+        {
+            //this.init();
+
+            string status = "error";
+            string msg = "";
+            string title = "";
+            int logType = 1;
+            string ip = string.Empty;
+
+            string uId = Request.Params.Get("uId");
+
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch
+            {
+                i_uId = 0;
+            }
+
+            //if (this.IsEffetive)
+            if (true)
+            {
+                if (i_uId <= 0)
+                {
+                    status = "error";
+                    msg = "帐号不存在";
+                }
+                else
+                {
+                    User adminUser = new User(i_uId);
+                    int Id = adminUser.Id;
+                    if (Id > 0)
+                    {//update
+                        //在此写入您的处理程序实现。
+                        //源图片路径
+                        try
+                        {
+                            /*
+                            string _fileNamePath = Request.Files["uploadfile"].FileName;
+                            int fileLength = Request.Files["uploadfile"].ContentLength;
+                            Stream fileStream = Request.Files["uploadfile"].InputStream;
+
+                            byte[] fileData = new byte[fileLength];
+                            fileStream.Read(fileData, 0, fileLength);
+
+                            string _savedFileResult = this.uploadFile(_fileNamePath, fileData); //开始上传
+                           
+                            msg = _savedFileResult;
+                            */
+
+                            this._isReusable = Fileupload.UploadFile(Request.Files["uploadfile"], out this._saveImageUrl, out msg);
+
+                            int result = 0;
+                            if (this._isReusable)
+                            {
+                                adminUser.UserFace = this._saveImageUrl;
+                                result = adminUser.ModifyUserFace();
+                                if (result > 0)
+                                {
+                                    status = "succeed";
+                                    msg = "图片保存成功";
+                                }
+                                else
+                                {
+                                    status = "error";
+                                    msg = "图片保存失败";
+
+                                }
+                            }
+                            else
+                            {
+                                status = "error";
+                                //msg = "图片上传失败";
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            status = "error";
+                            msg = "未知错误";
+                        }
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "修改图片失败,用户帐号不存在";
+                    }
+                }
+            }
+            else
+            {
+                msg = this.ValidMsg;
+            }
+
+            //ip = Request.UserHostAddress;
+            ip = Request.Url.Host;
+            title += "API：UploadFileTest； ";
+            title += "用户Id：" + i_uId + "，上传图片：";
+            Common.addLog(logType, title + msg);
+
+            string port = Request.Url.Port.ToString();
+            string host = "http://" + ip + ":" + port + "/";
+            string userFace = string.Empty;
+            if (this._saveImageUrl != string.Empty)
+            {
+                userFace = host + this._saveImageUrl;
+            }
+
+            object obj = new { status = status, msg = msg, userFace = userFace };
+            string contentType = "text/json; charset=utf-8";
+            return Json(obj, contentType);
+        }
+
 
         private string uploadFile(string filenamePath, byte[] fileData)
         {

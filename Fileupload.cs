@@ -258,12 +258,19 @@ namespace fengmiapp
             // Return the filename
             return path;
         }
-        
-        public static bool UploadFile(HttpPostedFileBase file, out string uploadPath)
+
+        public static bool UploadFile(HttpPostedFileBase file, out string uploadPath, out string message)
         {
             //初始化返回图片上传的路径
             uploadPath = string.Empty;
+            message = string.Empty;
+
             bool isSuccess = false;
+            if (null == file)
+            {
+                message = "上传图片为空";
+                return isSuccess;
+            }
 
             //读取文件名和扩展名，如123.jpg
             string fileName = Path.GetFileName(file.FileName);
@@ -272,7 +279,7 @@ namespace fengmiapp
             //获取文件上传的大小
             int fileLength = file.ContentLength;
              //初始化错误信息
-            string message = "";
+           
             //初始化上传文件的最大值
             int maxLength = 1024;
             //设置扩展名
@@ -294,6 +301,7 @@ namespace fengmiapp
 
             try
             {
+                /*
                 string SavePath = "Content/UploadFiles/";
                 string picPath = "../" + SavePath;
                 string newFileName = DateTime.Now.ToString("yyyyMMddHHmmffff") + fileExtension;
@@ -304,15 +312,20 @@ namespace fengmiapp
                 {
                     directoryInfo.Create();
                 }
-                //ResizeImage(file, 150, 100);
+               
                 file.SaveAs(newPicPath + newFileName);
                 uploadPath = SavePath + date + "/" + newFileName;
+                */
+
+                uploadPath = ResizeImage(file, 200, 200);
                 isSuccess = true;
+
+                message = "Success.";
                 //thumbPath = SavePath.Substring(1) + "Pictures_Small100" + date + "/" + newFileName;
                 //refName = date + "/" + fileName;
                 //GetThumbnailImage(picPath, date + "/", newFileName, width, height);
             }
-            catch
+            catch(Exception  ex)
             {
                 message = "Failure.";
             }
@@ -356,8 +369,8 @@ namespace fengmiapp
         }
         public static string ResizeImage(HttpPostedFileBase file, int width, int height)
         {
-            //string fileExtension = Path.GetExtension(file.FileName);//获取文件扩展名
-            //string newFileName = DateTime.Now.ToString("yyyyMMddHHmmffff") + fileExtension;//重置上传的文件名
+            string fileExtension = Path.GetExtension(file.FileName);//获取文件扩展名
+            string newFileName = DateTime.Now.ToString("yyyyMMddHHmmffff") + fileExtension;//重置上传的文件名
 
             string thumbnailDirectory =
             String.Format(@"{0}{1}{2}", FilesPath,
@@ -368,12 +381,20 @@ namespace fengmiapp
                 // If it doesn't exist, create the directory
                 Directory.CreateDirectory(thumbnailDirectory);
             }
+
+            string fileName=string.Empty;
+            fileName = newFileName;
+           // fileName = file.FileName;
+
             // Final path we will save our thumbnail
             string imagePath =
             String.Format(@"{0}{1}{2}", thumbnailDirectory,
-            DirSeparator, file.FileName);
+            DirSeparator, fileName);
 
-            string refilepath = "System/Uploads/HomeImg/Thumbnails/" + file.FileName;
+            string refilepath = string.Empty;
+            refilepath = "Content/UploadFiles/Thumbnails/" + fileName;
+            //refilepath = "System/Uploads/HomeImg/Thumbnails/" + fileName;
+
             // Create a stream to save the file to when we're
             // done resizing
             FileStream stream = new FileStream(Path.GetFullPath(
