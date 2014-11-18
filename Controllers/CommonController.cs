@@ -176,7 +176,6 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
-
         /// <summary>
         /// 上传图片
         /// </summary>
@@ -296,113 +295,14 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
-
-        private string uploadFile(string filenamePath, byte[] fileData)
+        public ActionResult Introduce()
         {
-            if (string.IsNullOrEmpty(filenamePath))
-            {
-                this._isReusable = false;
-                this._saveImageUrl = string.Empty;
-                return "图片文件为空";
-
-            }
-            //图片格式
-            string fileNameExit = filenamePath.Substring(filenamePath.IndexOf('.')).ToLower();
-            if (!this.checkfileExit(fileNameExit))
-            {
-                this._isReusable = false;
-                return "图片格式不正确";
-            }
-            //保存路径
-            string toFilePath = "../Content/UploadFiles/";
-            //物理完整路径
-            //HttpContext.Current.
-            string toFileFullPath = Server.MapPath(toFilePath);
-
-            //检查是否有该路径，没有就创建
-            if (!Directory.Exists(toFileFullPath))
-            {
-                Directory.CreateDirectory(toFileFullPath);
-            }
-            //生成将要保存的随机文件名
-            string toFileName = Common.GetFileName();
-
-            //将要保存的完整路径
-            string saveFile = toFileFullPath + toFileName + fileNameExit;
-            string saveUrlFile = toFilePath + toFileName + fileNameExit;
-
-            Image headimage = this.GetPicture(fileData);
-            System.Drawing.Imaging.ImageFormat imageFormat=System.Drawing.Imaging.ImageFormat.Png;
-            if (fileNameExit == ".gif")
-            {
-                imageFormat = System.Drawing.Imaging.ImageFormat.Gif;
-            }
-            else if (fileNameExit == ".jpg")
-            {
-                imageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
-            }
-            else
-            {
-                imageFormat = System.Drawing.Imaging.ImageFormat.Png;
-            }
-           
-            Bitmap bmp = new Bitmap(headimage);
-            //bmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
-            headimage.Dispose();
-            bmp.Save(saveFile, imageFormat);
-            //bmp.Save(headimage, imageFormat);
-            //headimage.Save(saveFile, imageFormat);
-            
-            this._saveImageUrl = saveUrlFile;
-            this._isReusable = true;
-            return "图片保存成功";
+            return View();
         }
 
-        /// <summary>
-        /// 检查图片格式
-        /// </summary>
-        /// <param name="_fileExit">文件后缀名</param>
-        /// <returns></returns>
-        private bool checkfileExit(string _fileExit)
+        public ActionResult PrivacyPolicy()
         {
-            string[] allowExit = new string[] { ".gif", ".jpg", ".png" };//判断文件类型
-            for (int i = 0; i < allowExit.Length; i++)
-            {
-                if (allowExit[i] == _fileExit)
-                {
-                    //符合文件类型则返回true;
-                    return true;
-                }
-            }
-            return false;
-        }
-      
-        /// <summary>
-        /// 图片转二进制
-        /// </summary>
-        /// <param name="imagepath"></param>
-        /// <returns></returns>
-        private byte[] GetPictureData(string imagepath)
-        {
-            /**/
-            ////根据图片文件的路径使用文件流打开，并保存为byte[] 
-            FileStream fs = new FileStream(imagepath, FileMode.Open);//可以是其他重载方法 
-            byte[] byData = new byte[fs.Length];
-            fs.Read(byData, 0, byData.Length);
-            fs.Close();
-            return byData;
-        }
-
-        /// <summary>
-        /// 二进制转图片
-        /// </summary>
-        /// <param name="streamByte"></param>
-        /// <returns></returns>
-        private System.Drawing.Image GetPicture(byte[] streamByte)
-        {
-            System.IO.MemoryStream ms = new System.IO.MemoryStream(streamByte);
-            System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
-            return img;
+            return View();
         }
 
     }

@@ -1,0 +1,15 @@
+﻿body {
+}
+div {
+    padding:5px 10px;
+    margin: 0;
+    line-height:1.5em;
+}
+p {
+     padding:5px 10px;
+    margin: 0;
+    line-height:1.5em;
+}
+.text_center {
+    text-align:center;
+}
