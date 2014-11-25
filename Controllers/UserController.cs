@@ -262,7 +262,7 @@ namespace fengmiapp.Controllers
             string nickName = Request.Params.Get("nickName");
             string identityCard = Request.Params.Get("identityCard");
             string birthDay = Request.Params.Get("birthDay");
-            string userFace = Request.Params.Get("userFace");
+            //string userFace = Request.Params.Get("userFace");
             string email = Request.Params.Get("email");
             string address = Request.Params.Get("address");
             string interests = Request.Params.Get("interests");
@@ -271,7 +271,7 @@ namespace fengmiapp.Controllers
             if (string.IsNullOrEmpty(nickName)) { nickName = string.Empty; }
             if (string.IsNullOrEmpty(identityCard)) { identityCard = string.Empty; }
             if (string.IsNullOrEmpty(birthDay)) { birthDay = string.Empty; }
-            if (string.IsNullOrEmpty(userFace)) { userFace = string.Empty; }
+            //if (string.IsNullOrEmpty(userFace)) { userFace = string.Empty; }
             if (string.IsNullOrEmpty(email)) { email = string.Empty; }
             if (string.IsNullOrEmpty(address)) { address = string.Empty; }
             if (string.IsNullOrEmpty(interests)) { interests = string.Empty; }
@@ -307,7 +307,7 @@ namespace fengmiapp.Controllers
                     catch { }
                     adminUser.Address = address;
                     adminUser.Email = email;
-                    adminUser.UserFace = userFace;
+                    //adminUser.UserFace = userFace;
                     adminUser.Interests = interests;
 
                     int result = adminUser.ModifyInfo();
@@ -442,6 +442,7 @@ namespace fengmiapp.Controllers
             string contentType = "text/json; charset=utf-8";
             return Json(obj, contentType);
         }
+
 
         /// <summary>
         /// 4.修改用户密码

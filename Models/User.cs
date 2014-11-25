@@ -460,7 +460,7 @@ namespace fengmiapp.Models
             /* 修改头像另外写接口 */
             if (!string.IsNullOrEmpty(this._userFace))
             {
-                set += "userFace=@userFace,";
+                //set += "userFace=@userFace,";
             }
              
             if (!string.IsNullOrEmpty(this._address))
