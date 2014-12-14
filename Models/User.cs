@@ -310,6 +310,21 @@ namespace fengmiapp.Models
             }
         }
 
+        public bool isUserExist()
+        {
+            bool result = true;
+            if (this._id > 0&&this._status>0)
+            {
+                result = true;
+            }
+            else
+            {
+                result = false;
+            }
+            return result;
+        }
+
+
         #region 添加操作
         public int Add()
         {

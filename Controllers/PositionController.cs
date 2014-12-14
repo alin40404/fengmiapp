@@ -51,74 +51,104 @@ namespace fengmiapp.Controllers
             }
             if (this.IsEffetive)
             {
-                DateTime dt_uploadTime = DateTime.Now;
-                try
+                User user = new User(i_uId);
+
+                if (user.isUserExist())
                 {
-                    dt_uploadTime = DateTime.Parse(uploadTime);
-                }
-                catch { }
-
-
-                UserPosition position = new UserPosition();
-                position.UId = i_uId;
-                position.GetNewestPositionOne();
-                int Id = position.Id;
-                int result = 0;
-                string temp_placeName = position.PlaceName;
-
-                if (Id > 0 && temp_placeName == placeName)
-                {
-                    position.UploadTime = dt_uploadTime;
-                    position.ModifyTime = DateTime.Now;
-
-                    result = position.Modify_Time();
-                    if (result > 0)
+                    DateTime dt_uploadTime = DateTime.Now;
+                    try
                     {
-                        status = "succeed";
-                        msg = "上传修改成功";
+                        dt_uploadTime = DateTime.Parse(uploadTime);
+                    }
+                    catch { }
 
+
+                    UserPosition position = new UserPosition();
+                    position.UId = i_uId;
+                    position.GetNewestPositionOne();
+                    int Id = position.Id;
+                    int result = 0;
+                    string temp_placeName = position.PlaceName;
+                    int userStatus = user.Status;
+                    //获取对好友隐身的好友Id
+                    string offlineUserIds=string.Empty;
+                    UserFriend userFriend = new UserFriend();
+                    bool isGetAll = false;
+                    int isHiding = 0;
+                    if (userStatus == 2)
+                    {//用户隐身
+                        isGetAll = true;
+                        isHiding = 1;
                     }
                     else
                     {
-                        status = "error";
-                        msg = "上传修改失败";
+                        isGetAll = false;
+                        isHiding = 0;
+                    }
+                    offlineUserIds = userFriend.GetUserFriendsIdList(isGetAll);
+
+                    position.IsHiding = isHiding;
+                    position.OfflineUserIds = offlineUserIds;
+
+                    if (Id > 0 && temp_placeName == placeName)
+                    {
+                        position.UploadTime = dt_uploadTime;
+                        position.ModifyTime = DateTime.Now;
+
+                        result = position.Modify_Time_IsHiding();
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "上传修改成功";
+
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "上传修改失败";
+                        }
+                    }
+                    else
+                    {
+                        double d_longitude = 0;
+                        try
+                        {
+                            d_longitude = double.Parse(longitude);
+                        }
+                        catch { }
+                        double d_latitude = 0;
+                        try
+                        {
+                            d_latitude = double.Parse(latitude);
+                        }
+                        catch { }
+
+
+                        position.UId = i_uId;
+                        position.Longitude = d_longitude;
+                        position.Latitude = d_latitude;
+                        position.PlaceName = placeName;
+                        position.UploadTime = dt_uploadTime;
+                        position.ModifyTime = DateTime.Now;
+
+                        result = position.Add();
+                        if (result > 0)
+                        {
+                            status = "succeed";
+                            msg = "上传成功";
+
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "上传失败";
+                        }
                     }
                 }
                 else
                 {
-                    double d_longitude = 0;
-                    try
-                    {
-                        d_longitude = double.Parse(longitude);
-                    }
-                    catch { }
-                    double d_latitude = 0;
-                    try
-                    {
-                        d_latitude = double.Parse(latitude);
-                    }
-                    catch { }
-
-
-                    position.UId = i_uId;
-                    position.Longitude = d_longitude;
-                    position.Latitude = d_latitude;
-                    position.PlaceName = placeName;
-                    position.UploadTime = dt_uploadTime;
-                    position.ModifyTime = DateTime.Now;
-
-                    result = position.Add();
-                    if (result > 0)
-                    {
-                        status = "succeed";
-                        msg = "上传成功";
-
-                    }
-                    else
-                    {
-                        status = "error";
-                        msg = "上传失败";
-                    }
+                    status = "error";
+                    msg = "上传失败，用户不存在";
                 }
             }
             else
@@ -157,6 +187,7 @@ namespace fengmiapp.Controllers
             int total = 0;
 
             string uId = Request.Params.Get("uId");
+
             string perPage = Request.Params.Get("perPage");
             string page = Request.Params.Get("page");
 
@@ -216,6 +247,14 @@ namespace fengmiapp.Controllers
                         string placeName = dr["placeName"].ToString();
                         string uploadTime = dr["uploadTime"].ToString();
                         string modifyTime = dr["modifyTime"].ToString();
+                        string offlineUserIds = dr["offlineUserIds"].ToString();
+                        string isHiding = dr["isHiding"].ToString();
+                        int i_isHiding = 0;
+                        try
+                        {
+                            i_isHiding = int.Parse(isHiding);
+                        }
+                        catch { }
 
                         listObj.Add(new
                        {
@@ -224,6 +263,8 @@ namespace fengmiapp.Controllers
                            placeName = placeName,
                            uploadTime = uploadTime,
                            modifyTime = modifyTime,
+                           offlineUserIds = offlineUserIds,
+                           isHiding = i_isHiding,
 
                        });
                     }
@@ -331,6 +372,14 @@ namespace fengmiapp.Controllers
                             string placeName = dr["placeName"].ToString();
                             string uploadTime = dr["uploadTime"].ToString();
                             string modifyTime = dr["modifyTime"].ToString();
+                            string offlineUserIds = dr["offlineUserIds"].ToString();
+                            string isHiding = dr["isHiding"].ToString();
+                            int i_isHiding = 0;
+                            try
+                            {
+                                i_isHiding = int.Parse(isHiding);
+                            }
+                            catch { }
 
                             obj_t = new
                             {
@@ -342,6 +391,8 @@ namespace fengmiapp.Controllers
                                     placeName = placeName,
                                     uploadTime = uploadTime,
                                     modifyTime = modifyTime,
+                                    offlineUserIds = offlineUserIds,
+                                    isHiding = i_isHiding,
                                 },
 
                             };
@@ -474,6 +525,14 @@ namespace fengmiapp.Controllers
                             string placeName = dr["placeName"].ToString();
                             string uploadTime = dr["uploadTime"].ToString();
                             string modifyTime = dr["modifyTime"].ToString();
+                            string offlineUserIds = dr["offlineUserIds"].ToString();
+                            string isHiding = dr["isHiding"].ToString();
+                            int i_isHiding = 0;
+                            try
+                            {
+                                i_isHiding = int.Parse(isHiding);
+                            }
+                            catch { }
 
                             obj_t = new
                             {
@@ -485,6 +544,8 @@ namespace fengmiapp.Controllers
                                     placeName = placeName,
                                     uploadTime = uploadTime,
                                     modifyTime = modifyTime,
+                                    offlineUserIds = offlineUserIds,
+                                    isHiding = i_isHiding,
                                 },
 
                             };
@@ -612,6 +673,15 @@ namespace fengmiapp.Controllers
                             string placeName = dr["placeName"].ToString();
                             string uploadTime = dr["uploadTime"].ToString();
                             string modifyTime = dr["modifyTime"].ToString();
+                            string offlineUserIds = dr["offlineUserIds"].ToString();
+                            string isHiding = dr["isHiding"].ToString();
+                            int i_isHiding = 0;
+                            try
+                            {
+                                i_isHiding = int.Parse(isHiding);
+                            }
+                            catch { }
+
 
                             obj_t = new
                             {
@@ -625,6 +695,9 @@ namespace fengmiapp.Controllers
                                     placeName = placeName,
                                     uploadTime = uploadTime,
                                     modifyTime = modifyTime,
+                                    offlineUserIds = offlineUserIds,
+                                    isHiding = i_isHiding,
+
                                 },
 
                             };

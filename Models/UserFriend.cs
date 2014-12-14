@@ -179,6 +179,19 @@ namespace fengmiapp.Models
             return base.Modify(set, para);
         }
 
+        public int ModifyStatus(int uId, int uFGroupId, int status)
+        {
+            string set = "status=@status";
+            string where = "uId=@uId and uFGroupId=@uFGroupId";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@status", status),
+                new SqlParameter("@uFGroupId", uFGroupId),
+                new SqlParameter("@uId", uId),
+			};
+            return base.Modify(set,where, para);
+        }
+
         /// <summary>
         /// 互改多位好友状态
         /// </summary>
@@ -297,6 +310,10 @@ namespace fengmiapp.Models
             return base.Modify(set, para);
         }
 
+        /// <summary>
+        /// 获取分组好友基本信息
+        /// </summary>
+        /// <returns></returns>
         public DataTable GetUserFriends()
         {
             string strSql=string.Empty;
@@ -320,6 +337,41 @@ namespace fengmiapp.Models
             //dt = this.GetDataList(strSql);
 
             return dt;
+
+        }
+
+        /// <summary>
+        /// 获取隐身好友Id 列表
+        /// </summary>
+        /// <returns></returns>
+        public string GetUserFriendsIdList(bool isGetAll)
+        {
+            int status = 2;
+            string strSql = " Select t.* from " + this._table + " as t  where 1=1 and t.uId = @uId  ";
+            if (isGetAll==false)
+            {
+                strSql += " and t.status = @status  ";
+            }
+            DataTable dt = new DataTable();
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+				new SqlParameter("@uId", this._uId),
+                new SqlParameter("@status", status),
+
+			};
+            dt = base.GetDataList(strSql, para);
+            string ufIdList = string.Empty;
+            int count = dt.Rows.Count;
+            for (int i = 0; i < count; i++)
+            {
+                DataRow dr = dt.Rows[i];
+                string fuId = dr["fuId"].ToString();
+                ufIdList += fuId+",";
+            }
+            //ufIdList = ufIdList.Trim(',');
+
+            return ufIdList;
 
         }
 

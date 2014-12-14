@@ -19,6 +19,8 @@ namespace fengmiapp.Models
         private int _status = 1;
 
         private DateTime _modifyTime = DateTime.Now;
+        private int _isOnToHide = 0;
+        private int _isOffToVisible = 0;
 
 
         #endregion
@@ -66,6 +68,23 @@ namespace fengmiapp.Models
         {
             get { return this._modifyTime; }
             set { this._modifyTime = value; }
+        }
+        
+        /// <summary>
+        /// IsOnToHide,在线是否对用户分组隐身
+        /// </summary>
+        public int IsOnToHide
+        {
+            get { return _isOnToHide; }
+            set { _isOnToHide = value; }
+        }
+        /// <summary>
+        /// IsOffToVisible，隐身是否对用户分组可见
+        /// </summary>
+        public int IsOffToVisible
+        {
+            get { return _isOffToVisible; }
+            set { _isOffToVisible = value; }
         }
 
         #endregion
@@ -146,6 +165,8 @@ namespace fengmiapp.Models
                     string modifyTime = dt.Rows[0]["modifyTime"].ToString();
 
                     this._modifyTime = DateTime.Parse(modifyTime);
+                    this._isOnToHide = int.Parse(dt.Rows[0]["isOnToHide"].ToString());
+                    this._isOffToVisible = int.Parse(dt.Rows[0]["isOffToVisible"].ToString());
 
                 }
             }
@@ -201,6 +222,29 @@ namespace fengmiapp.Models
             return base.Modify(set, para);
         }
 
+        public int ModifyOnline()
+        {
+            string set = "isOnToHide=@isOnToHide";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@isOnToHide", _isOnToHide),
+                new SqlParameter("@Id", _id),
+			};
+            return base.Modify(set, para);
+        }
+
+        public int ModifyOffline()
+        {
+            string set = "isOffToVisible=@isOffToVisible";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@isOffToVisible", _isOffToVisible),
+                new SqlParameter("@Id", _id),
+			};
+            return base.Modify(set, para);
+        }
+
+
         /// <summary>
         /// 删除好友分组
         /// </summary>
@@ -243,6 +287,7 @@ namespace fengmiapp.Models
             return dt;
 
         }
+
 
     }
 }

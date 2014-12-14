@@ -88,6 +88,28 @@ namespace fengmiapp.Models
 
         }
 
+        /// <summary>
+        /// 修改数据
+        /// </summary>
+        /// <param name="set"></param>
+        /// <param name="where"></param>
+        /// <param name="para"></param>
+        /// <returns></returns>
+        public int Modify(string set,string where, SqlParameter[] para)
+        {
+
+            if (!string.IsNullOrEmpty(where))
+            {
+                where = " Where 1=1 and " + where;
+            }
+            string sql = " UPDATE " + this._table + " set " + set +
+                    "  " + where;
+
+
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
+
+        }
+
         #endregion
         
         #region 删除

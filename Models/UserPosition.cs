@@ -18,6 +18,9 @@ namespace fengmiapp.Models
         private double _latitude = 0;
         private string _placeName = string.Empty;
         
+        private string _offlineUserIds = string.Empty;
+        private int _isHiding = 0;
+
         private DateTime _modifyTime = DateTime.Now;
         private DateTime _uploadTime = DateTime.Now;
 
@@ -67,6 +70,25 @@ namespace fengmiapp.Models
             get { return _placeName; }
             set { _placeName = value; }
         }
+       
+        ///<summary>
+        /// OfflineUserIds
+        ///</summary>
+        public string OfflineUserIds
+        {
+            get { return _offlineUserIds; }
+            set { _offlineUserIds = value; }
+        }
+
+        ///<summary>
+        /// IsHiding
+        ///</summary>
+        public int IsHiding
+        {
+            get { return _isHiding; }
+            set { _isHiding = value; }
+        }
+
 
         /// <summary>
         /// ModifyTime
@@ -126,6 +148,10 @@ namespace fengmiapp.Models
 
                     string uploadTime = dt.Rows[0]["uploadTime"].ToString();
                     this._uploadTime = DateTime.Parse(uploadTime);
+                   
+                    this._isHiding = int.Parse(dt.Rows[0]["isHiding"].ToString());
+                    this._offlineUserIds = dt.Rows[0]["offlineUserIds"].ToString(); ;
+
                 }
             }
             catch { }
@@ -151,7 +177,7 @@ namespace fengmiapp.Models
 
         public int Add()
         {
-            string value = "uId,longitude,latitude,placeName,modifyTime,uploadTime";
+            string value = "uId,longitude,latitude,placeName,modifyTime,uploadTime,isHiding,offlineUserIds";
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@uId", _uId),
@@ -160,6 +186,8 @@ namespace fengmiapp.Models
                 new SqlParameter("@placeName", _placeName),
                 new SqlParameter("@modifyTime", _modifyTime),
                 new SqlParameter("@uploadTime", _uploadTime),
+                new SqlParameter("@isHiding", _isHiding),
+                new SqlParameter("@offlineUserIds", _offlineUserIds),
 
 			};
             return base.Add(value, para);
@@ -176,6 +204,21 @@ namespace fengmiapp.Models
 			};
             return base.Modify(set, para);
         }
+
+        public int Modify_Time_IsHiding()
+        {
+            string set = "modifyTime=@modifyTime,uploadTime=@uploadTime,isHiding=@isHiding,offlineUserIds=@offlineUserIds";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@Id", _id),
+                new SqlParameter("@modifyTime", _modifyTime),
+                new SqlParameter("@uploadTime", _uploadTime),
+                new SqlParameter("@isHiding", _isHiding),
+                new SqlParameter("@offlineUserIds", _offlineUserIds),
+			};
+            return base.Modify(set, para);
+        }
+
 
         public DataTable GetPositionList(int number)
         {
