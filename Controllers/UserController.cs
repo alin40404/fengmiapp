@@ -716,132 +716,7 @@ namespace fengmiapp.Controllers
         }
 
         /// <summary>
-        /// 修改用户对某好友状态
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        public ActionResult DealUserToFriendUserStatus()
-        {
-            this.init();
-
-            string status = "error";
-            string msg = "";
-            string title = "";
-
-            string uId = Request.Params.Get("uId");
-            string fuId = Request.Params.Get("fuId");
-            string modifyTime = Request.Params.Get("modifyTime");
-            string userFriendStatus = Request.Params.Get("status");
-
-
-            //int i_uId=int.Parse(uId);
-            //int i_fuId=int.Parse(fuId);
-            int i_uId = 0;
-            try
-            {
-                i_uId = int.Parse(uId);
-            }
-            catch
-            {
-                i_uId = 0;
-            }
-
-            int i_fuId = 0;
-            try
-            {
-                i_fuId = int.Parse(fuId);
-            }
-            catch
-            {
-                i_fuId = 0;
-            }
-
-            if (this.IsEffetive)
-            {
-                DataTable dt = new DataTable();
-
-                UserFriend userfriend = new UserFriend(i_uId, i_fuId);
-                int UFId = userfriend.Id;
-
-                if (UFId > 0)
-                {//用户可用
-
-                    userFriendStatus = userFriendStatus.Trim();
-                    if (userFriendStatus != "1" && userFriendStatus != "2")
-                    {
-
-                        DateTime dt_modifyTime = new DateTime();
-                        try
-                        {
-                            dt_modifyTime = DateTime.Parse(modifyTime);
-                        }
-                        catch
-                        {
-                        }
-                        userfriend.ModifyTime = dt_modifyTime;
-
-                        int i_userFriendStatus = 0;
-                        try
-                        {
-                            i_userFriendStatus = int.Parse(userFriendStatus);
-                        }
-                        catch { }
-
-                        userfriend.Status = i_userFriendStatus;
-                        int result = userfriend.ModifyStatus();
-
-                        if (result > 0)
-                        {
-                            /**
-                            UserFriendStatus userfrStatus = new UserFriendStatus();
-                            userfrStatus.UId = userfriend.UId;
-                            userfrStatus.FuId = userfriend.FuId;
-                            userfrStatus.UploadTime = dt_modifyTime;
-                            userfrStatus.Status = i_userFriendStatus;
-                            userfrStatus.Add();
-                            */
-
-                            status = "succeed";
-                            msg = "修改成功";
-                        }
-                        else
-                        {
-                            status = "error";
-                            msg = "修改失败";
-                        }
-                    }
-                    else
-                    {
-                        status = "error";
-                        msg = "修改失败，修改状态错误";
-                    }
-                }
-                else
-                {
-                    status = "error";
-                    msg = "修改失败，未加好友";
-                }
-
-            }
-            else
-            {
-                msg = this.ValidMsg;
-            }
-
-            int logType = 3;
-            string ip = Request.UserHostAddress;
-            string emergeURL = Request.Url.ToString();
-            title += "API：DealUserToFriendUserStatus； ";
-            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，修改用户对某好友状态：";
-            Common.addLog(logType, title + msg);
-
-            object obj = new { status = status, msg = msg };
-            string contentType = "text/json; charset=utf-8";
-            return Json(obj, contentType);
-        }
-
-        /// <summary>
-        /// 5．修改用户设置
+        /// 修改用户设置
         /// </summary>
         /// <returns></returns>
         [HttpPost]
@@ -1025,6 +900,139 @@ namespace fengmiapp.Controllers
             string contentType = "text/json; charset=utf-8";
             return Json(obj, contentType);
         }
+
+
+        /// <summary>
+        /// 在线时 设置对某好友是否隐身
+        /// SetUserFriendGroupOnline
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult SetUserToFriendUserOnline()
+        {
+            this.init();
+
+            string status = "error";
+            string msg = "";
+            string title = "";
+
+            string uId = Request.Params.Get("uId");
+            string fuId = Request.Params.Get("fuId");
+            string modifyTime = Request.Params.Get("modifyTime");
+            string userFriendStatus = Request.Params.Get("status");
+
+
+            //int i_uId=int.Parse(uId);
+            //int i_fuId=int.Parse(fuId);
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch
+            {
+                i_uId = 0;
+            }
+
+            int i_fuId = 0;
+            try
+            {
+                i_fuId = int.Parse(fuId);
+            }
+            catch
+            {
+                i_fuId = 0;
+            }
+
+            if (this.IsEffetive)
+            {
+                DataTable dt = new DataTable();
+
+                UserFriend userfriend = new UserFriend(i_uId, i_fuId);
+                int UFId = userfriend.Id;
+
+                if (UFId > 0)
+                {//用户可用
+
+                    userFriendStatus = userFriendStatus.Trim();
+                    if (userFriendStatus != "1" && userFriendStatus != "2")
+                    {
+
+                        DateTime dt_modifyTime = new DateTime();
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(modifyTime))
+                            {
+                                dt_modifyTime = DateTime.Parse(modifyTime);
+                            }
+                        }
+                        catch
+                        {
+                        }
+                        userfriend.ModifyTime = dt_modifyTime;
+
+                        int i_userFriendStatus = 0;
+                        try
+                        {
+                            i_userFriendStatus = int.Parse(userFriendStatus);
+                        }
+                        catch { }
+
+                        userfriend.Status = i_userFriendStatus;
+                        int result = userfriend.ModifyStatus();
+
+                        if (result > 0)
+                        {
+                            /**
+                            UserFriendStatus userfrStatus = new UserFriendStatus();
+                            userfrStatus.UId = userfriend.UId;
+                            userfrStatus.FuId = userfriend.FuId;
+                            userfrStatus.UploadTime = dt_modifyTime;
+                            userfrStatus.Status = i_userFriendStatus;
+                            userfrStatus.Add();
+                            */
+
+                            status = "succeed";
+                            msg = "修改成功";
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "修改失败";
+                        }
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "修改失败，修改状态错误";
+                    }
+                }
+                else
+                {
+                    status = "error";
+                    msg = "修改失败，未加好友";
+                }
+
+            }
+            else
+            {
+                msg = this.ValidMsg;
+            }
+
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+            title += "API：DealUserToFriendUserStatus； ";
+            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，修改用户对某好友状态：";
+            Common.addLog(logType, title + msg);
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+            return Json(obj, contentType);
+        }
+
+
+
 
         #endregion
 
@@ -2513,6 +2521,8 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
 
         }
+
+
 
         #endregion
 

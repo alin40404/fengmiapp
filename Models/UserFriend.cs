@@ -344,14 +344,21 @@ namespace fengmiapp.Models
         /// 获取隐身好友Id 列表
         /// </summary>
         /// <returns></returns>
-        public string GetUserFriendsIdList(bool isGetAll)
+        public string GetUserFriendsIdList(bool isHide)
         {
             int status = 2;
             string strSql = " Select t.* from " + this._table + " as t  where 1=1 and t.uId = @uId  ";
-            if (isGetAll==false)
-            {
-                strSql += " and t.status = @status  ";
+            strSql += " and t.status = @status  ";
+
+            if (isHide == false)
+            {//隐藏
+                status = 2;
             }
+            else
+            {//在线
+                status = 1;
+            }
+
             DataTable dt = new DataTable();
 
             SqlParameter[] para = new SqlParameter[]

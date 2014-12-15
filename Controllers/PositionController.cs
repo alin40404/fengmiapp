@@ -73,19 +73,19 @@ namespace fengmiapp.Controllers
                     //获取对好友隐身的好友Id
                     string offlineUserIds=string.Empty;
                     UserFriend userFriend = new UserFriend();
-                    bool isGetAll = false;
+                    bool isHide = false;
                     int isHiding = 0;
                     if (userStatus == 2)
                     {//用户隐身
-                        isGetAll = true;
+                        isHide = true;
                         isHiding = 1;
                     }
                     else
                     {
-                        isGetAll = false;
+                        isHide = false;
                         isHiding = 0;
                     }
-                    offlineUserIds = userFriend.GetUserFriendsIdList(isGetAll);
+                    offlineUserIds = userFriend.GetUserFriendsIdList(isHide);
 
                     position.IsHiding = isHiding;
                     position.OfflineUserIds = offlineUserIds;
