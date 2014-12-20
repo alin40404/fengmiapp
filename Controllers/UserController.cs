@@ -244,7 +244,7 @@ namespace fengmiapp.Controllers
         #region 用户基本信息操作
 
         /// <summary>
-        /// 3.修改用户个人信息
+        /// 修改用户个人信息
         /// </summary>
         /// <returns></returns>
         [HttpPost]
@@ -918,9 +918,12 @@ namespace fengmiapp.Controllers
 
             string uId = Request.Params.Get("uId");
             string fuId = Request.Params.Get("fuId");
-            string modifyTime = Request.Params.Get("modifyTime");
-            string userFriendStatus = Request.Params.Get("status");
+            string isOnToHide = Request.Params.Get("isOnToHide");
 
+            string modifyTime = DateTime.Now.ToString();
+            string userFriendStatus = string.Empty;
+            //string userFriendStatus = Request.Params.Get("status");
+            //string modifyTime = Request.Params.Get("modifyTime");
 
             //int i_uId=int.Parse(uId);
             //int i_fuId=int.Parse(fuId);
@@ -944,18 +947,25 @@ namespace fengmiapp.Controllers
                 i_fuId = 0;
             }
 
+
             if (this.IsEffetive)
             {
                 DataTable dt = new DataTable();
-
                 UserFriend userfriend = new UserFriend(i_uId, i_fuId);
                 int UFId = userfriend.Id;
 
                 if (UFId > 0)
                 {//用户可用
 
-                    userFriendStatus = userFriendStatus.Trim();
-                    if (userFriendStatus != "1" && userFriendStatus != "2")
+                    isOnToHide = isOnToHide.Trim();
+                    int i_isOnToHide = 0;
+                    try
+                    {
+                        i_isOnToHide = int.Parse(isOnToHide);
+                    }
+                    catch{}
+
+                    if (i_isOnToHide != 1 && i_isOnToHide != 0)
                     {
 
                         DateTime dt_modifyTime = new DateTime();
@@ -966,20 +976,12 @@ namespace fengmiapp.Controllers
                                 dt_modifyTime = DateTime.Parse(modifyTime);
                             }
                         }
-                        catch
-                        {
-                        }
+                        catch{}
+
                         userfriend.ModifyTime = dt_modifyTime;
 
-                        int i_userFriendStatus = 0;
-                        try
-                        {
-                            i_userFriendStatus = int.Parse(userFriendStatus);
-                        }
-                        catch { }
-
-                        userfriend.Status = i_userFriendStatus;
-                        int result = userfriend.ModifyStatus();
+                        userfriend.IsOnToHide = i_isOnToHide;
+                        int result = userfriend.ModifyOnline();
 
                         if (result > 0)
                         {
@@ -993,24 +995,24 @@ namespace fengmiapp.Controllers
                             */
 
                             status = "succeed";
-                            msg = "修改成功";
+                            msg = "设置成功";
                         }
                         else
                         {
                             status = "error";
-                            msg = "修改失败";
+                            msg = "设置失败";
                         }
                     }
                     else
                     {
                         status = "error";
-                        msg = "修改失败，修改状态错误";
+                        msg = "设置失败，设置状态错误";
                     }
                 }
                 else
                 {
                     status = "error";
-                    msg = "修改失败，未加好友";
+                    msg = "设置失败，未加好友";
                 }
 
             }
@@ -1022,8 +1024,8 @@ namespace fengmiapp.Controllers
             int logType = 3;
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
-            title += "API：DealUserToFriendUserStatus； ";
-            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，修改用户对某好友状态：";
+            title += "API：SetUserToFriendUserOnline； ";
+            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，在线时设置对某好友是否隐身：";
             Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg };
@@ -1031,8 +1033,136 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
+        /// <summary>
+        /// 隐身时 设置对某好友是否在线
+        /// SetUserToFriendUserOffline
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult SetUserToFriendUserOffline()
+        {
+            this.init();
+
+            string status = "error";
+            string msg = "";
+            string title = "";
+
+            string uId = Request.Params.Get("uId");
+            string fuId = Request.Params.Get("fuId");
+            string isOffToVisible = Request.Params.Get("isOffToVisible");
+
+            string modifyTime = DateTime.Now.ToString();
+            string userFriendStatus = string.Empty;
+            //string userFriendStatus = Request.Params.Get("status");
+            //string modifyTime = Request.Params.Get("modifyTime");
+
+            //int i_uId=int.Parse(uId);
+            //int i_fuId=int.Parse(fuId);
+            int i_uId = 0;
+            try
+            {
+                i_uId = int.Parse(uId);
+            }
+            catch
+            {
+                i_uId = 0;
+            }
+
+            int i_fuId = 0;
+            try
+            {
+                i_fuId = int.Parse(fuId);
+            }
+            catch
+            {
+                i_fuId = 0;
+            }
 
 
+            if (this.IsEffetive)
+            {
+                DataTable dt = new DataTable();
+                UserFriend userfriend = new UserFriend(i_uId, i_fuId);
+                int UFId = userfriend.Id;
+
+                if (UFId > 0)
+                {//用户可用
+
+                    isOffToVisible = isOffToVisible.Trim();
+                    int i_isOffToVisible = 0;
+                    try
+                    {
+                        i_isOffToVisible = int.Parse(isOffToVisible);
+                    }
+                    catch { }
+
+                    if (i_isOffToVisible != 1 && i_isOffToVisible != 0)
+                    {
+
+                        DateTime dt_modifyTime = new DateTime();
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(modifyTime))
+                            {
+                                dt_modifyTime = DateTime.Parse(modifyTime);
+                            }
+                        }
+                        catch { }
+
+                        userfriend.ModifyTime = dt_modifyTime;
+
+                        userfriend.IsOnToHide = i_isOffToVisible;
+                        int result = userfriend.ModifyOffline();
+
+                        if (result > 0)
+                        {
+                            /**
+                            UserFriendStatus userfrStatus = new UserFriendStatus();
+                            userfrStatus.UId = userfriend.UId;
+                            userfrStatus.FuId = userfriend.FuId;
+                            userfrStatus.UploadTime = dt_modifyTime;
+                            userfrStatus.Status = i_userFriendStatus;
+                            userfrStatus.Add();
+                            */
+
+                            status = "succeed";
+                            msg = "设置成功";
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "设置失败";
+                        }
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "设置失败，设置状态错误";
+                    }
+                }
+                else
+                {
+                    status = "error";
+                    msg = "设置失败，未加好友";
+                }
+
+            }
+            else
+            {
+                msg = this.ValidMsg;
+            }
+
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+            title += "API：SetUserToFriendUserOffline； ";
+            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，隐身时设置对某好友是否在线：";
+            Common.addLog(logType, title + msg);
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+            return Json(obj, contentType);
+        }
 
         #endregion
 
@@ -2378,10 +2508,10 @@ namespace fengmiapp.Controllers
                             status = "succeed";
                             msg = "设置成功";
 
-                            UserFriend userFri = new UserFriend();
-                            //隐身
-                            int tempStatus = 2;
-                            userFri.ModifyStatus(i_uId, i_uFGroupId, tempStatus);
+                            //UserFriend userFri = new UserFriend();
+                            ////隐身
+                            //int tempStatus = 2;
+                            //userFri.ModifyStatus(i_uId, i_uFGroupId, tempStatus);
                         }
                         else
                         {
@@ -2485,10 +2615,10 @@ namespace fengmiapp.Controllers
                             status = "succeed";
                             msg = "设置成功";
 
-                            UserFriend userFri = new UserFriend();
-                            //设置好友在线
-                            int tempStatus = 1;
-                            userFri.ModifyStatus(i_uId, i_uFGroupId, tempStatus);
+                            //UserFriend userFri = new UserFriend();
+                            ////设置好友在线
+                            //int tempStatus = 1;
+                            //userFri.ModifyStatus(i_uId, i_uFGroupId, tempStatus);
                         }
                         else
                         {
@@ -2521,8 +2651,6 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
 
         }
-
-
 
         #endregion
 

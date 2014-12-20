@@ -187,7 +187,7 @@ namespace fengmiapp.Controllers
             int total = 0;
 
             string uId = Request.Params.Get("uId");
-
+            string fuId = Request.Params.Get("fuId");
             string perPage = Request.Params.Get("perPage");
             string page = Request.Params.Get("page");
 
@@ -217,11 +217,11 @@ namespace fengmiapp.Controllers
 
                 if (i_page == 1)
                 {
-                    dt = position.GetPositionList(i_perPage);
+                    dt = position.GetPositionList(fuId,i_perPage);
                 }
                 else
                 {
-                    dt = position.GetPositionList(i_page, i_perPage);
+                    dt = position.GetPositionList(fuId,i_page, i_perPage);
                 }
 
                 int count = dt.Rows.Count;
