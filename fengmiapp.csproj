@@ -135,6 +135,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PositionController.cs" />
     <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Email.cs" />
     <Compile Include="Fileupload.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -263,6 +264,7 @@
     <Content Include="Views\Home\Register.cshtml" />
     <Content Include="Views\Common\Introduce.cshtml" />
     <Content Include="Views\Common\PrivacyPolicy.cshtml" />
+    <Content Include="Views\Home\Send.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

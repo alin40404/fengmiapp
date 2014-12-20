@@ -186,27 +186,30 @@ namespace fengmiapp.Models
 
         public int Add()
         {
-            string value = "uId,gName,status,modifyTime";
+            string value = "uId,gName,status,modifyTime,isOnToHide,isOffToVisible";
             SqlParameter[] para = new SqlParameter[]
             {
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@gName", _gName),
                 new SqlParameter("@status", _status),
                 new SqlParameter("@modifyTime", _modifyTime),
-             
+                new SqlParameter("@isOnToHide", _isOnToHide),
+                new SqlParameter("@isOffToVisible", _isOffToVisible),             
             };
             return base.Add(value,para);
         }
 
         public int AddBackId()
         {
-            string value = "uId,gName,status,modifyTime";
+            string value = "uId,gName,status,modifyTime,isOnToHide,isOffToVisible";
             SqlParameter[] para = new SqlParameter[]
             {
                 new SqlParameter("@uId", _uId),
                 new SqlParameter("@gName", _gName),
                 new SqlParameter("@status", _status),
                 new SqlParameter("@modifyTime", _modifyTime),
+                new SqlParameter("@isOnToHide", _isOnToHide),
+                new SqlParameter("@isOffToVisible", _isOffToVisible),
             };
             return base.AddBackId(value, para);
         }

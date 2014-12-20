@@ -241,6 +241,126 @@ namespace fengmiapp.Controllers
 
         #endregion
 
+
+        #region 找回密码
+
+        /// <summary>
+        /// 用邮箱找回密码
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult FindPwdWithEmail()
+        {
+            this.init();
+
+            string title = "";
+            string status = "error";
+            string msg = "";
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+
+            HttpRequestBase request = Request;
+            string phone = Request.Params.Get("phone");
+            string email = request.Params.Get("email");
+
+            string content = string.Empty; //request.Params.Get("content");
+            string password = string.Empty;
+
+            bool result = true;
+
+
+            if (this.IsEffetive)
+            {
+                User user = new User(phone);
+                int Id =user.Id;
+                if (Id > 0)
+                {
+                    if (email == user.Email)
+                    {
+                        string code = this._randCode();
+                        content = "<p>&nbsp;&nbsp;&nbsp;&nbsp;您好，您的密码已经重置为：" + code+" </p>";
+                        content += "<p>请妥善保管，并尽快更改密码！</p>";
+                        Email emailObj = new Email();
+                        emailObj.MailSubject = "密码重置";
+                        emailObj.MailBody = content;
+                        emailObj.IsbodyHtml = true;    //是否是HTML
+                        //emailObj.MailToArray = new string[] { "ehoneynet@126.com", };//接收者邮件集合
+                        emailObj.MailToArray = new string[] { email };//接收者邮件集合
+                        // emailObj.MailCcArray = new string[] { "******@qq.com" };//抄送者邮件集合
+                        result = emailObj.Send();
+
+
+                        if (result)
+                        {
+                            user.Id = Id;
+                            password = Common.MD5(code);
+                            user.PassWord = password;
+
+                            user.ModifyPWD();
+
+                            status = "succeed";
+                            msg = "发送成功";
+
+                        }
+                        else
+                        {
+                            status = "error";
+                            msg = "发送失败";
+                        }
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "邮箱填写不正确";
+                    }
+                }
+                else
+                {
+                    status = "error";
+                    msg = "帐号不存在";
+
+                }
+            }
+            else
+            {
+                msg = this.ValidMsg;
+            }
+
+            title += "API：FindPwdWithEmail； ";
+            title += "用户Email：" + email + "，邮件内容：" + content + "，发送邮件：";
+            Common.addLog(logType, title + msg);
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+            return Json(obj, contentType);
+        }
+
+        /// <summary>
+        /// 六位随机码
+        /// </summary>
+        /// <returns></returns>
+        private string _randCode()
+        {
+            string r ="1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghjkmnpqrt";
+            int len = r.Length;
+            Random rd = new Random();
+            int count = 6;
+            string validCode = string.Empty;
+
+            for (int i = 0; i < count; i++)
+            {
+                int index = rd.Next(len);
+                validCode += r[index];
+            }
+
+
+            return validCode;
+        }
+
+
+        #endregion
+
         #region 用户基本信息操作
 
         /// <summary>
@@ -452,7 +572,7 @@ namespace fengmiapp.Controllers
         {
             this.init();
 
-                        string title = "";
+            string title = "";
             string msg = "";
             string status = "error";
 
@@ -1338,6 +1458,67 @@ namespace fengmiapp.Controllers
             return Json(obj, contentType);
         }
 
+        /// <summary>
+        /// 发送邮件
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult SendEmail()
+        {
+            this.init();
+
+            string title = "";
+            string status = "error";
+            string msg = "";
+            int logType = 3;
+            string ip = Request.UserHostAddress;
+            string emergeURL = Request.Url.ToString();
+
+            HttpRequestBase request = Request;
+            string email = request.Params.Get("email");
+            string content = request.Params.Get("content");
+
+            bool result = true;
+
+
+            if (this.IsEffetive)
+            {
+
+                Email emailObj = new Email();
+                emailObj.MailSubject = "找回密码";
+                emailObj.MailBody = content;
+                emailObj.IsbodyHtml = true;    //是否是HTML
+                //emailObj.MailToArray = new string[] { "ehoneynet@126.com", };//接收者邮件集合
+                emailObj.MailToArray = new string[] { email };//接收者邮件集合
+                // emailObj.MailCcArray = new string[] { "******@qq.com" };//抄送者邮件集合
+                result = emailObj.Send();
+                if (result)
+                {
+                    status = "succeed";
+                    msg = "发送成功";
+
+                }
+                else
+                {
+                    status = "error";
+                    msg = "发送失败";
+                }
+            }
+            else
+            {
+                msg = this.ValidMsg;
+            }
+
+            title += "API：SendEmail； ";
+            title += "用户Email：" + email + "，邮件内容：" + content + "，发送邮件：";
+            Common.addLog(logType, title + msg);
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+            return Json(obj, contentType);
+        }
+
+
         #endregion
 
         #region 好友操作
@@ -1825,19 +2006,50 @@ namespace fengmiapp.Controllers
                 }
                 else
                 {
-                    UserFriendGroup userFriendGroup = new UserFriendGroup(i_uId, name);
-                    int Id = userFriendGroup.Id;
-
-                    int result = 0;
-                    if (Id > 0)
+                    User user = new User(i_uId);
+                    if (user.isUserExist())
                     {
-                        int ufg_status = 1;
-                        ufg_status = userFriendGroup.Status;
-                        if (ufg_status < 1)
+
+                        UserFriendGroup userFriendGroup = new UserFriendGroup(i_uId, name);
+                        int Id = userFriendGroup.Id;
+
+                        int result = 0;
+                        if (Id > 0)
                         {
-                            ufg_status = 1;
-                            userFriendGroup.Status = ufg_status;
-                            result = userFriendGroup.ModifyStatus();
+                            int ufg_status = 1;
+                            ufg_status = userFriendGroup.Status;
+                            if (ufg_status < 1)
+                            {
+                                ufg_status = 1;
+                                userFriendGroup.Status = ufg_status;
+                                result = userFriendGroup.ModifyStatus();
+                                if (result > 0)
+                                {
+                                    status = "succeed";
+                                    msg = "创建成功";
+                                }
+                                else
+                                {
+                                    status = "error";
+                                    msg = "创建失败";
+                                }
+                            }
+                            else
+                            {
+                                status = "error";
+                                msg = "创建失败，组名已经存在";
+                            }
+                            uFGroupId = Id;
+                        }
+                        else
+                        {
+                            userFriendGroup.GName = name;
+                            userFriendGroup.UId = i_uId;
+                            userFriendGroup.Status = userStatus;
+                            result = userFriendGroup.AddBackId();
+
+                            uFGroupId = result;
+
                             if (result > 0)
                             {
                                 status = "succeed";
@@ -1849,32 +2061,12 @@ namespace fengmiapp.Controllers
                                 msg = "创建失败";
                             }
                         }
-                        else
-                        {
-                            status = "error";
-                            msg = "创建失败，组名已经存在";
-                        }
-                        uFGroupId = Id;
                     }
                     else
                     {
-                        userFriendGroup.GName = name;
-                        userFriendGroup.UId = i_uId;
-                        userFriendGroup.Status = userStatus;
-                        result = userFriendGroup.AddBackId();
+                        status = "error";
+                        msg = "用户帐号不存在，创建失败";
 
-                        uFGroupId = result;
-
-                        if (result > 0)
-                        {
-                            status = "succeed";
-                            msg = "创建成功";
-                        }
-                        else
-                        {
-                            status = "error";
-                            msg = "创建失败";
-                        }
                     }
                 }
             }

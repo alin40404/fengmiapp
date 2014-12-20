@@ -50,5 +50,11 @@ namespace fengmiapp.Controllers
         {
             return View();
         }
+
+        public ActionResult Send()
+        {
+            return View();
+        }
+    
     }
 }

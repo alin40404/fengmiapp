@@ -174,7 +174,7 @@ namespace fengmiapp.Models
 
         public int Add()
         {
-            string value = "uId,fuId,addType,uFGroupId,status,modifyTime";
+            string value = "uId,fuId,addType,uFGroupId,status,modifyTime,isOnToHide,isOffToVisible";
             SqlParameter[] para = new SqlParameter[]
             {
                 new SqlParameter("@uId", _uId),
@@ -183,7 +183,8 @@ namespace fengmiapp.Models
                 new SqlParameter("@uFGroupId", _uFGroupId),
                 new SqlParameter("@status", _status),
                 new SqlParameter("@modifyTime", _modifyTime),
-             
+                new SqlParameter("@isOnToHide", _isOnToHide),
+                new SqlParameter("@isOffToVisible", _isOffToVisible),
             };
             return base.Add(value,para);
         }
