@@ -241,7 +241,6 @@ namespace fengmiapp.Controllers
 
         #endregion
 
-
         #region 找回密码
 
         /// <summary>
@@ -357,7 +356,6 @@ namespace fengmiapp.Controllers
 
             return validCode;
         }
-
 
         #endregion
 

@@ -12,10 +12,11 @@ namespace fengmiapp
         #region 参数
         //ehoneynet@126.com
         //123456aaaaaa
-        public string _mailFrom = "alin40404@126.com";
-        public string _mailPwd = "40404chen";
-        public string _host = "smtp.126.com";
-
+        public string _mailFrom = "support@ehoneynet.com";
+        public string _mailPwd = "abc@123";
+        //public string _host = "smtp.126.com";
+        public string _host = "smtp.qq.com";
+        
         public string[] _mailToArray = null;
         public string[] _mailCcArray = null;
         public string _mailSubject = string.Empty;
@@ -170,6 +171,12 @@ namespace fengmiapp
             }
             catch (Exception err)
             {
+                string tempMsg = string.Empty;
+                tempMsg += "Email类，Send方法异常,在添加附件时有错误：";
+                tempMsg += err.Message;
+                Common.addLog(0, tempMsg);
+
+
                 throw new Exception("在添加附件时有错误:" + err);
             }
 
@@ -190,21 +197,15 @@ namespace fengmiapp
             }
             catch (System.Net.Mail.SmtpException ex)
             {
+                string tempMsg = string.Empty;
+                tempMsg += "Email类，Send方法异常：";
+                tempMsg += ex.Message;
+                Common.addLog(0, tempMsg);
+
                 return false;
             }
 
         }
     
-        /*
-        Email email = new Email();
-        email.mailFrom = "发送人的邮箱地址";
-        email.mailPwd = "发送人邮箱的密码";
-        email.mailSubject = "邮件主题";
-        email.mailBody = "邮件内容";
-        email.isbodyHtml = true;    //是否是HTML
-        email.host = "smtp.126.com";//如果是QQ邮箱则：smtp:qq.com,依次类推
-        email.mailToArray = new string[] { "******@qq.com","12345678@qq.com"};//接收者邮件集合
-        email.mailCcArray = new string[] { "******@qq.com" };//抄送者邮件集合
-        */
     }
 }
