@@ -632,10 +632,12 @@ namespace fengmiapp.Controllers
                     status = "succeed";
                     msg = "已获取";
                     string userStatus = string.Empty;
+                    string userFriStatus = string.Empty;
                     string fuId = string.Empty;
                     for (int i_UF = 0; i_UF < countUF; i_UF++)
                     {
                         fuId = dt_uf.Rows[i_UF]["fuId"].ToString();
+                        userFriStatus = dt_uf.Rows[i_UF]["status"].ToString();
                         userStatus = dt_uf.Rows[i_UF]["userStatus"].ToString();
                         int i_fuId = 0;
                         try
@@ -658,7 +660,8 @@ namespace fengmiapp.Controllers
                             {
                                 uId = uId,
                                 fuId = fuId,
-                                status = userStatus,
+                                status = userFriStatus,
+                                userStatus = userStatus,
                                 position = new { },
                             };
                         }
@@ -687,7 +690,8 @@ namespace fengmiapp.Controllers
                             {
                                 uId = uId,
                                 fuId = fuId,
-                                status = userStatus,
+                                status = userFriStatus,
+                                userStatus = userStatus,
                                 position = new
                                 {
                                     longitude = longitude,

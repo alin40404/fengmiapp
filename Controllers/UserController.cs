@@ -770,7 +770,7 @@ namespace fengmiapp.Controllers
             if (this.IsEffetive)
             {
                 userStatus=userStatus.Trim();
-                if (userStatus != "1" && userStatus != "2")
+                if (userStatus == "1" || userStatus == "2")
                 {
                     User adminUser = new User(i_uId);
 
@@ -1065,6 +1065,14 @@ namespace fengmiapp.Controllers
                 i_fuId = 0;
             }
 
+            //isOnToHide = isOnToHide.Trim();
+            int i_isOnToHide = 0;
+            try
+            {
+                i_isOnToHide = int.Parse(isOnToHide);
+            }
+            catch { }
+
 
             if (this.IsEffetive)
             {
@@ -1075,15 +1083,8 @@ namespace fengmiapp.Controllers
                 if (UFId > 0)
                 {//用户可用
 
-                    isOnToHide = isOnToHide.Trim();
-                    int i_isOnToHide = 0;
-                    try
-                    {
-                        i_isOnToHide = int.Parse(isOnToHide);
-                    }
-                    catch{}
 
-                    if (i_isOnToHide != 1 && i_isOnToHide != 0)
+                    if (i_isOnToHide == 1 || i_isOnToHide == 0)
                     {
 
                         DateTime dt_modifyTime = new DateTime();
@@ -1143,7 +1144,7 @@ namespace fengmiapp.Controllers
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
             title += "API：SetUserToFriendUserOnline； ";
-            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，在线时设置对某好友是否隐身：";
+            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，isOnToHide：" + i_isOnToHide + "，在线时设置对某好友是否隐身：";
             Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg };
@@ -1196,6 +1197,14 @@ namespace fengmiapp.Controllers
                 i_fuId = 0;
             }
 
+           // isOffToVisible = isOffToVisible.Trim();
+            int i_isOffToVisible = 0;
+            try
+            {
+                i_isOffToVisible = int.Parse(isOffToVisible);
+            }
+            catch { }
+
 
             if (this.IsEffetive)
             {
@@ -1206,15 +1215,7 @@ namespace fengmiapp.Controllers
                 if (UFId > 0)
                 {//用户可用
 
-                    isOffToVisible = isOffToVisible.Trim();
-                    int i_isOffToVisible = 0;
-                    try
-                    {
-                        i_isOffToVisible = int.Parse(isOffToVisible);
-                    }
-                    catch { }
-
-                    if (i_isOffToVisible != 1 && i_isOffToVisible != 0)
+                    if (i_isOffToVisible == 1 || i_isOffToVisible == 0)
                     {
 
                         DateTime dt_modifyTime = new DateTime();
@@ -1274,7 +1275,7 @@ namespace fengmiapp.Controllers
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
             title += "API：SetUserToFriendUserOffline； ";
-            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，隐身时设置对某好友是否在线：";
+            title += "用户Id：" + i_uId + "，好友Id：" + i_fuId + "，isOffToVisible：" + i_isOffToVisible + "，隐身时设置对某好友是否在线：";
             Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg };
@@ -2690,23 +2691,32 @@ namespace fengmiapp.Controllers
                     }
                     else
                     {
-                        userFriendGroup.IsOnToHide = isOnToHide;
-                        int result = userFriendGroup.ModifyOnline();
-
-                        if (result > 0)
+                        if (isOnToHide == 1 || isOnToHide == 0)
                         {
-                            status = "succeed";
-                            msg = "设置成功";
+                            userFriendGroup.IsOnToHide = isOnToHide;
+                            int result = userFriendGroup.ModifyOnline();
 
-                            //UserFriend userFri = new UserFriend();
-                            ////隐身
-                            //int tempStatus = 2;
-                            //userFri.ModifyStatus(i_uId, i_uFGroupId, tempStatus);
+                            if (result > 0)
+                            {
+                                status = "succeed";
+                                msg = "设置成功";
+
+
+                                //UserFriend userFri = new UserFriend();
+                                ////隐身
+                                //int tempStatus = 2;
+                                //userFri.ModifyStatus(i_uId, i_uFGroupId, tempStatus);
+                            }
+                            else
+                            {
+                                status = "error";
+                                msg = "设置失败";
+                            }
                         }
                         else
                         {
                             status = "error";
-                            msg = "设置失败";
+                            msg = "设置失败，设置状态错误";
                         }
                     }
                 }

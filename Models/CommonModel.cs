@@ -110,6 +110,17 @@ namespace fengmiapp.Models
 
         }
 
+        /// <summary>
+        /// 修改数据
+        /// </summary>
+        /// <param name="sql">SQL语句</param>
+        /// <param name="para">参数</param>
+        /// <returns></returns>
+        public int Query(string sql, SqlParameter[] para)
+        {
+            return this.ExecuteNonQuery(CommandType.Text, sql, para);
+        }
+
         #endregion
         
         #region 删除

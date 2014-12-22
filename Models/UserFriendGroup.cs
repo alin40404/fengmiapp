@@ -216,9 +216,10 @@ namespace fengmiapp.Models
 
         public int ModifyStatus()
         {
-            string set = "status=@status";
+            string set = "status=@status,modifyTime=@modifyTime";
             SqlParameter[] para = new SqlParameter[]
 			{
+                new SqlParameter("@modifyTime", _modifyTime),
                 new SqlParameter("@status", _status),
                 new SqlParameter("@Id", _id),
 			};
@@ -227,9 +228,10 @@ namespace fengmiapp.Models
 
         public int ModifyOnline()
         {
-            string set = "isOnToHide=@isOnToHide";
+            string set = "isOnToHide=@isOnToHide,modifyTime=@modifyTime";
             SqlParameter[] para = new SqlParameter[]
 			{
+                new SqlParameter("@modifyTime", _modifyTime),
                 new SqlParameter("@isOnToHide", _isOnToHide),
                 new SqlParameter("@Id", _id),
 			};
@@ -238,9 +240,10 @@ namespace fengmiapp.Models
 
         public int ModifyOffline()
         {
-            string set = "isOffToVisible=@isOffToVisible";
+            string set = "isOffToVisible=@isOffToVisible,modifyTime=@modifyTime";
             SqlParameter[] para = new SqlParameter[]
 			{
+                new SqlParameter("@modifyTime", _modifyTime),
                 new SqlParameter("@isOffToVisible", _isOffToVisible),
                 new SqlParameter("@Id", _id),
 			};

@@ -251,11 +251,21 @@ namespace fengmiapp.Models
 
         public int ModifyOnline()
         {
-            string set = "isOnToHide=@isOnToHide,modifyTime=@modifyTime";
+            if (this._isOnToHide == 1)
+            {
+                this._status = 2;
+            }
+            else
+            {
+                this._status = 1;
+            }
+
+            string set = "status=@status,isOnToHide=@isOnToHide,modifyTime=@modifyTime";
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@modifyTime", _modifyTime),
                 new SqlParameter("@isOnToHide", _isOnToHide),
+                new SqlParameter("@status", _status),
                 new SqlParameter("@Id", _id),
 			};
             return base.Modify(set, para);
@@ -263,16 +273,67 @@ namespace fengmiapp.Models
 
         public int ModifyOffline()
         {
-            string set = "isOffToVisible=@isOffToVisible,modifyTime=@modifyTime";
+            if (this._isOffToVisible == 0)
+            {
+                this._status = 2;
+            }
+            else
+            {
+                this._status = 1;
+            }
+
+            string set = "status=@status,isOffToVisible=@isOffToVisible,modifyTime=@modifyTime";
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@modifyTime", _modifyTime),
                 new SqlParameter("@isOffToVisible", _isOffToVisible),
+                new SqlParameter("@status", _status),
                 new SqlParameter("@Id", _id),
 			};
             return base.Modify(set, para);
         }
 
+        public int ModifyStatusWithUFGroupIdOnline(int isOnToHide)
+        {
+
+
+            string set1 = " status = 1 ";
+            string set2 = " status = 2 ";
+
+            string where = "";
+            where += " [status]>0 and [uFGroupId]=@uFGroupId  ";
+
+            string where1 = where;
+            string where2 = where;
+
+
+            if (isOnToHide == 0)
+            {//在线
+                where1 += " [isOnToHide]=1 ";
+            }
+            else
+            {//隐身
+
+            }
+
+            string sql1 = " UPDATE " + this._table + " set " + set1 + "   Where 1=1 ";
+            string sql2 = " UPDATE " + this._table + " set " + set2 + "   Where 1=1 ";
+
+            sql1 += " ;";
+            sql2 += " ;";
+
+            string sql = sql1 + sql2;
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@status", _status),
+                new SqlParameter("@uFGroupId", _uFGroupId),
+			};
+
+
+
+            return base.Modify(sql, para);
+        }
 
         /// <summary>
         /// 删除分组时，修改好友里面的分组Id=0
