@@ -85,7 +85,7 @@ namespace fengmiapp.Controllers
                         isHide = false;
                         isHiding = 0;
                     }
-                    offlineUserIds = userFriend.GetUserFriendsIdList(isHide);
+                    offlineUserIds = userFriend.GetOfflineUserFriendsIdList();
 
                     position.IsHiding = isHiding;
                     position.OfflineUserIds = offlineUserIds;
@@ -685,6 +685,15 @@ namespace fengmiapp.Controllers
                             }
                             catch { }
 
+                            int i_isHidingToUser = 0;
+                            if (!string.IsNullOrEmpty(offlineUserIds))
+                            {
+                                if (offlineUserIds.Contains(fuId+","))
+                                {
+                                    i_isHidingToUser = 1;
+                                }
+                            }
+
 
                             obj_t = new
                             {
@@ -701,7 +710,7 @@ namespace fengmiapp.Controllers
                                     modifyTime = modifyTime,
                                     offlineUserIds = offlineUserIds,
                                     isHiding = i_isHiding,
-
+                                    isHidingToUser = i_isHidingToUser,
                                 },
 
                             };

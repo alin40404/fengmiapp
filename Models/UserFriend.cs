@@ -295,10 +295,82 @@ namespace fengmiapp.Models
 
         public int ModifyStatusWithUFGroupIdOnline(int isOnToHide)
         {
+            string sql = "proc_modify_userfri_status_ufgid_online";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@isOnToHide", isOnToHide),
+                new SqlParameter("@uFGroupId", _uFGroupId),
+			};
+
+            return base.ExecuteProc(sql, para);
+
+            /*
+            string set1 = " status =@status1 ";
+            string set2 = " status =@status2 ";
+
+            string where = "";
+            where += " [status]>0 and [uFGroupId]=@uFGroupId  ";
+
+            string where1 = where;
+            string where2 = where;
+
+            string status1 = "1";
+            string status2 = "2";
+
+            if (isOnToHide == 0)
+            {//分组在线
+                where1 += " [isOnToHide]=0 ";
+                where2 += " [isOnToHide]=1 ";
+
+                status1 = "1";
+                status2 = "2";
+            }
+            else
+            {//分组隐身
+
+                where1 += " [isOffToVisible]=1 ";
+                where2 += " [isOffToVisible]=0 ";
+
+                status1 = "1";
+                status2 = "2";
+            }
+
+            string sql1 = " UPDATE " + this._table + " set " + set1 + "   Where 1=1 ";
+            string sql2 = " UPDATE " + this._table + " set " + set2 + "   Where 1=1 ";
+
+            sql1 += " ;";
+            sql2 += " ;";
+
+            string sql = sql1 + sql2;
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@status1", status1),
+                new SqlParameter("@status2", status2),
+                new SqlParameter("@uFGroupId", _uFGroupId),
+			};
+            return base.Query(sql, para);
+            */
 
 
-            string set1 = " status = 1 ";
-            string set2 = " status = 2 ";
+        }
+
+        public int ModifyStatusWithUFGroupIdOffline(int isOffToVisible)
+        {
+
+            string sql = "proc_modify_userfri_status_ufgid_offline";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@isOffToVisible", isOffToVisible),
+                new SqlParameter("@uFGroupId", _uFGroupId),
+			};
+
+            return base.ExecuteProc(sql, para);
+
+
+            /*
+            string set1 = " status =@status1 ";
+            string set2 = " status =@status2 ";
 
             string where = "";
             where += " [status]>0 and [uFGroupId]=@uFGroupId  ";
@@ -307,12 +379,26 @@ namespace fengmiapp.Models
             string where2 = where;
 
 
-            if (isOnToHide == 0)
-            {//在线
+
+            string status1 = "1";
+            string status2 = "2";
+
+            if (isOffToVisible == 1)
+            {//分组在线
                 where1 += " [isOnToHide]=0 ";
+                where2 += " [isOnToHide]=1 ";
+
+                status1 = "1";
+                status2 = "2";
             }
             else
-            {//隐身
+            {//分组隐身
+
+                where1 += " [isOffToVisible]=1 ";
+                where2 += " [isOffToVisible]=0 ";
+
+                status1 = "1";
+                status2 = "2";
 
             }
 
@@ -326,13 +412,14 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
-                new SqlParameter("@status", _status),
+                new SqlParameter("@status1", status1),
+                new SqlParameter("@status2", status2),
                 new SqlParameter("@uFGroupId", _uFGroupId),
 			};
+            return base.Query(sql, para);
+            */
 
 
-
-            return base.Modify(sql, para);
         }
 
         /// <summary>
@@ -451,13 +538,13 @@ namespace fengmiapp.Models
         /// 获取隐身好友Id 列表
         /// </summary>
         /// <returns></returns>
-        public string GetUserFriendsIdList(bool isHide)
+        public string GetOfflineUserFriendsIdList()
         {
-            int status = 0;
+            int status = 2;
 
             string table1 = "[userFriend_group]";
             string strSql = " Select t.*,uf_group.gName,uf_group.isOnToHide as g_isOnToHide,uf_group.isOffToVisible as g_isOffToVisible from " + this._table + " as t left join " + table1 + " as uf_group on t.uFGroupId = uf_group.Id where 1=1 and t.uId = @uId  ";
-            strSql += " and t.status > @status   ";
+            strSql += " and t.status = @status   ";
 
             DataTable dt = new DataTable();
 
@@ -504,84 +591,8 @@ namespace fengmiapp.Models
                 }
                 catch { }
 
-                if (string.IsNullOrEmpty(gName))
-                {//没有分组
-                    if (isHide == false)
-                    {//在线
-                        if (isOnToHide == 0)
-                        {//在线
-                        }
-                        else
-                        {//隐身
-                            ufIdList += fuId + ",";
-                        }
-                    }
-                    else
-                    {//隐身
-                        if (isOffToVisible == 0)
-                        {//隐身
-                            ufIdList += fuId + ",";
-                        }
-                        else
-                        {//在线
-                            
-                        }                        
-                    }
-                }
-                else
-                {
-                    if (isHide == false)
-                    {//在线
-                        if (g_isOnToHide == 0)
-                        {//在线
-                            if (isOnToHide == 0)
-                            {//在线
-                            }
-                            else
-                            {//隐身
-                                ufIdList += fuId + ",";
-                            }
+                ufIdList += fuId + ",";
 
-                        }
-                        else
-                        {//隐身
-                            if (isOffToVisible == 0)
-                            {//隐身
-                                ufIdList += fuId + ",";
-                            }
-                            else
-                            {//在线
-
-                            }
-                        }
-                    }
-                    else
-                    {//隐身
-                        if (g_isOffToVisible == 1)
-                        {//在线
-                            if (isOnToHide == 0)
-                            {//在线
-                            }
-                            else
-                            {//隐身
-                                ufIdList += fuId + ",";
-                            }
-
-                        }
-                        else
-                        {//隐身
-                            if (isOffToVisible == 0)
-                            {//隐身
-                                ufIdList += fuId + ",";
-                            }
-                            else
-                            {//在线
-
-                            }
-                        }
-                    }
-
-                }
 
             }
             //ufIdList = ufIdList.Trim(',');

@@ -121,6 +121,17 @@ namespace fengmiapp.Models
             return this.ExecuteNonQuery(CommandType.Text, sql, para);
         }
 
+        /// <summary>
+        /// 执行存储过程
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="para"></param>
+        /// <returns></returns>
+        public int ExecuteProc(string sql, SqlParameter[] para)
+        {
+            return this.ExecuteNonQuery(CommandType.StoredProcedure, sql, para);
+        }
+
         #endregion
         
         #region 删除

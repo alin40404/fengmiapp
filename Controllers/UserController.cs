@@ -762,53 +762,51 @@ namespace fengmiapp.Controllers
             {
                 i_uId = int.Parse(uId);
             }
-            catch
+            catch{}
+
+            int i_userStatus = 0;
+            try
             {
-                i_uId = 0;
+                i_userStatus = int.Parse(userStatus);
             }
+            catch
+            {}
 
             if (this.IsEffetive)
             {
                 userStatus=userStatus.Trim();
-                if (userStatus == "1" || userStatus == "2")
-                {
+
+                
+                if (i_userStatus == 1 || i_userStatus == 2)
+                {//1 在线 ，2 隐身
                     User adminUser = new User(i_uId);
-
                     int Id = adminUser.Id;
+                    adminUser.Status = i_userStatus;
+                    if (Id > 0)
+                    {//update
 
-
-                    //1 在线 ，2 隐身
-                    int i_status = 1;
-                        try
+                        int result = adminUser.ModifyStatus();
+                        if (result > 0)
                         {
-                            i_status = int.Parse(userStatus);
-                        }
-                        catch { }
-                        adminUser.Status = i_status;
+                            //修改对好友用户状态
+                            adminUser.ModifyUserFriendsStatus(i_userStatus);
 
+                            status = "succeed";
+                            msg = "修改成功";
 
-                        if (Id > 0)
-                        {//update
-
-                            int result = adminUser.ModifyStatus();
-                            if (result > 0)
-                            {
-                                status = "succeed";
-                                msg = "修改成功";
-
-                            }
-                            else
-                            {
-                                status = "error";
-                                msg = "修改失败";
-                            }
                         }
                         else
                         {
                             status = "error";
-                            msg = "修改失败,用户帐号不存在";
-
+                            msg = "修改失败";
                         }
+                    }
+                    else
+                    {
+                        status = "error";
+                        msg = "修改失败,用户帐号不存在";
+
+                    }
                 }
                 else
                 {
@@ -2702,7 +2700,10 @@ namespace fengmiapp.Controllers
                                 msg = "设置成功";
 
 
-                                //UserFriend userFri = new UserFriend();
+                                UserFriend userFri = new UserFriend();
+                                userFri.UFGroupId = Id;
+                                userFri.ModifyStatusWithUFGroupIdOnline(isOnToHide);
+
                                 ////隐身
                                 //int tempStatus = 2;
                                 //userFri.ModifyStatus(i_uId, i_uFGroupId, tempStatus);
@@ -2815,7 +2816,10 @@ namespace fengmiapp.Controllers
                             status = "succeed";
                             msg = "设置成功";
 
-                            //UserFriend userFri = new UserFriend();
+                            UserFriend userFri = new UserFriend();
+                            userFri.UFGroupId = Id;
+                            userFri.ModifyStatusWithUFGroupIdOffline(isOffToVisible);
+
                             ////设置好友在线
                             //int tempStatus = 1;
                             //userFri.ModifyStatus(i_uId, i_uFGroupId, tempStatus);

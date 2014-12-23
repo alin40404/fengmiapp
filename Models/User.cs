@@ -404,6 +404,7 @@ namespace fengmiapp.Models
 
             SqlParameter[] para = new SqlParameter[]
 			{
+
                 new SqlParameter("@Id", _id),
                 new SqlParameter("@status", _status),
 			};
@@ -543,7 +544,69 @@ namespace fengmiapp.Models
             return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
         }
-        
+
+        public int ModifyUserFriendsStatus(int userStatus)
+        {
+            /*
+            string set1 = " status =@status1 ";
+            string set2 = " status =@status2 ";
+
+            string where = "";
+            where += " [status]>0 and [uId]=@uId  ";
+
+            string where1 = where;
+            string where2 = where;
+
+            string status1 = "1";
+            string status2 = "2";
+
+            if (userStatus == 1)
+            {//用户在线
+                where1 += " [isOnToHide]=0 ";
+                where2 += " [isOnToHide]=1 ";
+
+                status1 = "1";
+                status2 = "2";
+            }
+            else
+            {//用户隐身
+
+                where1 += " [isOffToVisible]=1 ";
+                where2 += " [isOffToVisible]=0 ";
+
+                status1 = "1";
+                status2 = "2";
+
+            }
+
+            string table = "[userFriend]";
+
+            string sql1 = " UPDATE " + table + " set " + set1 + "   Where 1=1 ";
+            string sql2 = " UPDATE " + table + " set " + set2 + "   Where 1=1 ";
+
+            sql1 += " ;";
+            sql2 += " ;";
+
+            string sql = sql1 + sql2;
+
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@status1", status1),
+                new SqlParameter("@status2", status2),
+                new SqlParameter("@uId", _id),
+			};
+            */
+
+            string sql = "proc_modify_userfri_status";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@status", userStatus),
+                new SqlParameter("@uId", _id),
+			};
+
+            return base.ExecuteProc(sql, para);
+        }
+
         #endregion
 
         #region 删除操作
