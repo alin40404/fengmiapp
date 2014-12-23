@@ -309,7 +309,7 @@ namespace fengmiapp.Models
 
             if (isOnToHide == 0)
             {//在线
-                where1 += " [isOnToHide]=1 ";
+                where1 += " [isOnToHide]=0 ";
             }
             else
             {//隐身
