@@ -562,7 +562,7 @@ namespace fengmiapp.Controllers
 
 
         /// <summary>
-        /// 4.修改用户密码
+        /// 修改用户密码
         /// </summary>
         /// <returns></returns>
         [HttpPost]
@@ -785,11 +785,14 @@ namespace fengmiapp.Controllers
                     if (Id > 0)
                     {//update
 
-                        int result = adminUser.ModifyStatus();
+                        int result = 0;
+                        //result = adminUser.ModifyStatus();
+
+                        //修改对好友用户状态
+                        result = adminUser.ModifyUserFriendsStatus(i_userStatus);
+
                         if (result > 0)
                         {
-                            //修改对好友用户状态
-                            adminUser.ModifyUserFriendsStatus(i_userStatus);
 
                             status = "succeed";
                             msg = "修改成功";
@@ -823,7 +826,7 @@ namespace fengmiapp.Controllers
             string ip = Request.UserHostAddress;
             string emergeURL = Request.Url.ToString();
             title += "API：DealUserStatus； ";
-            title += "用户Id：" + i_uId + "，修改用户状态：";
+            title += "用户Id：" + i_uId + "，修改用户状态：" + i_userStatus+"，";
             Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg };
@@ -2691,8 +2694,13 @@ namespace fengmiapp.Controllers
                     {
                         if (isOnToHide == 1 || isOnToHide == 0)
                         {
-                            userFriendGroup.IsOnToHide = isOnToHide;
-                            int result = userFriendGroup.ModifyOnline();
+                            int result = 0;
+                            UserFriend userFri = new UserFriend();
+                            userFri.UFGroupId = Id;
+                            result= userFri.ModifyStatusWithUFGroupIdOnline(isOnToHide);
+
+                            //userFriendGroup.IsOnToHide = isOnToHide;
+                            //int result = userFriendGroup.ModifyOnline();
 
                             if (result > 0)
                             {
@@ -2700,9 +2708,6 @@ namespace fengmiapp.Controllers
                                 msg = "设置成功";
 
 
-                                UserFriend userFri = new UserFriend();
-                                userFri.UFGroupId = Id;
-                                userFri.ModifyStatusWithUFGroupIdOnline(isOnToHide);
 
                                 ////隐身
                                 //int tempStatus = 2;
@@ -2808,17 +2813,18 @@ namespace fengmiapp.Controllers
                     }
                     else
                     {
-                        userFriendGroup.IsOffToVisible = isOffToVisible;
-                        int result = userFriendGroup.ModifyOffline();
+                        int result = 0;
+                        UserFriend userFri = new UserFriend();
+                        userFri.UFGroupId = Id;
+                        result = userFri.ModifyStatusWithUFGroupIdOffline(isOffToVisible);
+
+                        //userFriendGroup.IsOffToVisible = isOffToVisible;
+                        //int result = userFriendGroup.ModifyOffline();
 
                         if (result > 0)
                         {
                             status = "succeed";
                             msg = "设置成功";
-
-                            UserFriend userFri = new UserFriend();
-                            userFri.UFGroupId = Id;
-                            userFri.ModifyStatusWithUFGroupIdOffline(isOffToVisible);
 
                             ////设置好友在线
                             //int tempStatus = 1;

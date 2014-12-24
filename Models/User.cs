@@ -29,6 +29,7 @@ namespace fengmiapp.Models
         private int _status = 1;
         private int _isPermitAddFriend = 1;//默认允许被添加好友
         private string _interests = String.Empty;
+        private DateTime _modifyTime = DateTime.Now;
 
         #endregion
 
@@ -159,6 +160,14 @@ namespace fengmiapp.Models
         {
             get { return _isPermitAddFriend; }
             set { _isPermitAddFriend = value; }
+        }
+        /// <summary>
+        /// ModifyTime
+        /// </summary>
+        public DateTime ModifyTime
+        {
+            get { return this._modifyTime; }
+            set { this._modifyTime = value; }
         }
 
         #endregion
@@ -331,7 +340,7 @@ namespace fengmiapp.Models
            // string sql ="INSERT INTO " + this._table + "(password,phone,email,realName,nickName,userFace,identityCard,birthDay,address,registerTime,userExp,status,interests,isPermitAddFriend) " + "VALUES (@password,@phone,@email,@realName,@nickName,@userFace,@identityCard,@birthDay,@address,@registerTime,@userExp,@status,@interests,@isPermitAddFriend)";
 
             //byte[] userFace = Encoding.UTF8.GetBytes(_userFace);
-            string value = "password,phone,email,realName,nickName,userFace,identityCard,birthDay,address,registerTime,userExp,status,interests,isPermitAddFriend";
+            string value = "password,phone,email,realName,nickName,userFace,identityCard,birthDay,address,registerTime,userExp,status,interests,isPermitAddFriend,modifyTime";
 
             SqlParameter[] para = new SqlParameter[]
             {
@@ -350,7 +359,7 @@ namespace fengmiapp.Models
                 new SqlParameter("@status", _status),
                 new SqlParameter("@interests",_interests),
                 new SqlParameter("@isPermitAddFriend", _isPermitAddFriend),
-             
+                new SqlParameter("@modifyTime", _modifyTime),
             };
             return base.Add(value, para);
         }
@@ -365,13 +374,13 @@ namespace fengmiapp.Models
                     "password=@password " +
                     "Where Id=@Id";
              * */
-            string set = "password=@password";
+            string set = "password=@password,modifyTime=@modifyTime";
 
             SqlParameter[] para = new SqlParameter[]
 			{
 				new SqlParameter("@Id", _id),
-				new SqlParameter("@password", _password)
-             
+				new SqlParameter("@password", _password),
+                new SqlParameter("@modifyTime", _modifyTime),
 			};
             return base.Modify(set, para);
 
@@ -382,7 +391,8 @@ namespace fengmiapp.Models
             string sql = "UPDATE " + "" + this._table + "" + " set " +
                     "email=@email, " +
                     "realName=@realName, " +
-                    "nickName=@nickName " +
+                    "nickName=@nickName, " +
+                    "modifyTime=@modifyTime " +
                     "Where Id=@Id";
 
             SqlParameter[] para = new SqlParameter[]
@@ -391,6 +401,7 @@ namespace fengmiapp.Models
                 new SqlParameter("@email", _email),
                 new SqlParameter("@realName", _realName),
                 new SqlParameter("@nickName", _nickName),
+                new SqlParameter("@modifyTime", _modifyTime),
 			};
             return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
@@ -399,7 +410,8 @@ namespace fengmiapp.Models
         public int ModifyStatus()
         {
             string sql = "UPDATE " + "" + this._table + "" + " set " +
-                    " status=@status " +
+                    " status=@status, " +
+                    "modifyTime=@modifyTime " +
                     " Where Id=@Id  ";
 
             SqlParameter[] para = new SqlParameter[]
@@ -407,6 +419,7 @@ namespace fengmiapp.Models
 
                 new SqlParameter("@Id", _id),
                 new SqlParameter("@status", _status),
+                new SqlParameter("@modifyTime", _modifyTime),
 			};
             return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
@@ -415,13 +428,15 @@ namespace fengmiapp.Models
         public int ModifyUserFace()
         {
             string sql = "UPDATE " + "" + this._table + "" + " set " +
-                    " userFace=@userFace " +
+                    " userFace=@userFace, " +
+                    "modifyTime=@modifyTime " +
                     " Where Id=@Id  ";
 
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@Id", _id),
                 new SqlParameter("@userFace", _userFace),
+                new SqlParameter("@modifyTime", _modifyTime),
 			};
             return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
@@ -430,13 +445,16 @@ namespace fengmiapp.Models
         public int ModifyPermit()
         {
             string sql = "UPDATE " + "" + this._table + "" + " set " +
-                    " isPermitAddFriend=@isPermitAddFriend " +
+                    " isPermitAddFriend=@isPermitAddFriend, " +
+                    "modifyTime=@modifyTime " +
                     " Where Id=@Id  ";
 
             SqlParameter[] para = new SqlParameter[]
 			{
                 new SqlParameter("@Id", _id),
                 new SqlParameter("@isPermitAddFriend", _isPermitAddFriend),
+                new SqlParameter("@modifyTime", _modifyTime),
+
 			};
             return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
@@ -456,6 +474,7 @@ namespace fengmiapp.Models
             //"Where Id=@Id";
 
             string set = "";
+
             if (!string.IsNullOrEmpty(this._realName))
             {
                 set += "realName=@realName,";
@@ -499,6 +518,8 @@ namespace fengmiapp.Models
             }
             else
             {
+                set += "modifyTime=@modifyTime,";
+
                 set = set.TrimEnd(',');
                 set = "  " + set + "  ";
             }
@@ -518,7 +539,7 @@ namespace fengmiapp.Models
                 new SqlParameter("@address", _address),
                 new SqlParameter("@identityCard", _identityCard),
                 new SqlParameter("@interests", _interests),
-
+                new SqlParameter("@modifyTime", _modifyTime),
 			};
 
 
@@ -531,6 +552,7 @@ namespace fengmiapp.Models
             string sql = "UPDATE " + "" + this._table + "" + " set " +
                     "loginTimes=@loginTimes, " +
                     "lastLoginIP=@lastLoginIP, " +
+                    "modifyTime=@modifyTime, " +
                     "lastLoginTime=@lastLoginTime " +
                     "Where Id=@Id";
 
@@ -540,6 +562,8 @@ namespace fengmiapp.Models
                 new SqlParameter("@loginTimes", _userExp),
                 new SqlParameter("@lastLoginIP", _address),
                 new SqlParameter("@lastLoginTime", _birthDay),
+                new SqlParameter("@modifyTime", _modifyTime),
+
 			};
             return this.ExecuteNonQuery(CommandType.Text, sql, para);
 
@@ -547,59 +571,10 @@ namespace fengmiapp.Models
 
         public int ModifyUserFriendsStatus(int userStatus)
         {
-            /*
-            string set1 = " status =@status1 ";
-            string set2 = " status =@status2 ";
-
-            string where = "";
-            where += " [status]>0 and [uId]=@uId  ";
-
-            string where1 = where;
-            string where2 = where;
-
-            string status1 = "1";
-            string status2 = "2";
-
-            if (userStatus == 1)
-            {//用户在线
-                where1 += " [isOnToHide]=0 ";
-                where2 += " [isOnToHide]=1 ";
-
-                status1 = "1";
-                status2 = "2";
-            }
-            else
-            {//用户隐身
-
-                where1 += " [isOffToVisible]=1 ";
-                where2 += " [isOffToVisible]=0 ";
-
-                status1 = "1";
-                status2 = "2";
-
-            }
-
-            string table = "[userFriend]";
-
-            string sql1 = " UPDATE " + table + " set " + set1 + "   Where 1=1 ";
-            string sql2 = " UPDATE " + table + " set " + set2 + "   Where 1=1 ";
-
-            sql1 += " ;";
-            sql2 += " ;";
-
-            string sql = sql1 + sql2;
-
-            SqlParameter[] para = new SqlParameter[]
-			{
-                new SqlParameter("@status1", status1),
-                new SqlParameter("@status2", status2),
-                new SqlParameter("@uId", _id),
-			};
-            */
-
             string sql = "proc_modify_userfri_status";
             SqlParameter[] para = new SqlParameter[]
 			{
+                new SqlParameter("@modifyTime", _modifyTime),
                 new SqlParameter("@status", userStatus),
                 new SqlParameter("@uId", _id),
 			};
