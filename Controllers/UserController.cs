@@ -1477,6 +1477,8 @@ namespace fengmiapp.Controllers
             HttpRequestBase request = Request;
             string email = request.Params.Get("email");
             string content = request.Params.Get("content");
+            //邮件主题
+            string subject = request.Params.Get("subject");
 
             bool result = true;
 
@@ -1485,7 +1487,7 @@ namespace fengmiapp.Controllers
             {
 
                 Email emailObj = new Email();
-                emailObj.MailSubject = "找回密码";
+                emailObj.MailSubject = subject;
                 emailObj.MailBody = content;
                 emailObj.IsbodyHtml = true;    //是否是HTML
                 //emailObj.MailToArray = new string[] { "ehoneynet@126.com", };//接收者邮件集合
@@ -1510,7 +1512,7 @@ namespace fengmiapp.Controllers
             }
 
             title += "API：SendEmail； ";
-            title += "用户Email：" + email + "，邮件内容：" + content + "，发送邮件：";
+            title += "用户Email：" + email + "，邮件主题：" + subject + "，发送邮件：";
             Common.addLog(logType, title + msg);
 
             object obj = new { status = status, msg = msg };
@@ -2249,7 +2251,7 @@ namespace fengmiapp.Controllers
         }
 
         /// <summary>
-        /// 3.修改好友分组状态
+        /// 修改好友分组状态
         /// </summary>
         /// <returns></returns>
         [HttpPost]
