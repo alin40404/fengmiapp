@@ -299,8 +299,8 @@ namespace fengmiapp.Controllers
                             user.ModifyPWD();
 
                             status = "succeed";
-                            msg = "发送成功";
-
+                            //msg = "发送成功";
+                            msg = "密码已发到您邮箱，请注意查收！";
                         }
                         else
                         {
