@@ -690,7 +690,7 @@ namespace fengmiapp.Controllers
                             int i_isHidingToUser = 0;
                             if (!string.IsNullOrEmpty(offlineUserIds))
                             {
-                                if (offlineUserIds.Contains(fuId+","))
+                                if (offlineUserIds.Contains(uId + ","))
                                 {
                                     i_isHidingToUser = 1;
                                 }
