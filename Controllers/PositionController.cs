@@ -639,7 +639,9 @@ namespace fengmiapp.Controllers
                     for (int i_UF = 0; i_UF < countUF; i_UF++)
                     {
                         fuId = dt_uf.Rows[i_UF]["fuId"].ToString();
+                        //用户对好友设置的状态
                         userFriStatus = dt_uf.Rows[i_UF]["status"].ToString();
+                        //用户好友此刻的状态
                         userStatus = dt_uf.Rows[i_UF]["userStatus"].ToString();
                         int i_fuId = 0;
                         try
@@ -701,8 +703,8 @@ namespace fengmiapp.Controllers
                             {
                                 uId = uId,
                                 fuId = fuId,
-                                status = userFriStatus,
-                                userStatus = userStatus,
+                                status = userFriStatus,//用户对好友设置的状态
+                                userStatus = userStatus,//好友此刻的状态
                                 position = new
                                 {
                                     longitude = longitude,

@@ -1231,7 +1231,7 @@ namespace fengmiapp.Controllers
 
                         userfriend.ModifyTime = dt_modifyTime;
 
-                        userfriend.IsOnToHide = i_isOffToVisible;
+                        userfriend.IsOffToVisible = i_isOffToVisible;
                         int result = userfriend.ModifyOffline();
 
                         if (result > 0)
