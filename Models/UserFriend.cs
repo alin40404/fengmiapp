@@ -251,6 +251,18 @@ namespace fengmiapp.Models
 
         public int ModifyOnline()
         {
+            string sql = "proc_modify_userfri_online";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@isOnToHide", _isOnToHide),
+                new SqlParameter("@fuId", _fuId),
+                new SqlParameter("@uId", _uId),
+                new SqlParameter("@Id", _id),
+			};
+
+            return base.ExecuteProc(sql, para);
+
+            /*
             if (this._isOnToHide == 1)
             {
                 this._status = 2;
@@ -269,10 +281,22 @@ namespace fengmiapp.Models
                 new SqlParameter("@Id", _id),
 			};
             return base.Modify(set, para);
+            */
         }
 
         public int ModifyOffline()
         {
+            string sql = "proc_modify_userfri_offline";
+            SqlParameter[] para = new SqlParameter[]
+			{
+                new SqlParameter("@isOffToVisible", _isOffToVisible),
+                new SqlParameter("@fuId", _fuId),
+                new SqlParameter("@uId", _uId),
+                new SqlParameter("@Id", _id),
+			};
+
+            return base.ExecuteProc(sql, para);
+            /*
             if (this._isOffToVisible == 0)
             {
                 this._status = 2;
@@ -291,6 +315,7 @@ namespace fengmiapp.Models
                 new SqlParameter("@Id", _id),
 			};
             return base.Modify(set, para);
+             */
         }
 
         public int ModifyStatusWithUFGroupIdOnline(int isOnToHide)
