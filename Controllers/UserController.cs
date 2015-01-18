@@ -3666,6 +3666,61 @@ namespace fengmiapp.Controllers
 
         }
 
+        /// <summary>
+        /// 搜索群
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult SearchUserGroup()
+        {
+            this.init();
+
+            string status = "error";
+            string msg = "";
+            string title = "";
+
+            string name = Request.Params.Get("name");
+
+         
+
+            if (this.IsEffetive)
+            {
+                UserGroup userGroup = new UserGroup();
+                userGroup.Name = name;
+
+
+                int result = userGroup.ModifyName();
+
+                if (result > 0)
+                {
+                    status = "succeed";
+                    msg = "修改成功";
+
+                }
+                else
+                {
+                    status = "error";
+                    msg = "修改失败";
+                }
+
+            }
+            else
+            {
+                msg = this.ValidMsg;
+            }
+
+            int logType = 1;
+            string ip = Request.UserHostAddress;
+            title += "API：SearchUserGroup； ";
+            title += "群名称：" + name + "，搜索群：";
+            Common.addLog(logType, title + msg);
+
+
+            object obj = new { status = status, msg = msg };
+            string contentType = "text/json; charset=utf-8";
+
+            return Json(obj, contentType);
+        }
 
         #endregion
 

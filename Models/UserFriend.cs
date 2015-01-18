@@ -257,7 +257,7 @@ namespace fengmiapp.Models
                 new SqlParameter("@isOnToHide", _isOnToHide),
                 new SqlParameter("@fuId", _fuId),
                 new SqlParameter("@uId", _uId),
-                new SqlParameter("@Id", _id),
+                //new SqlParameter("@Id", _id),
 			};
 
             return base.ExecuteProc(sql, para);
@@ -292,7 +292,7 @@ namespace fengmiapp.Models
                 new SqlParameter("@isOffToVisible", _isOffToVisible),
                 new SqlParameter("@fuId", _fuId),
                 new SqlParameter("@uId", _uId),
-                new SqlParameter("@Id", _id),
+               //new SqlParameter("@Id", _id),
 			};
 
             return base.ExecuteProc(sql, para);
