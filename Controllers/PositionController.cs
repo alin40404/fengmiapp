@@ -662,8 +662,10 @@ namespace fengmiapp.Controllers
                             {
                                 uId = uId,
                                 fuId = fuId,
-                                status = userFriStatus,//好友自身的状态
-                                userStatus = userStatus,//用户对好友的综合后的状态
+                                //用户对好友的综合后的状态
+                                userFriStatus = userFriStatus,
+                                //好友自身的状态
+                                userStatus = userStatus,
                                 position = new { },
                             };
                         }
@@ -701,7 +703,9 @@ namespace fengmiapp.Controllers
                             {
                                 uId = uId,
                                 fuId = fuId,
-                                status = userFriStatus,
+                                //用户对好友的综合后的状态
+                                userFriStatus = userFriStatus,
+                                //好友自身的状态
                                 userStatus = userStatus,
                                 position = new
                                 {
